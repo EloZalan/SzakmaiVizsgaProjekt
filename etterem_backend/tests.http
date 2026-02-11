@@ -1,0 +1,51 @@
+@baseUrl = http://127.0.0.1:8000/api
+@token = 8|MtBOjaohZae2i4SFS0rDL1TDh78RPo420hyFzlHw39a14d9a
+
+### Login
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "admin@admin.com",
+    "password": "admin"
+}
+
+### Me
+GET {{baseUrl}}/me
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Logout
+POST {{baseUrl}}/logout
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Add waiter
+POST {{baseUrl}}/add-waiter
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Teszt Elek",
+    "email": "tesztelek@waiter.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+}
+
+### Delete waiter
+DELETE {{baseUrl}}/delete-waiter
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "seeder@waiter.com"
+}
