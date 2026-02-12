@@ -1,7 +1,7 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 8|MtBOjaohZae2i4SFS0rDL1TDh78RPo420hyFzlHw39a14d9a
+@token = 10|BNuClsW1IUeszBanCTd9SwR3N36JVU2QE932tH3wc0fabd6d
 
-### Login
+### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
 Accept: application/json
@@ -9,6 +9,16 @@ Accept: application/json
 {
     "email": "admin@admin.com",
     "password": "admin"
+}
+
+### Login waiter
+POST {{baseUrl}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "tesztelek@waiter.com",
+    "password": "password123"
 }
 
 ### Me

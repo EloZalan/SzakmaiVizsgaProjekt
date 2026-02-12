@@ -1,0 +1,2 @@
+Projekt fontos megjegyzesek
+- a backend 6 ora inaktivitas utan torli a tokent szoval erre a frontendnek kell csinalnia egy timert, hogy egybol kidobja a usert ne csak akkor amikor egy keres beerkezik
