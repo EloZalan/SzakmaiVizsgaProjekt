@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 10|BNuClsW1IUeszBanCTd9SwR3N36JVU2QE932tH3wc0fabd6d
+@token = 12|zZtRLZG7nZkvg5qzCYpkwTlCIK0XGLK47YLPnv6u5188b2fc
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -31,6 +31,14 @@ Authorization: Bearer {{token}}
 
 ### Logout
 POST {{baseUrl}}/logout
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Get all table
+GET {{baseUrl}}/tables
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}

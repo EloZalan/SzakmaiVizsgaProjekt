@@ -17,9 +17,9 @@ class CheckTokenActivity
     {
         $user = $request->user();
         if ($user && $user->currentAccessToken()) {
-            $lastUsed = $user->currentAccesToken()->last_used_at;
+            $lastUsed = $user->currentAccessToken()->last_used_at;
 
-            if ($lastUsed && $lastUsed->diffInMinutes(now()) > 360) {
+            if ($lastUsed && $lastUsed->diffInMinutes(now()) > 1) {
                 $request->user()->currentAccessToken()->delete();
                 return response()->json(['message' => 'A folyamat megszakadt inaktivitás miatt.'], 401);
             }
