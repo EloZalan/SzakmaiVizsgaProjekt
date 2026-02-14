@@ -27,11 +27,11 @@ class AdminActionsController extends Controller
         return response(['waiter' => $user], 201);
     }
 
-    public function deleteWaiter(Request $request) {
-        $user = User::where('email', $request->email)->first();
+    public function deleteWaiter(Request $request, Int $id) {
+        $user = User::where('id', $id)->first();
         if (!$user) {
             return response()->json([
-                'message' => 'Ilyen emaillel nem létezik felhasználó.'
+                'message' => 'Nem talalhato ilyen azonositoju pincer'
             ], 404);
         }
         User::destroy($user->id);
@@ -39,4 +39,12 @@ class AdminActionsController extends Controller
             'message' => 'Pincér törölve.'
         ], 200);
     }
+
+    public function getAllWaiter(Request $request) {
+        $users = User::where('role', 'waiter')->get();
+        return response()->json([
+            'users' => $users
+        ]);
+    }
+
 }
