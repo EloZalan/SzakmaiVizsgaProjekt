@@ -17,5 +17,12 @@ class WaiterSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role' => 'waiter',
         ]);
+
+        User::create([
+            'name' => 'Teszt Elek',
+            'email' => 'tesztelek@waiter.com',
+            'password' => Hash::make('password123'),
+            'role' => 'waiter',
+        ]);
     }
 }
