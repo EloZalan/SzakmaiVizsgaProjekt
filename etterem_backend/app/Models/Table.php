@@ -11,4 +11,17 @@ class Table extends Model
         'capacity',
         'status'
     ];
+
+    protected $casts = [
+        'capacity' => 'integer',
+        'table_number' => 'integer'
+    ];
+
+    public function orders() {
+        return $this->hasMany(Order::class);
+    }
+
+    public function reservations() {
+        return $this->hasMany(Reservation::class);
+    }
 }
