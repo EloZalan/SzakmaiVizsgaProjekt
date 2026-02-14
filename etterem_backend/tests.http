@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 12|zZtRLZG7nZkvg5qzCYpkwTlCIK0XGLK47YLPnv6u5188b2fc
+@token = 16|hyR9nsClOohBlKETm5paQRsX4s5MHqgXs0bOxwfG23ac9ee8
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -45,8 +45,16 @@ Authorization: Bearer {{token}}
 
 {}
 
+### Get all waiter
+GET {{baseUrl}}/admin/waiters
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
 ### Add waiter
-POST {{baseUrl}}/add-waiter
+POST {{baseUrl}}/admin/waiters
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
@@ -59,11 +67,9 @@ Accept: application/json
 }
 
 ### Delete waiter
-DELETE {{baseUrl}}/delete-waiter
+DELETE {{baseUrl}}/admin/waiters/3
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
-{
-    "email": "seeder@waiter.com"
-}
+{}

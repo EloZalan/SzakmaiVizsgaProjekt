@@ -15,8 +15,9 @@ Route::middleware('auth:sanctum', 'check.activity')->group(function () {
     Route::get('/tables', [TableController::class, 'getAllTable']);
 
     Route::middleware('admin')->group(function () {
-        Route::post('/add-waiter', [AdminActionsController::class, 'addWaiter']);
-        Route::delete('/delete-waiter', [AdminActionsController::class, 'deleteWaiter']);
+        Route::get('admin/waiters', [AdminActionsController::class, 'getAllWaiter']);
+        Route::post('/admin/waiters', [AdminActionsController::class, 'addWaiter']);
+        Route::delete('/admin/waiters/{id}', [AdminActionsController::class, 'deleteWaiter']);
     });
 });
 
