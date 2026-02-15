@@ -16,16 +16,17 @@ class ReservationController extends Controller
             'guest_name' => 'required|string',
             'phone_number' => ['required', new Phone('HU'), Rule::unique('reservations', 'phone_number')],
             'guest_count' => 'required|integer|min:1',
-            'start_time' => 'required|date'
+            'start_time' => 'required|date|after_or_equal:now'
         ]);
 
         $start = Carbon::parse($request->start_time);
 
-        if (!in_array($start->minute, [0, 30])) {
-            return response()->json([
-                'message' => 'Csak egész vagy fél órára lehet foglalni.'
-            ], 422);
-        }
+        // CSAK EGESZKOR ES FELKOR LEHET FOGLALNI
+        // if (!in_array($start->minute, [0, 30])) {
+        //     return response()->json([
+        //         'message' => 'Csak egész vagy fél órára lehet foglalni.'
+        //     ], 422);
+        // }
 
         $end = $start->copy()->addHours(2);
 

@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 16|hyR9nsClOohBlKETm5paQRsX4s5MHqgXs0bOxwfG23ac9ee8
+@token = 1|Gy7LAiTZDKiraWXDk3WFc2aQLzTXQISxZje82xsbf0ae37f8
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -81,8 +81,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "guest_name": "Peto Mate",
-  "phone_number": "+36304234559",
-  "guest_count": 5,
-  "start_time": "2026-02-20T12:30:00Z"
+  "guest_name": "Horvath Anna",
+  "phone_number": "+36704567559",
+  "guest_count": 2,
+  "start_time": "2026-02-15T20:10:00Z"
 }
