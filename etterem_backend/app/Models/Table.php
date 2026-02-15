@@ -17,6 +17,8 @@ class Table extends Model
         'table_number' => 'integer'
     ];
 
+    protected $appends = ['status'];
+
     public function orders() {
         return $this->hasMany(Order::class);
     }
@@ -24,4 +26,18 @@ class Table extends Model
     public function reservations() {
         return $this->hasMany(Reservation::class);
     }
+
+    public function getStatusAttribute() {
+        $now = now();
+        $hasBlockingReservation = $this->reservations()
+            ->get()
+            ->first(function ($reservation) use ($now) {
+                $blockStart = $reservation->start_time->copy()->subHours(2);
+                $blockEnd = $reservation->end_time;
+
+                return $now->between($blockStart, $blockEnd);
+            });
+        return $hasBlockingReservation ? 'reserved' : 'available';
+    }
+
 }
