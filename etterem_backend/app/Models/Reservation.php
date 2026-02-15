@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 
 class Reservation extends Model
 {
@@ -11,6 +12,7 @@ class Reservation extends Model
         'guest_name',
         'phone_number',
         'start_time',
+        'end_time',
         'guest_count',
     ];
 
@@ -18,6 +20,7 @@ class Reservation extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'guest_count' => 'integer',
+        'phone_number' => E164PhoneNumberCast::class . ':HU',
     ];
 
     public function table() {

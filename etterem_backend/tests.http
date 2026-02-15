@@ -73,3 +73,16 @@ Content-Type: application/json
 Accept: application/json
 
 {}
+
+
+### Make reservation
+POST {{baseUrl}}/reservations
+Content-Type: application/json
+Accept: application/json
+
+{
+  "guest_name": "Peto Mate",
+  "phone_number": "+36304234559",
+  "guest_count": 5,
+  "start_time": "2026-02-20T12:30:00Z"
+}
