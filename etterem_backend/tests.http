@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|Gy7LAiTZDKiraWXDk3WFc2aQLzTXQISxZje82xsbf0ae37f8
+@token = 2|Axk2hSHzBQoABQf1i1idHyb7ncBuiBSASWKl2oJn72e1e819
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -82,7 +82,7 @@ Accept: application/json
 
 {
   "guest_name": "Horvath Anna",
-  "phone_number": "+36704567559",
+  "phone_number": "+36708567559",
   "guest_count": 2,
-  "start_time": "2026-02-15T20:10:00Z"
+  "start_time": "2026-02-23T19:08:00Z"
 }
