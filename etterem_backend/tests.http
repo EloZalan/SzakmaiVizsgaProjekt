@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|X0LQMMlzvCskxDhXH7PJdfJhUkcH0OeMhdUmjV0h344b59b5
+@token = 2|prLSIwPzPczFJZt9P0Pb7wSDyMP5Hh2x8QD9r9fVb08068f0
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -17,7 +17,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "email": "tesztelek@waiter.com",
+    "email": "seeder@waiter.com",
     "password": "password123"
 }
 
@@ -81,13 +81,28 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "guest_name": "Horvath Anna",
-  "phone_number": "+36708566559",
-  "guest_count": 2,
-  "start_time": "2026-02-24T9:28:20Z"
+  "guest_name": "Kalocs Pista",
+  "phone_number": "+36706566559",
+  "guest_count": 6,
+  "start_time": "2026-02-24T18:4:00Z"
 }
 
 ### Waiter to table
-POST {{baseUrl}}/tables/7/orders
+POST {{baseUrl}}/tables/10/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+### Add order item to an order
+POST {{baseUrl}}/orders/1/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "menu_item_id": 4,
+    "quantity": 2
+}
+
+### Ready to pay simulation
+POST {{baseUrl}}/orders/1/simulate-ready
+Authorization: Bearer {{token}}
