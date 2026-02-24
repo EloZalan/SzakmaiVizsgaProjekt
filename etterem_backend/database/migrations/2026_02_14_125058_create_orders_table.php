@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('table_id')->constrained('tables')->onDelete('cascade');
             $table->foreignId('waiter_id')->constrained('users')->onDelete('cascade');
             $table->unsignedInteger('total_price');
-            $table->enum('status', ['waiting_for_service', 'eating', 'ready_to_pay', 'done'])->default('waiting_for_service');
+            $table->enum('status', ['in_progress', 'eating', 'ready_to_pay', 'done'])->default('in_progress');
             $table->timestamps();
         });
     }

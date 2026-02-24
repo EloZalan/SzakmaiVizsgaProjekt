@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 2|Axk2hSHzBQoABQf1i1idHyb7ncBuiBSASWKl2oJn72e1e819
+@token = 1|X0LQMMlzvCskxDhXH7PJdfJhUkcH0OeMhdUmjV0h344b59b5
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -82,7 +82,12 @@ Accept: application/json
 
 {
   "guest_name": "Horvath Anna",
-  "phone_number": "+36708567559",
+  "phone_number": "+36708566559",
   "guest_count": 2,
-  "start_time": "2026-02-23T19:08:00Z"
+  "start_time": "2026-02-24T9:28:20Z"
 }
+
+### Waiter to table
+POST {{baseUrl}}/tables/7/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
