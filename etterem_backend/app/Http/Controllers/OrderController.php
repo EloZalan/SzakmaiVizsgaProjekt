@@ -81,9 +81,9 @@ class OrderController extends Controller
     }
 
     public function simulateReadyToPay(Order $order) {
-        if ($order->orderItems->isEmpty()) {
+        if ($order->orderItems->isEmpty() || $order->status === "done") {
             return response()->json([
-                'message' => 'Nincs meg rendelesed nem tudsz fizetni.'
+                'message' => 'Nincs fizetendő rendelés.'
             ], 422);
         }
 
