@@ -155,7 +155,7 @@ export class HeroComponent {
     {
       imageUrl: 'assets/images/hero-1.jpg',
       headline: 'AUTHENTIC BBQ FLAVORS',
-      subline: 'Fire-grilled perfection since 2022',
+      subline: 'Fire-grilled perfection since 2020',
     },
     {
       imageUrl: 'assets/images/hero-2.jpg',

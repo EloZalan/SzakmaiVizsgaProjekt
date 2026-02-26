@@ -11,7 +11,7 @@ import { Component } from '@angular/core';
           <span class="brand__text">GRILLHOUSE</span>
         </div>
 
-        <div class="sub">Authentic BBQ Flavors • Est. 2022</div>
+        <div class="sub">Authentic BBQ Flavors • Est. 2020</div>
         <div class="copy">© 2026 Grillhouse. All rights reserved.</div>
       </div>
     </footer>
