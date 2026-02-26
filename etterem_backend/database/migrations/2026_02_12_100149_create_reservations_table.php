@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('guest_name');
             $table->string('phone_number');
             $table->dateTime('start_time');
-            $table->dateTime('end_time');
             $table->integer('guest_count');
             $table->timestamps();
         });

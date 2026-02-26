@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AdminActionsController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TableController;
 use Illuminate\Http\Request;
@@ -15,6 +17,10 @@ Route::middleware('auth:sanctum', 'check.activity')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/tables', [TableController::class, 'getAllTable']);
+    Route::post('/tables/{table}/orders', [OrderController::class, 'openOrder']);
+    Route::post('/orders/{order}/items', [OrderController::class, 'addItem']);
+    Route::post('/orders/{order}/simulate-ready', [OrderController::class, 'simulateReadyToPay']);
+    Route::post('/orders/{order}/pay', [PaymentController::class, 'pay']);
 
     Route::middleware('admin')->group(function () {
         Route::get('admin/waiters', [AdminActionsController::class, 'getAllWaiter']);

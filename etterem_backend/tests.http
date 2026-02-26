@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|Gy7LAiTZDKiraWXDk3WFc2aQLzTXQISxZje82xsbf0ae37f8
+@token = 1|K9mjChxeEAXYHwKzJnkQI2oMm9Db2i51I95YASotcbc14c07
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -17,7 +17,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "email": "tesztelek@waiter.com",
+    "email": "seeder@waiter.com",
     "password": "password123"
 }
 
@@ -81,8 +81,38 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "guest_name": "Horvath Anna",
-  "phone_number": "+36704567559",
-  "guest_count": 2,
-  "start_time": "2026-02-15T20:10:00Z"
+  "guest_name": "Kanizsa Mark",
+  "phone_number": "+36706569539",
+  "guest_count": 6,
+  "start_time": "2026-02-25T9:11:00Z"
+}
+
+### Waiter to table
+POST {{baseUrl}}/tables/11/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Add order item to an order
+POST {{baseUrl}}/orders/1/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "menu_item_id": 1,
+    "quantity": 2
+}
+
+### Ready to pay simulation
+POST {{baseUrl}}/orders/1/simulate-ready
+Authorization: Bearer {{token}}
+
+### Payment
+POST {{baseUrl}}/orders/1/pay
+Authorization:  Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "payment_method": "card"
 }

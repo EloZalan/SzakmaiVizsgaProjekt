@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             WaiterSeeder::class,
             TableSeeder::class,
+            MenuCategorySeeder::class,
+            MenuItemSeeder::class,
         ]);
     }
 }

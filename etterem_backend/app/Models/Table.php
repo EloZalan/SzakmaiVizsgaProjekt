@@ -29,15 +29,25 @@ class Table extends Model
 
     public function getStatusAttribute() {
         $now = now();
-        $hasBlockingReservation = $this->reservations()
-            ->get()
-            ->first(function ($reservation) use ($now) {
-                $blockStart = $reservation->start_time->copy()->subHours(2);
-                $blockEnd = $reservation->end_time;
 
-                return $now->between($blockStart, $blockEnd);
-            });
-        return $hasBlockingReservation ? 'reserved' : 'available';
+        $hasActiveOrder = $this->orders()
+            ->where('status', '!=', 'done')
+            ->exists();
+
+        if ($hasActiveOrder) {
+            return 'reserved';
+        }
+
+        $hasUpcomingReservation = $this->reservations()
+            ->whereBetween('start_time', [$now, $now->copy()->addHours(2)])
+            ->exists();
+
+        if ($hasUpcomingReservation) {
+            return 'reserved';
+        }
+
+        return 'available';
     }
+
 
 }

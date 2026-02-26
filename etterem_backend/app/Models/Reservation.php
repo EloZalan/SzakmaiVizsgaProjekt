@@ -12,7 +12,6 @@ class Reservation extends Model
         'guest_name',
         'phone_number',
         'start_time',
-        'end_time',
         'guest_count',
     ];
 
