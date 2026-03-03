@@ -16,30 +16,32 @@ class OrderController extends Controller
     public function openOrder(Request $request, Table $table) {
         $now = Carbon::now();
 
-        $activeReservation = Reservation::where('table_id', $table->id)
+        $activeReservation = $table->reservations()
             ->where('start_time', '<=', $now)
-            ->where('end_time', '>=', $now)
+            ->where('end_time', '>', $now)
+            ->latest('start_time')
             ->first();
 
         if (!$activeReservation) {
-            return response()->json([
-                'message' => 'Ezen az asztalon jelenleg nincs érvényes foglalás.'
-            ], 400);
+            return response()->json(['message' => 'Nincs érvényes foglalás ebben az időpontban.'], 400);
         }
 
-        $existingOrder = Order::where('table_id', $table->id)
-            ->where('status', '!=', 'done')
-            ->first();
+        $existingOrder = Order::where('reservation_id', $activeReservation->id)->first();
 
         if ($existingOrder) {
+            $statusMessage = $existingOrder->status === 'done'
+                ? 'Ez a vendég már fizetett és távozott!'
+                : 'Ehhez a foglaláshoz már van egy aktív rendelés!';
+
             return response()->json([
-                'message' => 'Az asztalon már van egy aktív rendelés!',
-                'current_status' => $existingOrder->status
+                'message' => $statusMessage,
+                'order_id' => $existingOrder->id
             ], 400);
         }
 
         $order = Order::create([
             'table_id' => $table->id,
+            'reservation_id' => $activeReservation->id,
             'waiter_id' => Auth::id(),
             'total_price' => 0,
             'status' => 'in_progress'
@@ -47,15 +49,17 @@ class OrderController extends Controller
 
         return response()->json([
             'message' => 'Rendelés sikeresen megnyitva!',
-            'order' => $order,
-            'guest_details' => [
-                'name' => $activeReservation->guest_name,
-                'phone' => $activeReservation->phone_number
-            ]
+            'order' => $order
         ], 201);
     }
 
     public function addItem(Request $request, Order $order) {
+        if ($order->status !== 'in_progress') {
+            return response()->json([
+                'message' => 'Ehhez a rendeléshez már nem vehetsz fel új tételt.'
+            ], 400);
+        }
+
         $fields = $request->validate([
             'menu_item_id' => 'required|exists:menu_items,id',
             'quantity' => 'required|integer|min:1',
