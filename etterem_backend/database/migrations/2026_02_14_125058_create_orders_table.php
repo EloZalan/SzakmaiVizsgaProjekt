@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('table_id')->constrained('tables')->onDelete('cascade');
             $table->foreignId('waiter_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('reservation_id')->nullable()->constrained()->onDelete('set null');
             $table->unsignedInteger('total_price');
             $table->enum('status', ['in_progress', 'ready_to_pay', 'done'])->default('in_progress');
             $table->timestamps();
