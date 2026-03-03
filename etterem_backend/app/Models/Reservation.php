@@ -12,6 +12,7 @@ class Reservation extends Model
         'guest_name',
         'phone_number',
         'start_time',
+        'end_time',
         'guest_count',
     ];
 
@@ -24,5 +25,9 @@ class Reservation extends Model
 
     public function table() {
         return $this->belongsTo(Table::class);
+    }
+
+    public function order() {
+        return $this->hasOne(Order::class);
     }
 }
