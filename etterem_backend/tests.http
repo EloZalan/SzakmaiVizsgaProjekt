@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|K9mjChxeEAXYHwKzJnkQI2oMm9Db2i51I95YASotcbc14c07
+@token = 1|iUsDtsn8yykqCp4vxsM7trHR7dU3PmxOQvDnZU7g19bb3f24
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -81,14 +81,14 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "guest_name": "Kanizsa Mark",
-  "phone_number": "+36706569539",
-  "guest_count": 6,
-  "start_time": "2026-02-25T9:11:00Z"
+  "guest_name": "Nagy Imre",
+  "phone_number": "+36709534249",
+  "guest_count": 5,
+  "start_time": "2026-03-03T12:05:00Z"
 }
 
 ### Waiter to table
-POST {{baseUrl}}/tables/11/orders
+POST {{baseUrl}}/tables/2/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -99,8 +99,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "menu_item_id": 1,
-    "quantity": 2
+    "menu_item_id": 3,
+    "quantity": 6
 }
 
 ### Ready to pay simulation
