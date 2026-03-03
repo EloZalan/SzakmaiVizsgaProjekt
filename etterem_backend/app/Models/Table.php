@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Table extends Model
@@ -9,7 +10,6 @@ class Table extends Model
     protected $fillable = [
         'table_number',
         'capacity',
-        'status'
     ];
 
     protected $casts = [
@@ -27,7 +27,8 @@ class Table extends Model
         return $this->hasMany(Reservation::class);
     }
 
-    public function getStatusAttribute() {
+    public function getStatusAttribute()
+    {
         $now = now();
 
         $hasActiveOrder = $this->orders()
@@ -35,18 +36,21 @@ class Table extends Model
             ->exists();
 
         if ($hasActiveOrder) {
-            return 'reserved';
+            return 'occupied';
         }
 
-        $hasUpcomingReservation = $this->reservations()
-            ->whereBetween('start_time', [$now, $now->copy()->addHours(2)])
+        $bufferStart = $now->copy()->subHours(2);
+        $bufferEnd = $now->copy()->addHours(2);
+
+        $hasReservedWindow = $this->reservations()
+            ->whereDoesntHave('order', function ($q) {
+                $q->where('status', 'done');
+            })
+            ->where('start_time', '<=', $bufferEnd)
+            ->where('end_time', '>=', $bufferStart)
             ->exists();
 
-        if ($hasUpcomingReservation) {
-            return 'reserved';
-        }
-
-        return 'available';
+        return $hasReservedWindow ? 'reserved' : 'available';
     }
 
 
