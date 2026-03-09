@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 class TableController extends Controller
 {
     public function index() {
-        return response()->json(['tables' => Table::all()]);
+        return response()->json(Table::all());
     }
 
     public function store(Request $request) {
@@ -21,11 +21,11 @@ class TableController extends Controller
             'capacity' => $request->capacity,
         ]);
 
-        return response()->json(['table' => $table], 201);
+        return response()->json($table, 201);
     }
 
     public function show(Table $table) {
-        return response()->json(['table' => $table]);
+        return response()->json($table);
     }
 
     public function update(Request $request, Table $table) {
@@ -37,7 +37,7 @@ class TableController extends Controller
             'capacity' => $request->capacity,
         ]);
 
-        return response()->json(['table' => $table]);
+        return response()->json($table);
     }
 
     public function destroy(Table $table) {
