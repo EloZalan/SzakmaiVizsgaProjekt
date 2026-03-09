@@ -161,7 +161,7 @@ export class HeroComponent {
     },
     {
       imageUrl: '../assets/images/hero-2.jpg',
-      headline: 'SMOKE • SEAR • SERVE',
+      headline: 'SMOKE • SEAR • SERVE ALL YOU NEED',
       subline: 'House-made sauces, prime cuts',
     },
     {
