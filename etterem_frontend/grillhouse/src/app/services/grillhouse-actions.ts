@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class GrillhouseActionsService {
-  // A képen látható gombok / akciók:
+  private fullMenuVisible = false;
+
   login(): void {
     // TODO: implement later
   }
@@ -16,10 +17,14 @@ export class GrillhouseActionsService {
   }
 
   viewFullMenu(): void {
-    // TODO: implement later
+    this.fullMenuVisible = !this.fullMenuVisible;
   }
 
   getDirections(): void {
     // TODO: implement later
+  }
+
+  isFullMenuVisible(): boolean {
+    return this.fullMenuVisible;
   }
 }

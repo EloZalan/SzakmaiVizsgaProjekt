@@ -21,12 +21,18 @@ export class AuthService {
     return this._user()?.role ?? 'guest';
   }
 
-  login(username: string, password: string): void {
-    // TODO: később ide jön API hívás
-    // MOST: demo - "pincer" user -> pincer role, különben guest
-    const role: UserRole = username.toLowerCase() === 'pincer' ? 'pincer' : 'guest';
-    this._user.set({ username, role });
+login(username: string, password: string): void {
+  // TODO: később ide jön API hívás
+  let role: UserRole = 'guest';
+
+  if (username.toLowerCase() === 'pincer') {
+    role = 'pincer';
+  } else if (username.toLowerCase() === 'admin') {
+    role = 'admin';
   }
+
+  this._user.set({ username, role });
+}
 
   logout(): void {
     this._user.set(null);
