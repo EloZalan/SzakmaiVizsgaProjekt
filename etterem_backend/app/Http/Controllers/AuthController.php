@@ -36,6 +36,31 @@ class AuthController extends Controller
         ]);
     }
 
+    public function update(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required|string|min:8|confirmed',
+        ]);
+
+        if (isset($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+
+        if (isset($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Adatok sikeresen frissítve.',
+            'user' => $user,
+        ]);
+    }
+
     public function logout(Request $request) {
         $user = $request->user();
         $user->currentAccessToken()->delete();
