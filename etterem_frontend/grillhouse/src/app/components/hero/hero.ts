@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
+import { NgFor } from '@angular/common';
+
 type HeroSlide = {
   imageUrl: string;
   headline: string;
@@ -10,7 +12,7 @@ type HeroSlide = {
 @Component({
   selector: 'app-hero',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, NgFor],
   template: `
     <section class="hero">
       <div
