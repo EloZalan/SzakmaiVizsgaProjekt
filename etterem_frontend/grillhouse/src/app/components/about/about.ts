@@ -9,7 +9,9 @@ import { Component } from '@angular/core';
         <div class="grid">
           <div class="left">
             <div class="logoBox" aria-hidden="true">
-              <div class="logoCircle">GRILLS</div>
+              <div class="logoCircle">
+                <img src="../assets/images/logo1024A.png" height="150" alt="">
+              </div>
             </div>
 
             <h2 class="title">Where Fire Meets Flavor</h2>
@@ -43,7 +45,7 @@ import { Component } from '@angular/core';
           <div class="right">
             <div
               class="image"
-              [style.backgroundImage]="'url(assets/images/about.jpg)'"
+              [style.backgroundImage]="'url(../assets/images/slider1.jpg)'"
               role="img"
               aria-label="Wood and smoker"
             ></div>
@@ -70,15 +72,16 @@ import { Component } from '@angular/core';
 
       .logoBox {
         width: 160px;
-        height: 120px;
+        height: 160px;
         display: grid;
         place-items: center;
         margin-bottom: 12px;
       }
 
       .logoCircle {
-        width: 120px;
-        height: 120px;
+        padding-top: 8px;
+        width: 150px;
+        height: 150px;
         border-radius: 14px;
         display: grid;
         place-items: center;

@@ -153,36 +153,47 @@ type HeroSlide = {
 export class HeroComponent {
   slides: HeroSlide[] = [
     {
-      imageUrl: 'assets/images/hero-1.jpg',
+      imageUrl: '../assets/images/hero-1.jpg',
       headline: 'AUTHENTIC BBQ FLAVORS',
       subline: 'Fire-grilled perfection since 2020',
     },
     {
-      imageUrl: 'assets/images/hero-2.jpg',
+      imageUrl: '../assets/images/hero-2.jpg',
       headline: 'SMOKE • SEAR • SERVE',
       subline: 'House-made sauces, prime cuts',
     },
     {
-      imageUrl: 'assets/images/hero-3.jpg',
+      imageUrl: '../assets/images/hero-3.jpg',
       headline: 'SLOW SMOKED, BIG FLAVOR',
       subline: 'Pitmaster-crafted, every day',
     },
     {
-      imageUrl: 'assets/images/hero-4.jpg',
+      imageUrl: '../assets/images/hero-4.jpg',
       headline: 'YOUR TABLE IS WAITING',
       subline: 'Reserve in seconds',
     },
   ];
 
   activeIndex = 0;
+  private intervalId!: any;
 
   constructor(private actions: GrillhouseActionsService) {}
+
+  ngOnInit(): void {
+    this.intervalId = setInterval(() => {
+      this.activeIndex = (this.activeIndex + 1) % this.slides.length;
+    }, 5000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalId);
+  }
 
   select(i: number): void {
     this.activeIndex = i;
   }
 
   onViewMenu(): void {
-    this.actions.viewMenu(); // TODO later
+    this.actions.viewMenu();
   }
 }

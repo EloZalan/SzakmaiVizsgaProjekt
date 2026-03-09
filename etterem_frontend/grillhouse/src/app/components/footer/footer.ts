@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
     <footer class="footer">
       <div class="container footer__inner">
         <div class="brand">
-          <span class="brand__icon">🔥</span>
+          <span class="brand__icon"><img src="../assets/images/logo1024A.png" height="100" alt=""></span>
           <span class="brand__text">GRILLHOUSE</span>
         </div>
 

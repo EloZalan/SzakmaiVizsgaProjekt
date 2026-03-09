@@ -13,7 +13,7 @@ type MenuCard = {
   template: `
     <div class="container">
       <div class="head">
-        <div class="flame" aria-hidden="true">🔥</div>
+        <div class="flame" aria-hidden="true"><img src="../assets/images/logo1024A.png" height="250" alt=""></div>
         <h2 class="title">Our Signature Menu</h2>
         <p class="subtitle">Premium cuts, expertly grilled</p>
       </div>
@@ -43,7 +43,6 @@ type MenuCard = {
       .flame {
         color: var(--gh-accent);
         font-size: 22px;
-        margin-bottom: 8px;
       }
 
       .title {
