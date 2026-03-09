@@ -10,7 +10,7 @@ import { GrillhouseActionsService } from '../../services/grillhouse-actions';
     <header class="nav" [class.scrolled]="scrolled">
       <div class="nav__inner container">
         <a class="brand" [routerLink]="['/']" fragment="top">
-          <span class="brand__icon">🔥</span>
+          <span class="brand__icon"><img src="../assets/images/logo1024A.png" height="75" alt=""></span>
           <span class="brand__text">GRILLHOUSE</span>
         </a>
 
@@ -66,6 +66,7 @@ import { GrillhouseActionsService } from '../../services/grillhouse-actions';
       .brand__icon {
         color: var(--gh-accent);
         font-size: 18px;
+        padding-top: 10px;
       }
 
       .brand__text {
