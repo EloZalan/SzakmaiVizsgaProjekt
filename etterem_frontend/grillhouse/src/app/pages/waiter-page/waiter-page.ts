@@ -4,25 +4,8 @@ import { Router } from '@angular/router';
 import { NgFor, NgIf, CurrencyPipe } from '@angular/common';
 import { AuthService } from '../../services/auth';
 
-type TableStatus = 'FREE' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
-type PaymentMethod = 'CARD' | 'CASH' | 'QR';
-
-type OrderItem = {
-  name: string;
-  qty: number;
-  price: number; // per item
-};
-
-type TableInfo = {
-  id: number;
-  name: string;
-  status: TableStatus;
-  guests: number;
-  server: string;
-  updatedAt: string;
-  items: OrderItem[];
-  note?: string;
-};
+import { TableInfo } from '../../models/table-info.model';
+import { PaymentMethod } from '../../models/payment-method.model';
 
 @Component({
   selector: 'app-waiter-page',

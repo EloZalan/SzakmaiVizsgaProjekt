@@ -13,7 +13,7 @@ export class GrillhouseActionsService {
   }
 
   viewMenu(): void {
-    // TODO: implement later
+    window.scrollTo({ top: (document.body.scrollHeight) / 2, behavior: 'smooth' });
   }
 
   viewFullMenu(): void {

@@ -3,11 +3,7 @@ import { RouterLink } from '@angular/router';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { NgFor } from '@angular/common';
 
-type HeroSlide = {
-  imageUrl: string;
-  headline: string;
-  subline: string;
-};
+import { HeroSlide } from '../../models/hero-slide.model';
 
 @Component({
   selector: 'app-hero',

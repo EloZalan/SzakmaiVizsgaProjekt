@@ -2,11 +2,7 @@ import { Component } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 
-type MenuCard = {
-  name: string;
-  price: number;
-  desc: string;
-};
+import { MenuCard } from '../../models/menu-card.model';
 
 @Component({
   selector: 'app-menu-preview',

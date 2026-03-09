@@ -1,11 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
-export type UserRole = 'guest' | 'pincer' | 'admin';
-
-export interface AuthUser {
-  username: string;
-  role: UserRole;
-}
+import { AuthUser } from '../models/auth-user.model';
+import { UserRole } from '../models/user-role.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

@@ -1,0 +1,1 @@
+export type TableStatus = 'FREE' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';

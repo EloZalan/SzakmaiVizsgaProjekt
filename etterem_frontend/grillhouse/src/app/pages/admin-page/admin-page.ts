@@ -3,23 +3,8 @@ import { NgFor, NgIf, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
-type StaffRole = 'PINCER' | 'ADMIN';
-type StaffStatus = 'ACTIVE' | 'INACTIVE';
-
-type StaffMember = {
-  id: number;
-  name: string;
-  role: StaffRole;
-  status: StaffStatus;
-  shift: string;
-};
-
-type RestaurantTable = {
-  id: number;
-  name: string;
-  seats: number;
-  status: 'ACTIVE' | 'DISABLED';
-};
+import { StaffMember } from '../../models/staff-member.model';
+import { RestaurantTable } from '../../models/restaurant-table.model';
 
 @Component({
   selector: 'app-admin-page',
