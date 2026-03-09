@@ -47,7 +47,7 @@ import { GrillhouseActionsService } from '../../services/grillhouse-actions';
           <div class="right">
             <div
               class="image"
-              [style.backgroundImage]="'url(assets/images/visit.jpg)'"
+              [style.backgroundImage]="'url(../assets/images/visit1.jpg)'"
               role="img"
               aria-label="Restaurant seating area"
             ></div>
