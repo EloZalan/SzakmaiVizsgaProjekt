@@ -13,9 +13,15 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reservations', [ReservationController::class, 'store']);
 
-Route::middleware('auth:sanctum', 'check.activity')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [AuthController::class, 'me']);
+    Route::put('/user', [AuthController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
+    Route::put('/reservations/{reservation}', [ReservationController::class, 'update']);
+    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);
 
     Route::get('/tables', [TableController::class, 'index']);
     Route::get('tables/{table}', [TableController::class, 'show']);

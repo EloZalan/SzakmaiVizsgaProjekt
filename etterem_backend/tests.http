@@ -1,6 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|pUeAxFWj4qF1L8z2AI4laj2UcYSUnQZZQNpmOLyVc15b4e0c
-
+@token = 1|OWYKr4kJeqmZHlWNLjBzrhIoJanfWlg8DlaPp0io51f6db14
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -22,12 +21,24 @@ Accept: application/json
 }
 
 ### Me
-GET {{baseUrl}}/me
+GET {{baseUrl}}/user
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {}
+
+### Update user
+PUT {{baseUrl}}/user
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "email": "valami@waiter.com",
+    "password": "almafa312",
+    "password_confirmation": "almafa312"
+}
 
 ### Logout
 POST {{baseUrl}}/logout
@@ -218,8 +229,45 @@ Accept: application/json
   "guest_name": "Nagy Imre",
   "phone_number": "+36709534249",
   "guest_count": 5,
-  "start_time": "2026-03-03T12:05:00Z"
+  "start_time": "2026-03-09T14:29:00Z"
 }
+
+### Get all reservations
+GET {{baseUrl}}/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Get reservation by id
+GET {{baseUrl}}/reservations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Update reservation
+PUT {{baseUrl}}/reservations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "guest_name": "Frissített Vendég",
+  "phone_number": "+36701234567",
+  "start_time": "2026-03-09T14:35:00Z",
+  "guest_count": 2
+}
+
+### Delete reservation
+DELETE {{baseUrl}}/reservations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
 
 ### Waiter to table
 POST {{baseUrl}}/tables/2/orders

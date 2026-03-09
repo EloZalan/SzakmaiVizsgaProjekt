@@ -17,14 +17,6 @@ class MenuCategoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // not used in API context
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -46,14 +38,6 @@ class MenuCategoryController extends Controller
     public function show(MenuCategory $menu_category)
     {
         return response()->json(['category' => $menu_category]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MenuCategory $menu_category)
-    {
-        // not used in API context
     }
 
     /**
