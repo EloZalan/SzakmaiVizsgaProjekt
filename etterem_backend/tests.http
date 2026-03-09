@@ -157,6 +157,58 @@ Accept: application/json
 {}
 
 
+### Menu item CRUD
+
+### Get all items (public)
+GET {{baseUrl}}/menu-items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Get item by id (public)
+GET {{baseUrl}}/menu-items/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Create item (admin)
+POST {{baseUrl}}/admin/menu-items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Tomato Soup",
+    "description": "A warm starter",
+    "price": 500,
+    "category_id": 1
+}
+
+### Update item (admin)
+PUT {{baseUrl}}/admin/menu-items/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Tomato Soup",
+    "description": "Freshly made",
+    "price": 550,
+    "category_id": 1
+}
+
+### Delete item (admin)
+DELETE {{baseUrl}}/admin/menu-items/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
 ### Make reservation
 POST {{baseUrl}}/reservations
 Content-Type: application/json
