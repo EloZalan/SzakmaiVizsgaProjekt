@@ -50,7 +50,7 @@ class ReservationController extends Controller
 
         return response()->json([
             'message' => 'Sikeres foglalás!',
-            'table_number' => $table->table_number,
+            'table_number' => $table->id,
             'reservation' => $reservation
         ]);
     }

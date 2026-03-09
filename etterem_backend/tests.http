@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|iUsDtsn8yykqCp4vxsM7trHR7dU3PmxOQvDnZU7g19bb3f24
+@token = 1|pUeAxFWj4qF1L8z2AI4laj2UcYSUnQZZQNpmOLyVc15b4e0c
 
 ### Login admin
 POST {{baseUrl}}/login
@@ -42,6 +42,42 @@ GET {{baseUrl}}/tables
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
+
+{}
+
+### Create table
+POST {{baseUrl}}/admin/tables
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "capacity": 4
+}
+
+### Get table
+GET {{baseUrl}}/tables/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### Update table
+PUT {{baseUrl}}/admin/tables/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "capacity": 3
+}
+
+### Delete table
+DELETE {{baseUrl}}/admin/tables/13
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
 
 {}
 
