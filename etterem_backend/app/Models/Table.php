@@ -8,13 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Table extends Model
 {
     protected $fillable = [
-        'table_number',
         'capacity',
     ];
 
     protected $casts = [
         'capacity' => 'integer',
-        'table_number' => 'integer'
     ];
 
     protected $appends = ['status'];

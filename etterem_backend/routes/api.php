@@ -16,7 +16,8 @@ Route::middleware('auth:sanctum', 'check.activity')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/tables', [TableController::class, 'getAllTable']);
+    Route::get('/tables', [TableController::class, 'index']);
+    Route::get('tables/{table}', [TableController::class, 'show']);
     Route::post('/tables/{table}/orders', [OrderController::class, 'openOrder']);
     Route::post('/orders/{order}/items', [OrderController::class, 'addItem']);
     Route::post('/orders/{order}/simulate-ready', [OrderController::class, 'simulateReadyToPay']);
@@ -26,6 +27,10 @@ Route::middleware('auth:sanctum', 'check.activity')->group(function () {
         Route::get('admin/waiters', [AdminActionsController::class, 'getAllWaiter']);
         Route::post('/admin/waiters', [AdminActionsController::class, 'addWaiter']);
         Route::delete('/admin/waiters/{id}', [AdminActionsController::class, 'deleteWaiter']);
+
+        Route::post('/admin/tables', [TableController::class, 'store']);
+        Route::put('/admin/tables/{table}', [TableController::class, 'update']);
+        Route::delete('/admin/tables/{table}', [TableController::class, 'destroy']);
     });
 });
 
