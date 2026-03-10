@@ -13,10 +13,7 @@ class MenuItemController extends Controller
      */
     public function index()
     {
-        // return all items with their category relationship
-        $items = MenuItem::with('menuCategory')->get();
-
-        return response()->json(['items' => $items]);
+        return response()->json(MenuItem::all());
     }
 
     /**
@@ -38,7 +35,7 @@ class MenuItemController extends Controller
             'category_id',
         ]));
 
-        return response()->json(['item' => $item], 201);
+        return response()->json($item, 201);
     }
 
     /**
@@ -46,8 +43,8 @@ class MenuItemController extends Controller
      */
     public function show(MenuItem $menu_item)
     {
-        $menu_item->load('menuCategory');
-        return response()->json(['item' => $menu_item]);
+        $item = MenuItem::findOrFail($menu_item->id);
+        return response()->json($item, 200);
     }
 
     /**
@@ -69,7 +66,7 @@ class MenuItemController extends Controller
             'category_id',
         ]));
 
-        return response()->json(['item' => $menu_item]);
+        return response()->json($menu_item, 200);
     }
 
     /**
