@@ -13,7 +13,7 @@ class MenuCategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(['categories' => MenuCategory::all()]);
+        return response()->json(MenuCategory::all());
     }
 
     /**
@@ -29,7 +29,7 @@ class MenuCategoryController extends Controller
             'name' => $request->name,
         ]);
 
-        return response()->json(['category' => $category], 201);
+        return response()->json($category, 201);
     }
 
     /**
@@ -37,7 +37,7 @@ class MenuCategoryController extends Controller
      */
     public function show(MenuCategory $menu_category)
     {
-        return response()->json(['category' => $menu_category]);
+        return response()->json($menu_category);
     }
 
     /**
@@ -57,7 +57,7 @@ class MenuCategoryController extends Controller
             'name' => $request->name,
         ]);
 
-        return response()->json(['category' => $menu_category]);
+        return response()->json($menu_category, 200);
     }
 
     /**
@@ -67,6 +67,6 @@ class MenuCategoryController extends Controller
     {
         $menu_category->delete();
 
-        return response()->json([], 204);
+        return response()->json("", 204);
     }
 }
