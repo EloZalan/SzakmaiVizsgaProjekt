@@ -58,10 +58,7 @@ class ReservationController extends Controller
             'guest_count' => $request->guest_count,
         ]);
 
-        return response()->json([
-            'message' => 'Sikeres foglalás!',
-            'reservation' => $reservation
-        ]);
+        return response()->json($reservation, 201);
     }
 
     public function update(Request $request, Reservation $reservation)
@@ -108,10 +105,7 @@ class ReservationController extends Controller
 
         $reservation->save();
 
-        return response()->json([
-            'message' => 'Foglalás frissítve.',
-            'reservation' => $reservation,
-        ]);
+        return response()->json($reservation, 200);
     }
 
     protected function findAvailableTableForUpdate(Carbon $requestedTime, int $guestCount, Reservation $currentReservation)
@@ -140,8 +134,6 @@ class ReservationController extends Controller
     {
         $reservation->delete();
 
-        return response()->json([
-            'message' => 'Foglalás törölve.',
-        ], 200);
+        return response()->json("", 204);
     }
 }
