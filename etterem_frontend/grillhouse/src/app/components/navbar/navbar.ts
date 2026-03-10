@@ -25,7 +25,7 @@ import { GrillhouseActionsService } from '../../services/grillhouse-actions';
   <span class="btn__icon">⟶</span>
   Login
 </button>
-          <button class="btn btn--primary" (click)="onReserveTable()">
+          <button class="btn btn--primary" [routerLink]="['/reserve']">
             Reserve Table
           </button>
         </div>
