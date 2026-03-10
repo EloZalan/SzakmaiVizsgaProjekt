@@ -24,7 +24,7 @@ class AdminActionsController extends Controller
 
 
 
-        return response(['waiter' => $user], 201);
+        return response($user, 201);
     }
 
     public function deleteWaiter(Request $request, Int $id) {
@@ -35,16 +35,12 @@ class AdminActionsController extends Controller
             ], 404);
         }
         User::destroy($user->id);
-        return response()->json([
-            'message' => 'Pincér törölve.'
-        ], 200);
+        return response()->json("", 204);
     }
 
     public function getAllWaiter(Request $request) {
         $users = User::where('role', 'waiter')->get();
-        return response()->json([
-            'users' => $users
-        ]);
+        return response()->json($users, 200);
     }
 
 }
