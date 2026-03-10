@@ -47,10 +47,7 @@ class OrderController extends Controller
             'status' => 'in_progress'
         ]);
 
-        return response()->json([
-            'message' => 'Rendelés sikeresen megnyitva!',
-            'order' => $order
-        ], 201);
+        return response()->json($order, 201);
     }
 
     public function addItem(Request $request, Order $order) {
@@ -77,7 +74,6 @@ class OrderController extends Controller
         $order->increment('total_price', $addedPrice);
 
         return response()->json([
-            'message' => 'Tétel hozzáadva!',
             'item' => $menuItem->name,
             'quantity' => $fields['quantity'],
             'current_total' => $order->total_price
@@ -94,7 +90,6 @@ class OrderController extends Controller
         $order->update(['status' => 'ready_to_pay']);
 
         return response()->json([
-            'message' => 'Szimuláció: A rendelés most már fizetésre kész!',
             'order_id' => $order->id,
             'new_status' => $order->status,
             'total_amount' => $order->total_price
