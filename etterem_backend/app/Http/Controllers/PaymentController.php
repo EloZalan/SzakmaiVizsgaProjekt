@@ -36,7 +36,6 @@ class PaymentController extends Controller
         $order->update(['status' => 'done']);
 
         return response()->json([
-            'message' => 'Sikeres fizetés! A rendelés lezárva és az asztal felszabadítva.',
             'payment_id' => $payment->id,
             'order_status' => 'done',
             'table' => [
