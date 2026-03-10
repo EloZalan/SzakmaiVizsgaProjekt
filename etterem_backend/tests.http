@@ -119,11 +119,9 @@ Accept: application/json
 
 {}
 
-### Menu category CRUD
 
 ### Get all categories (public)
 GET {{baseUrl}}/menu-categories
-Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -141,7 +139,6 @@ Accept: application/json
 
 ### Get category by id
 GET {{baseUrl}}/menu-categories/1
-Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -165,12 +162,8 @@ Accept: application/json
 
 {}
 
-
-### Menu item CRUD
-
 ### Get all items (public)
 GET {{baseUrl}}/menu-items
-Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -178,7 +171,6 @@ Accept: application/json
 
 ### Get item by id (public)
 GET {{baseUrl}}/menu-items/1
-Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
