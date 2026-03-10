@@ -55,10 +55,7 @@ class AuthController extends Controller
 
         $user->save();
 
-        return response()->json([
-            'message' => 'Adatok sikeresen frissítve.',
-            'user' => $user,
-        ]);
+        return response()->json($user, 200);
     }
 
     public function logout(Request $request) {
