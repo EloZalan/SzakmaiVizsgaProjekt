@@ -1,7 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|OWYKr4kJeqmZHlWNLjBzrhIoJanfWlg8DlaPp0io51f6db14
-### Login admin
-POST {{baseUrl}}/login
+@token = 4|g4ByNDWQvA6r3Mb9eobNDTotSbXZ8HU03LPR9LK35787466f
 Content-Type: application/json
 Accept: application/json
 
@@ -229,7 +227,7 @@ Accept: application/json
   "guest_name": "Nagy Imre",
   "phone_number": "+36709534249",
   "guest_count": 5,
-  "start_time": "2026-03-09T14:29:00Z"
+  "start_time": "2026-03-10T11:01:00Z"
 }
 
 ### Get all reservations
@@ -270,7 +268,7 @@ Accept: application/json
 {}
 
 ### Waiter to table
-POST {{baseUrl}}/tables/2/orders
+POST {{baseUrl}}/tables/12/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
