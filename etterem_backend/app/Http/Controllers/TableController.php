@@ -43,6 +43,6 @@ class TableController extends Controller
     public function destroy(Table $table) {
         $table->delete();
 
-        return response()->json([], 204);
+        return response()->json('', 204);
     }
 }
