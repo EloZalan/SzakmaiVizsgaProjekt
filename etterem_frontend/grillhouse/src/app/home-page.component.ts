@@ -17,47 +17,6 @@ import { FooterComponent } from './components/footer/footer';
     VisitUsComponent,
     FooterComponent,
   ],
-  template: `
-    <app-navbar />
-
-    <main class="page">
-      <section id="top">
-        <app-hero />
-      </section>
-
-      <section id="about" class="section">
-        <app-about />
-      </section>
-
-      <section id="menu" class="section">
-        <app-menu-preview />
-      </section>
-
-      <section id="location" class="section">
-        <app-visit-us />
-      </section>
-
-      <app-footer />
-    </main>
-  `,
-  styles: [
-    `
-      .page {
-        background: var(--gh-bg);
-        color: var(--gh-text);
-        min-height: 100vh;
-      }
-
-      .section {
-        padding: 72px 0;
-      }
-
-      @media (max-width: 900px) {
-        .section {
-          padding: 56px 0;
-        }
-      }
-    `,
-  ],
+  templateUrl: './home-page.component.html',
 })
 export class HomePageComponent {}
