@@ -1,0 +1,32 @@
+<div class="reserve-shell">
+  <div class="reserve-card">
+    <h1 class="reserve-title">Reserve a Table</h1>
+    <p class="reserve-subtitle">Mock reservation form</p>
+
+    <div class="reserve-form">
+      <label class="reserve-field">
+        <span>Name</span>
+        <input [(ngModel)]="name" />
+      </label>
+
+      <label class="reserve-field">
+        <span>Email</span>
+        <input [(ngModel)]="email" />
+      </label>
+
+      <label class="reserve-field">
+        <span>Date</span>
+        <input [(ngModel)]="date" type="date" />
+      </label>
+
+      <label class="reserve-field">
+        <span>Guests</span>
+        <input [(ngModel)]="guests" type="number" min="1" />
+      </label>
+
+      <button class="gh-btn gh-btn--primary gh-btn--block" (click)="submitReservation()">
+        Submit Reservation
+      </button>
+    </div>
+  </div>
+</div>
