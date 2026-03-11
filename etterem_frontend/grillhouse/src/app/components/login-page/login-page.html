@@ -1,1 +1,23 @@
-<p>login-page works!</p>
+<div class="login-shell">
+  <div class="login-card">
+    <h1 class="login-card__title">Login</h1>
+
+    <label class="login-field">
+      <span>Username</span>
+      <input [(ngModel)]="username" placeholder="admin vagy pincer" />
+    </label>
+
+    <label class="login-field">
+      <span>Password</span>
+      <input [(ngModel)]="password" type="password" placeholder="••••••••" />
+    </label>
+
+    <button class="gh-btn gh-btn--primary gh-btn--block" (click)="onLogin()">
+      Login
+    </button>
+
+    <p class="login-hint">
+      Demo: <b>admin</b> → admin felület, <b>pincer</b> → pincér felület.
+    </p>
+  </div>
+</div>
