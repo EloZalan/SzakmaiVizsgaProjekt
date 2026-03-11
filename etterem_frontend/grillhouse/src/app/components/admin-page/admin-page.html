@@ -1,1 +1,203 @@
-<p>admin-page works!</p>
+<div class="admin-shell">
+  <header class="panel-top">
+    <div>
+      <div class="panel-brand">
+        <span class="panel-brand__icon">🔥</span>
+        <span class="panel-brand__text">GRILLHOUSE</span>
+      </div>
+      <div class="panel-subtitle">Admin felület</div>
+    </div>
+
+    <div class="panel-top__right">
+      <div class="gh-pill">Bejelentkezve: <b>{{ auth.user()?.username }}</b></div>
+      <button class="gh-btn gh-btn--ghost" (click)="onLogout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="gh-container panel-page">
+    <div class="admin-layout">
+      <section class="gh-panel">
+        <div class="panel-head">
+          <h2>Dashboard</h2>
+          <p>Étterem statisztikák</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-box stat-box--accent">
+            <span>Mai bevétel</span>
+            <strong>{{ dailyRevenue | currency:'USD':'symbol':'1.0-0' }}</strong>
+            <small>Minta adat</small>
+          </div>
+
+          <div class="stat-box">
+            <span>Mai vendégek</span>
+            <strong>{{ todayGuests }}</strong>
+            <small>Összes kiszolgált vendég</small>
+          </div>
+
+          <div class="stat-box">
+            <span>Aktív pincérek</span>
+            <strong>{{ activeWaiters }}</strong>
+            <small>Jelenleg aktív dolgozók</small>
+          </div>
+
+          <div class="stat-box">
+            <span>Asztalok száma</span>
+            <strong>{{ tables.length }}</strong>
+            <small>Összes konfigurált asztal</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="gh-panel">
+        <div class="panel-head panel-head--row">
+          <div>
+            <h2>Szerepkörök kezelése</h2>
+            <p>Pincérek felvétele, kirúgása, szerepkör módosítás</p>
+          </div>
+          <button class="gh-btn gh-btn--primary" (click)="addWaiter()">+ Pincér felvétele</button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Név</th>
+                <th>Szerepkör</th>
+                <th>Státusz</th>
+                <th>Műszak</th>
+                <th>Művelet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let staff of staffMembers" [class.admin-table__row--selected]="selectedStaff?.id === staff.id">
+                <td>{{ staff.name }}</td>
+                <td>
+                  <span class="gh-tag" [class.gh-tag--accent]="staff.role === 'ADMIN'">
+                    {{ staff.role }}
+                  </span>
+                </td>
+                <td>
+                  <span class="gh-tag" [class.gh-tag--muted]="staff.status === 'INACTIVE'">
+                    {{ staff.status }}
+                  </span>
+                </td>
+                <td>{{ staff.shift }}</td>
+                <td>
+                  <div class="action-row">
+                    <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectStaff(staff)">Részletek</button>
+                    <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="toggleRole(staff.id)">Role váltás</button>
+                    <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="removeStaff(staff.id)">Kirúgás</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="gh-panel">
+        <div class="panel-head panel-head--row">
+          <div>
+            <h2>Asztalok módosítása</h2>
+            <p>Férőhely, törlés, hozzáadás</p>
+          </div>
+          <button class="gh-btn gh-btn--primary" (click)="addTable()">+ Asztal hozzáadás</button>
+        </div>
+
+        <div class="admin-table-grid">
+          <div class="admin-table-card" *ngFor="let table of tables" [class.admin-table-card--selected]="selectedTable?.id === table.id">
+            <div class="admin-table-card__top">
+              <strong>{{ table.name }}</strong>
+              <span class="gh-tag" [class.gh-tag--muted]="table.status === 'DISABLED'">
+                {{ table.status }}
+              </span>
+            </div>
+
+            <div class="admin-table-card__body">
+              <span>Férőhely</span>
+              <strong>{{ table.seats }} fő</strong>
+            </div>
+
+            <div class="action-row action-row--compact">
+              <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectTable(table)">Szerkesztés</button>
+              <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="changeSeats(table.id)">Férőhely</button>
+              <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="deleteTable(table.id)">Törlés</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="gh-panel">
+        <div class="panel-head">
+          <h2>Részletek</h2>
+          <p>Kiválasztott admin elem</p>
+        </div>
+
+        <ng-container *ngIf="selectedStaff; else adminTableOrEmpty">
+          <div class="summary-box">
+            <span>Dolgozó adatai</span>
+
+            <div class="detail-line">
+              <span>Név</span>
+              <strong>{{ selectedStaff.name }}</strong>
+            </div>
+            <div class="detail-line">
+              <span>Szerepkör</span>
+              <strong>{{ selectedStaff.role }}</strong>
+            </div>
+            <div class="detail-line">
+              <span>Státusz</span>
+              <strong>{{ selectedStaff.status }}</strong>
+            </div>
+            <div class="detail-line">
+              <span>Műszak</span>
+              <strong>{{ selectedStaff.shift }}</strong>
+            </div>
+
+            <div class="action-row action-row--end">
+              <button class="gh-btn gh-btn--ghost" (click)="toggleRole(selectedStaff.id)">Szerepkör váltása</button>
+              <button class="gh-btn gh-btn--danger" (click)="removeStaff(selectedStaff.id)">Kirúgás</button>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #adminTableOrEmpty>
+          <ng-container *ngIf="selectedTable; else adminEmpty">
+            <div class="summary-box">
+              <span>Asztal adatai</span>
+
+              <div class="detail-line">
+                <span>Név</span>
+                <strong>{{ selectedTable.name }}</strong>
+              </div>
+              <div class="detail-line">
+                <span>Férőhely</span>
+                <strong>{{ selectedTable.seats }} fő</strong>
+              </div>
+              <div class="detail-line">
+                <span>Státusz</span>
+                <strong>{{ selectedTable.status }}</strong>
+              </div>
+
+              <div class="action-row action-row--end">
+                <button class="gh-btn gh-btn--ghost" (click)="changeSeats(selectedTable.id)">Férőhely módosítás</button>
+                <button class="gh-btn gh-btn--danger" (click)="deleteTable(selectedTable.id)">Asztal törlése</button>
+              </div>
+            </div>
+          </ng-container>
+        </ng-template>
+
+        <ng-template #adminEmpty>
+          <div class="gh-empty">
+            <div class="gh-empty__icon">⚙️</div>
+            <div class="gh-empty__title">Válassz egy elemet</div>
+            <div class="gh-empty__text">
+              Kattints egy dolgozóra vagy asztalra, és itt megjelennek a részletek.
+            </div>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+  </main>
+</div>
