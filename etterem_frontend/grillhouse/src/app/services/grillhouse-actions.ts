@@ -13,18 +13,19 @@ export class GrillhouseActionsService {
   }
 
   viewMenu(): void {
-    window.scrollTo({ top: (document.body.scrollHeight) / 2, behavior: 'smooth' });
+    const menuSection = document.getElementById('menu');
+    menuSection?.scrollIntoView({ behavior: 'smooth' });
   }
 
   viewFullMenu(): void {
     this.fullMenuVisible = !this.fullMenuVisible;
   }
 
-  getDirections(): void {
-    // TODO: implement later
-  }
-
   isFullMenuVisible(): boolean {
     return this.fullMenuVisible;
+  }
+
+  getDirections(): void {
+    // TODO: implement later
   }
 }
