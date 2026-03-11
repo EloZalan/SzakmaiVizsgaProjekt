@@ -1,1 +1,52 @@
-<p>visit-us works!</p>
+<div class="gh-container">
+  <div class="visit-card">
+    <div class="visit-grid">
+      <div class="visit-copy">
+        <h2 class="visit-title">Visit Us</h2>
+
+        <div class="visit-info">
+          <div class="visit-row">
+            <div class="visit-row__icon">📍</div>
+            <div>
+              <div class="visit-row__title">Location</div>
+              <div class="visit-row__value">123 Grill Street</div>
+              <div class="visit-row__value">Smoketown, TX 75001</div>
+            </div>
+          </div>
+
+          <div class="visit-row">
+            <div class="visit-row__icon">🕒</div>
+            <div>
+              <div class="visit-row__title">Hours</div>
+              <div class="visit-row__value">Mon-Thu: 11am - 10pm</div>
+              <div class="visit-row__value">Fri-Sat: 11am - 11pm</div>
+              <div class="visit-row__value">Sunday: 12pm - 9pm</div>
+            </div>
+          </div>
+
+          <div class="visit-row">
+            <div class="visit-row__icon">📞</div>
+            <div>
+              <div class="visit-row__title">Contact</div>
+              <div class="visit-row__value">(555) GRILL-01</div>
+              <div class="visit-row__value">info@grillhouse.com</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="gh-btn gh-btn--primary" (click)="onGetDirections()">
+          Get Directions
+        </button>
+      </div>
+
+      <div class="visit-media">
+        <div
+          class="visit-image"
+          style="background-image: url('assets/images/hero-1.jpg')"
+          role="img"
+          aria-label="Restaurant interior"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
