@@ -1,1 +1,19 @@
-<p>navbar works!</p>
+<header class="nav-shell" [class.nav-shell--scrolled]="scrolled">
+  <div class="gh-container nav-inner">
+    <a class="nav-brand" [routerLink]="['/']" fragment="top">
+      <span class="nav-brand__icon">🔥</span>
+      <span class="nav-brand__text">GRILLHOUSE</span>
+    </a>
+
+    <nav class="nav-links">
+      <a [routerLink]="['/']" fragment="menu">Menu</a>
+      <a [routerLink]="['/']" fragment="about">About</a>
+      <a [routerLink]="['/']" fragment="location">Location</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a class="gh-btn gh-btn--ghost" [routerLink]="['/login']">Login</a>
+      <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">Reserve Table</a>
+    </div>
+  </div>
+</header>
