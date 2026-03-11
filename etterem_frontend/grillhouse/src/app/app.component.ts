@@ -6,17 +6,7 @@ import { NgIf } from '@angular/common';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, NgIf],
-  template: `
-    <router-outlet></router-outlet>
-
-    <button
-      *ngIf="showScrollButton"
-      class="scroll-top-btn"
-      (click)="scrollToTop()"
-    >
-      ↑
-    </button>
-  `,
+  templateUrl: './app.html',
 })
 export class AppComponent {
   showScrollButton = false;

@@ -1,4 +1,10 @@
-
-
 <router-outlet></router-outlet>
 
+<button
+  *ngIf="showScrollButton"
+  class="scroll-top-btn"
+  (click)="scrollToTop()"
+  aria-label="Go to top"
+>
+  ↑
+</button>
