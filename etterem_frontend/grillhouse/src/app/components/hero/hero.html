@@ -1,1 +1,30 @@
-<p>hero works!</p>
+<section class="hero-shell">
+  <div
+    class="hero-shell__bg"
+    [style.backgroundImage]="'url(' + slides[activeIndex].imageUrl + ')'"
+    aria-hidden="true"
+  ></div>
+
+  <div class="hero-shell__overlay"></div>
+
+  <div class="gh-container hero-shell__content">
+    <div class="hero-shell__center">
+      <h1 class="hero-shell__title">{{ slides[activeIndex].headline }}</h1>
+      <p class="hero-shell__subtitle">{{ slides[activeIndex].subline }}</p>
+
+      <button class="gh-btn gh-btn--primary gh-btn--lg" (click)="onViewMenu()">
+        View Menu
+      </button>
+
+      <div class="hero-shell__dots">
+        <button
+          *ngFor="let slide of slides; let i = index"
+          class="hero-shell__dot"
+          [class.hero-shell__dot--active]="i === activeIndex"
+          (click)="select(i)"
+          aria-label="Select slide"
+        ></button>
+      </div>
+    </div>
+  </div>
+</section>
