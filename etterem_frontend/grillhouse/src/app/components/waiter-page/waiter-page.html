@@ -9,7 +9,7 @@
     </div>
 
     <div class="panel-top__right">
-      <div class="gh-pill">Bejelentkezve: <b>{{ auth.user()?.username }}</b></div>
+      <div class="gh-pill">Bejelentkezve: <b>{{ auth.user?.name }}</b></div>
       <button class="gh-btn gh-btn--ghost" (click)="onLogout()">Logout</button>
     </div>
   </header>

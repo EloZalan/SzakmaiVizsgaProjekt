@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -7,16 +7,45 @@ import { AuthService } from '../../services/auth';
   selector: 'app-login-page',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './login-page.html',
+  templateUrl: './login-page.html'
 })
 export class LoginPageComponent {
-  username = '';
+  email = '';
   password = '';
+  errorMessage = '';
+  loading = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router
+  ) {}
 
-  onLogin(): void {
-    this.auth.login(this.username, this.password);
-    this.router.navigateByUrl(this.auth.getHomeRouteByRole());
+  onLogin(form: NgForm): void {
+    this.errorMessage = '';
+
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      return;
+    }
+
+    this.loading = true;
+
+    this.auth.login(this.email, this.password).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigateByUrl(this.auth.getHomeRouteByRole());
+      },
+      error: (err) => {
+        this.loading = false;
+
+        if (err.status === 422) {
+          this.errorMessage = 'Hibás vagy hiányzó adatok.';
+        } else if (err.status === 401) {
+          this.errorMessage = 'Hibás email vagy jelszó.';
+        } else {
+          this.errorMessage = 'Sikertelen bejelentkezés.';
+        }
+      }
+    });
   }
 }

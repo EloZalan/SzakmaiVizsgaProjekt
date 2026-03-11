@@ -13,7 +13,7 @@ export const routes: Routes = [
   {
     path: 'waiter',
     component: WaiterPageComponent,
-    canActivate: [roleGuard(['pincer'])],
+    canActivate: [roleGuard(['waiter'])],
   },
   {
     path: 'admin',

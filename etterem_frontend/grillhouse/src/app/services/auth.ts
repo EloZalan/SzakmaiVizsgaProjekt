@@ -1,43 +1,76 @@
-import { Injectable, signal } from '@angular/core';
-import { AuthUser } from '../models/auth-user.model';
-import { UserRole } from '../models/user-role.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
+import { ConfigService } from './config.service';
 
-@Injectable({ providedIn: 'root' })
+export type UserRole = 'admin' | 'waiter' | 'customer';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthService {
-  private readonly _user = signal<AuthUser | null>(null);
+  private http = inject(HttpClient);
+  private config = inject(ConfigService);
 
-  user = this._user.asReadonly();
+  user: User | null = this.getStoredUser();
+  token: string | null = localStorage.getItem('token');
+
+  login(email: string, password: string) {
+    return this.http
+      .post<LoginResponse>(`${this.config.apiUrl}/login`, {
+        email,
+        password,
+      })
+      .pipe(
+        tap((res) => {
+          this.token = res.token;
+          this.user = res.user;
+
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+        })
+      );
+  }
+
+  logout() {
+    return this.http.post(`${this.config.apiUrl}/logout`, {});
+  }
 
   isLoggedIn(): boolean {
-    return this._user() !== null;
+    return !!this.token;
   }
 
-  role(): UserRole {
-    return this._user()?.role ?? 'guest';
-  }
-
-  login(username: string, password: string): void {
-    let role: UserRole = 'guest';
-
-    if (username.trim().toLowerCase() === 'pincer') {
-      role = 'pincer';
-    } else if (username.trim().toLowerCase() === 'admin') {
-      role = 'admin';
-    }
-
-    this._user.set({ username, role });
-  }
-
-  logout(): void {
-    this._user.set(null);
+  get role(): UserRole | null {
+    return this.user?.role ?? null;
   }
 
   getHomeRouteByRole(): string {
-    const role = this.role();
+    switch (this.role) {
+      case 'admin':
+        return '/admin';
+      case 'waiter':
+        return '/waiter';
+      case 'customer':
+        return '/';
+      default:
+        return '/login';
+    }
+  }
 
-    if (role === 'pincer') return '/waiter';
-    if (role === 'admin') return '/admin';
-
-    return '/';
+  private getStoredUser(): User | null {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
   }
 }

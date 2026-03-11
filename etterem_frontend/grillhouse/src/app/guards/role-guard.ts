@@ -1,7 +1,6 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { AuthService } from '../services/auth';
-import { UserRole } from '../models/user-role.model';
+import { AuthService, UserRole } from '../services/auth';
 
 export const roleGuard = (allowed: UserRole[]): CanActivateFn => {
   return () => {
@@ -13,7 +12,7 @@ export const roleGuard = (allowed: UserRole[]): CanActivateFn => {
       return false;
     }
 
-    if (!allowed.includes(auth.role())) {
+    if (!auth.role || !allowed.includes(auth.role)) {
       router.navigateByUrl(auth.getHomeRouteByRole());
       return false;
     }

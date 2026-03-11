@@ -2,22 +2,66 @@
   <div class="login-card">
     <h1 class="login-card__title">Login</h1>
 
-    <label class="login-field">
-      <span>Username</span>
-      <input [(ngModel)]="username" placeholder="admin vagy pincer" />
-    </label>
+    <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" novalidate>
+      <label class="login-field">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          #emailRef="ngModel"
+          required
+          email
+          placeholder="pelda@email.com"
+        />
 
-    <label class="login-field">
-      <span>Password</span>
-      <input [(ngModel)]="password" type="password" placeholder="••••••••" />
-    </label>
+        @if (emailRef.touched && emailRef.invalid) {
+          <small class="error">
+            @if (emailRef.errors?.['required']) {
+              <span>Az email megadása kötelező.</span>
+            }
+            @if (emailRef.errors?.['email']) {
+              <span>Az email formátuma hibás.</span>
+            }
+          </small>
+        }
+      </label>
 
-    <button class="gh-btn gh-btn--primary gh-btn--block" (click)="onLogin()">
-      Login
-    </button>
+      <label class="login-field">
+        <span>Password</span>
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          #passwordRef="ngModel"
+          required
+          minlength="6"
+          placeholder="******"
+        />
 
-    <p class="login-hint">
-      Demo: <b>admin</b> → admin felület, <b>pincer</b> → pincér felület.
-    </p>
+        @if (passwordRef.touched && passwordRef.invalid) {
+          <small class="error">
+            @if (passwordRef.errors?.['required']) {
+              <span>A jelszó megadása kötelező.</span>
+            }
+            @if (passwordRef.errors?.['minlength']) {
+              <span>A jelszó legalább 6 karakter legyen.</span>
+            }
+          </small>
+        }
+      </label>
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      <button
+        class="gh-btn gh-btn--primary gh-btn--block"
+        type="submit"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Bejelentkezés...' : 'Login' }}
+      </button>
+    </form>
   </div>
 </div>
