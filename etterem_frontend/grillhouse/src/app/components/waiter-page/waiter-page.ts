@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth';
 import { TableInfo } from '../../models/table-info.model';
 import { PaymentMethod } from '../../models/payment-method.model';
 
+
 @Component({
   selector: 'app-waiter-page',
   standalone: true,

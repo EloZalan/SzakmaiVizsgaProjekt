@@ -86,7 +86,6 @@
                 <td>
                   <div class="action-row">
                     <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectStaff(staff)">Részletek</button>
-                    <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="toggleRole(staff.id)">Role váltás</button>
                     <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="removeStaff(staff.id)">Kirúgás</button>
                   </div>
                 </td>
@@ -156,7 +155,6 @@
             </div>
 
             <div class="action-row action-row--end">
-              <button class="gh-btn gh-btn--ghost" (click)="toggleRole(selectedStaff.id)">Szerepkör váltása</button>
               <button class="gh-btn gh-btn--danger" (click)="removeStaff(selectedStaff.id)">Kirúgás</button>
             </div>
           </div>

@@ -353,8 +353,13 @@ input {
 }
 
 .nav-brand__icon {
-  color: var(--gh-accent);
-  font-size: 18px;
+  width: 50px;
+  height: 60px;
+}
+
+.nav-brand__icon img {
+  width: 50px;
+  height: 60px;
 }
 
 .nav-brand__text {
@@ -489,6 +494,12 @@ input {
   font-weight: 900;
   letter-spacing: 1px;
   color: rgba(255, 255, 255, 0.85);
+
+}
+
+.about-logo-circle img{
+    width: 120px;
+  height: 120px;
 }
 
 .about-title {
@@ -1077,9 +1088,44 @@ input {
   .gh-section {
     padding: 56px 0;
   }
+
+  .about-logo-box {
+    display: none;
+}
+
+.about-logo-circle {
+  display: none;
+
+}
 }
 
 @media (max-width: 760px) {
+  .admin-shell{
+    font-size: 1.5rem;
+  }
+
+    .admin-shell p{
+    font-size: 1.3rem;
+  }
+
+    .admin-shell button{
+    font-size: 1.2rem;
+  }
+
+      .admin-shell span{
+    font-size: 1.2rem;
+  }
+
+      .admin-shell div{
+    font-size: 1.2rem;
+  }
+
+      .admin-shell small{
+    font-size: 1rem;
+  }
+
+  
+
   .gh-container {
     width: min(var(--gh-container), calc(100% - 28px));
   }
@@ -1104,5 +1150,11 @@ input {
   .nav-actions .gh-btn {
     padding: 10px 12px;
     font-size: 12px;
+  }
+
+  .directionsDiv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
