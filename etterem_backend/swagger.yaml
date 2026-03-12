@@ -46,7 +46,9 @@ components:
           format: email
         role:
           type: string
-          enum: [admin, waiter, customer]
+          enum: [admin, waiter]
+        on_shift:
+          type: boolean
 
     Reservation:
       type: object
@@ -206,6 +208,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
 
+  /take-shift:
+    post:
+      tags: [Auth]
+      summary: Pincér műszak felvétele
+      description: >
+        A bejelentkezett pincér műszakját állítja aktívra (`on_shift = true`).
+        Csak `waiter` szerepkörű felhasználó érheti el.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Műszak sikeresen felvéve
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Nem pincér próbál műszakot felvenni
+
   /logout:
     post:
       tags: [Auth]
@@ -261,6 +282,36 @@ paths:
                 $ref: '#/components/schemas/Reservation'
         '422':
           description: Nincs szabad asztal vagy érvénytelen adatok
+
+  /reservations/walk-in:
+    post:
+      tags: [Reservations]
+      summary: Helyben érkező (walk-in) vendég foglalásának létrehozása
+      description: >
+        Pincér által indított foglalás olyan vendégnek, aki nem foglalt előre.
+        Csak a vendég létszámát (`guest_count`) kell megadni. Csak műszakban lévő pincér érheti el.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [guest_count]
+              properties:
+                guest_count:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Foglalás létrehozva egy szabad asztalhoz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '422':
+          description: Sajnos nincs szabad asztal jelenleg
 
   /reservations/{reservation}:
     get:
@@ -389,6 +440,64 @@ paths:
                 $ref: '#/components/schemas/Order'
         '400':
           description: Nincs érvényes foglalás vagy már létezik rendelés
+        '403':
+          description: Csak műszakban lévő pincér nyithat rendelést
+    get:
+      tags: [Orders]
+      summary: Rendelés és tételek lekérése az adott asztal aktuális foglalásához
+      description: >
+        Visszaadja az aktuális foglaláshoz tartozó rendelést, a rendelt tételeket és a jelenlegi végösszeget.
+        Csak műszakban lévő pincér érheti el.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: table
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rendelés és tételek listája
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id:
+                    type: integer
+                  table_id:
+                    type: integer
+                  reservation_id:
+                    type: integer
+                    nullable: true
+                  status:
+                    type: string
+                    enum: [in_progress, ready_to_pay, done]
+                  total_price:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        menu_item_id:
+                          type: integer
+                        name:
+                          type: string
+                          nullable: true
+                        price:
+                          type: integer
+                          nullable: true
+                        quantity:
+                          type: integer
+                        line_total:
+                          type: integer
+                          nullable: true
+        '400':
+          description: Nincs érvényes foglalás ehhez az asztalhoz
 
   /menu-categories:
     get:
