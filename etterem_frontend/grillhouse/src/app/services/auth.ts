@@ -45,7 +45,14 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.post(`${this.config.apiUrl}/logout`, {});
+    this.http.post(`${this.config.apiUrl}/logout`, {}).subscribe({
+      next: () => {
+        this.clearAuth();
+      },
+      error: () => {
+        this.clearAuth();
+      },
+    });
   }
 
   isLoggedIn(): boolean {
@@ -72,5 +79,12 @@ export class AuthService {
   private getStoredUser(): User | null {
     const raw = localStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
+  }
+
+  private clearAuth(): void {
+    this.token = null;
+    this.user = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }
