@@ -1,13 +1,20 @@
-import { TableStatus } from './table-status.model';
-import { OrderItem } from './order-item.model';
+export type WaiterTableStatus = 'FREE' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
+
+export interface TableOrderItem {
+  menuItemId: number;
+  name: string;
+  qty: number;
+  price: number;
+}
 
 export interface TableInfo {
   id: number;
   name: string;
-  status: TableStatus;
+  status: WaiterTableStatus;
   guests: number;
   server: string;
   updatedAt: string;
-  items: OrderItem[];
+  items: TableOrderItem[];
   note?: string;
+  orderId?: number | null;
 }

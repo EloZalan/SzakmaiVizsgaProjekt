@@ -1,1 +1,1 @@
-export type PaymentMethod = 'CARD' | 'CASH' | 'QR';
+export type PaymentMethod = 'CARD' | 'CASH';

@@ -3,8 +3,7 @@
     <div>
       <div class="panel-brand">
         <span class="panel-brand__icon">
-             <img src="../../../assets/images/logo1024A.png" alt="">
-
+          <img src="../../../assets/images/logo1024A.png" alt="">
         </span>
         <span class="panel-brand__text">GRILLHOUSE</span>
       </div>
@@ -67,8 +66,21 @@
           </div>
         </div>
 
-        <div class="waiter-tables-grid">
+        <div class="gh-empty" *ngIf="loading">
+          Betöltés...
+        </div>
+
+        <div class="gh-empty" *ngIf="!loading && !!errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <div class="gh-empty" *ngIf="!loading && !errorMessage && tables.length === 0">
+          Nincs megjeleníthető asztal.
+        </div>
+
+        <div class="waiter-tables-grid" *ngIf="!loading && !errorMessage && tables.length > 0">
           <button
+            type="button"
             class="waiter-table-tile"
             *ngFor="let t of tables"
             (click)="selectTable(t)"
@@ -79,8 +91,14 @@
           >
             <div class="waiter-table-tile__top">
               <strong>{{ t.name }}</strong>
-              <span class="gh-tag gh-tag--accent" *ngIf="t.status === 'NEEDS_PAYMENT'">PAY</span>
-              <span class="gh-tag gh-tag--muted" *ngIf="t.status === 'CLOSED'">CLOSED</span>
+
+              <span class="gh-tag gh-tag--accent" *ngIf="t.status === 'NEEDS_PAYMENT'">
+                PAY
+              </span>
+
+              <span class="gh-tag gh-tag--muted" *ngIf="t.status === 'CLOSED'">
+                CLOSED
+              </span>
             </div>
 
             <div class="waiter-table-tile__mid">
@@ -101,13 +119,13 @@
           <ng-container *ngIf="mode === 'payment'; else waiterDetailsView">
             <div class="panel-head panel-head--row">
               <div>
-                <h2>Fizetés • {{ s.name }}</h2>
+                <h2>Fizetés · {{ s.name }}</h2>
                 <p>Összeg: {{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</p>
               </div>
 
               <div class="action-row">
-                <button class="gh-btn gh-btn--ghost" (click)="backToDetails()">Vissza</button>
-                <button class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
+                <button type="button" class="gh-btn gh-btn--ghost" (click)="backToDetails()">Vissza</button>
+                <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
               </div>
             </div>
 
@@ -121,10 +139,10 @@
                 <div class="summary-box">
                   <span>Borravaló</span>
                   <div class="tip-chip-row">
-                    <button class="tip-chip" [class.tip-chip--active]="tipPreset === 0" (click)="setTipPreset(0)">0%</button>
-                    <button class="tip-chip" [class.tip-chip--active]="tipPreset === 10" (click)="setTipPreset(10)">10%</button>
-                    <button class="tip-chip" [class.tip-chip--active]="tipPreset === 12" (click)="setTipPreset(12)">12%</button>
-                    <button class="tip-chip" [class.tip-chip--active]="tipPreset === 15" (click)="setTipPreset(15)">15%</button>
+                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 0" (click)="setTipPreset(0)">0%</button>
+                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 10" (click)="setTipPreset(10)">10%</button>
+                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 12" (click)="setTipPreset(12)">12%</button>
+                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 15" (click)="setTipPreset(15)">15%</button>
                   </div>
                   <small>{{ tipAmount(s) | currency:'USD':'symbol':'1.2-2' }}</small>
                 </div>
@@ -136,21 +154,27 @@
               </div>
 
               <div class="payment-method-row">
-                <button class="method-chip" [class.method-chip--active]="paymentMethod === 'CARD'" (click)="setPaymentMethod('CARD')">💳 Card</button>
-                <button class="method-chip" [class.method-chip--active]="paymentMethod === 'CASH'" (click)="setPaymentMethod('CASH')">💵 Cash</button>
-                <button class="method-chip" [class.method-chip--active]="paymentMethod === 'QR'" (click)="setPaymentMethod('QR')">📱 QR</button>
+                <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CARD'" (click)="setPaymentMethod('CARD')">
+                  💳 Card
+                </button>
+                <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CASH'" (click)="setPaymentMethod('CASH')">
+                  💵 Cash
+                </button>
               </div>
 
               <div class="summary-box">
                 <span>Split bill</span>
+
                 <div class="detail-line">
                   <span>Vendégek</span>
                   <strong>{{ s.guests }}</strong>
                 </div>
+
                 <div class="detail-line">
                   <span>Fizetendő / fő</span>
                   <strong>{{ perGuest(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
                 </div>
+
                 <div class="detail-line">
                   <span>Mód</span>
                   <strong>{{ paymentMethod }}</strong>
@@ -158,8 +182,8 @@
               </div>
 
               <div class="action-row action-row--end">
-                <button class="gh-btn gh-btn--ghost" (click)="cancelPayment()">Mégse</button>
-                <button class="gh-btn gh-btn--primary" (click)="confirmPayment(s.id)">
+                <button type="button" class="gh-btn gh-btn--ghost" (click)="cancelPayment()">Mégse</button>
+                <button type="button" class="gh-btn gh-btn--primary" (click)="confirmPayment(s.id)">
                   Fizetés véglegesítése
                 </button>
               </div>
@@ -173,7 +197,7 @@
                 <p>Státusz: {{ s.status }}</p>
               </div>
 
-              <button class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
             </div>
 
             <div class="detail-grid-two">
@@ -181,14 +205,17 @@
                 <span>Vendégek</span>
                 <strong>{{ s.guests }} fő</strong>
               </div>
+
               <div class="summary-box">
                 <span>Pincér</span>
                 <strong>{{ s.server }}</strong>
               </div>
+
               <div class="summary-box">
                 <span>Frissítés</span>
                 <strong>{{ s.updatedAt }}</strong>
               </div>
+
               <div class="summary-box summary-box--accent">
                 <span>Összeg</span>
                 <strong>{{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
@@ -199,7 +226,7 @@
               <div class="order-item" *ngFor="let it of s.items">
                 <div>
                   <strong>{{ it.name }}</strong>
-                  <small>{{ it.qty }} × {{ it.price | currency:'USD':'symbol':'1.0-0' }}</small>
+                  <small>x{{ it.qty }} · {{ it.price | currency:'USD':'symbol':'1.0-0' }}</small>
                 </div>
                 <strong>{{ (it.qty * it.price) | currency:'USD':'symbol':'1.2-2' }}</strong>
               </div>
@@ -215,10 +242,27 @@
             </div>
 
             <div class="action-row action-row--end">
-              <button class="gh-btn gh-btn--primary" (click)="addItem(s.id)">+ Tétel</button>
-              <button class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status === 'CLOSED'">
-                Fizetve
+              <button type="button" class="gh-btn gh-btn--primary" (click)="addItem(s.id)">+ Tétel</button>
+
+              <button
+                type="button"
+                class="gh-btn gh-btn--ghost"
+                (click)="markReady(s.id)"
+                [disabled]="!s.orderId || s.items.length === 0"
+              >
+                Fizetésre kész
               </button>
+
+              <button
+                type="button"
+                class="gh-btn gh-btn--ghost"
+                (click)="openPayment(s.id)"
+                [disabled]="s.status === 'CLOSED' || !s.orderId"
+              >
+                Fizetés
+              </button>
+
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
             </div>
           </ng-template>
         </section>
