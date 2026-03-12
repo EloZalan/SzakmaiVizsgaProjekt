@@ -98,37 +98,49 @@
         </div>
       </section>
 
-      <section class="gh-panel">
-        <div class="panel-head panel-head--row">
-          <div>
-            <h2>Asztalok módosítása</h2>
-            <p>Férőhely, törlés, hozzáadás</p>
-          </div>
-          <button class="gh-btn gh-btn--primary" (click)="addTable()">+ Asztal hozzáadás</button>
-        </div>
+<section class="gh-panel">
+  <div class="panel-head panel-head--row">
+    <div>
+      <h2>Asztalok módosítása</h2>
+      <p>Férőhely, törlés, hozzáadás</p>
+    </div>
+    <button class="gh-btn gh-btn--primary" (click)="addTable()">+ Asztal hozzáadás</button>
+  </div>
 
-        <div class="admin-table-grid">
-          <div class="admin-table-card" *ngFor="let table of tables" [class.admin-table-card--selected]="selectedTable?.id === table.id">
-            <div class="admin-table-card__top">
-              <strong>{{ table.name }}</strong>
-              <span class="gh-tag" [class.gh-tag--muted]="table.status === 'DISABLED'">
-                {{ table.status }}
-              </span>
-            </div>
+  <div *ngIf="tablesLoading" class="gh-empty-text">
+    Asztalok betöltése...
+  </div>
 
-            <div class="admin-table-card__body">
-              <span>Férőhely</span>
-              <strong>{{ table.seats }} fő</strong>
-            </div>
+  <div *ngIf="tablesError" class="gh-empty-text">
+    {{ tablesError }}
+  </div>
 
-            <div class="action-row action-row--compact">
-              <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectTable(table)">Szerkesztés</button>
-              <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="changeSeats(table.id)">Férőhely</button>
-              <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="deleteTable(table.id)">Törlés</button>
-            </div>
-          </div>
-        </div>
-      </section>
+  <div class="admin-table-grid" *ngIf="!tablesLoading && !tablesError">
+    <div
+      class="admin-table-card"
+      *ngFor="let table of tables"
+      [class.admin-table-card--selected]="selectedTable?.id === table.id"
+    >
+      <div class="admin-table-card__top">
+        <strong>{{ table.name }}</strong>
+        <span class="gh-tag" [class.gh-tag--muted]="table.status === 'DISABLED'">
+          {{ table.status }}
+        </span>
+      </div>
+
+      <div class="admin-table-card__body">
+        <span>Férőhely</span>
+        <strong>{{ table.seats }} fő</strong>
+      </div>
+
+      <div class="action-row action-row--compact">
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectTable(table)">Szerkesztés</button>
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="changeSeats(table.id)">Férőhely</button>
+        <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="deleteTable(table.id)">Törlés</button>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section class="gh-panel">
         <div class="panel-head">
