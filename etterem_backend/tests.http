@@ -1,5 +1,8 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 4|g4ByNDWQvA6r3Mb9eobNDTotSbXZ8HU03LPR9LK35787466f
+@token = 2|hzcumFZkPXuJaDZLGkJWxavU1MzHwmQ4IC4cdg3w4f2ca266
+
+### Login admin
+POST {{baseUrl}}/login
 Content-Type: application/json
 Accept: application/json
 
@@ -20,6 +23,14 @@ Accept: application/json
 
 ### Me
 GET {{baseUrl}}/user
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Take shift
+POST {{baseUrl}}/take-shift
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
@@ -219,7 +230,17 @@ Accept: application/json
   "guest_name": "Nagy Imre",
   "phone_number": "+36709534249",
   "guest_count": 5,
-  "start_time": "2026-03-10T11:01:00Z"
+  "start_time": "2026-03-12T15:12:00Z"
+}
+
+### Walk in reservation
+POST {{baseUrl}}/reservations/walk-in
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "guest_count": 4
 }
 
 ### Get all reservations
@@ -260,9 +281,16 @@ Accept: application/json
 {}
 
 ### Waiter to table
-POST {{baseUrl}}/tables/12/orders
+POST {{baseUrl}}/tables/2/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
+
+### Get all order from a table
+GET {{baseUrl}}/tables/12/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
 
 ### Add order item to an order
 POST {{baseUrl}}/orders/1/items
