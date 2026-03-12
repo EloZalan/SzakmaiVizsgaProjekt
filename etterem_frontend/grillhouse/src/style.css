@@ -71,7 +71,8 @@ input {
 }
 
 .gh-btn:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: black;
+  color: white;
 }
 
 .gh-btn:active {
@@ -81,6 +82,11 @@ input {
 .gh-btn--primary {
   background: var(--gh-accent);
   border-color: var(--gh-accent);
+  color: #120a05;
+}
+
+.btn-login:hover{
+  background: #ff6a00;
   color: #120a05;
 }
 
@@ -208,6 +214,13 @@ input {
 
 .panel-brand__icon {
   color: var(--gh-accent);
+  width: 55px;
+  height: 55px;
+}
+
+.panel-brand__icon img {
+  width: 55px;
+  height: 55px;
 }
 
 .panel-brand__text {
