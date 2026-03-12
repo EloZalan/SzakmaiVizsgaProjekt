@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('table_id')->constrained('tables')->onDelete('cascade');
             $table->string('guest_name');
-            $table->string('phone_number');
+            $table->string('phone_number')->nullable(true);
             $table->dateTime('start_time');
             $table->integer('guest_count');
             $table->timestamps();
