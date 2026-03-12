@@ -3,7 +3,7 @@
     <div>
       <div class="panel-brand">
         <span class="panel-brand__icon">
-          <img src="../../../assets/images/logo1024A.png" alt="">
+          <img src="../../../assets/images/logo1024A.png" alt="Logo">
         </span>
         <span class="panel-brand__text">GRILLHOUSE</span>
       </div>
@@ -66,63 +66,65 @@
           </div>
         </div>
 
-        <div class="gh-empty" *ngIf="loading">
-          Betöltés...
-        </div>
+        @if (loading) {
+          <div class="gh-empty">
+            <div class="spinner"></div> <p>Betöltés...</p>
+          </div>
+        } @else if (errorMessage) {
+          <div class="gh-empty">
+            <p class="error-text">{{ errorMessage }}</p>
+            <button class="gh-btn gh-btn--ghost" (click)="loadWaiterPage()">Újrapróbálkozás</button>
+          </div>
+        } @else if (tables.length === 0) {
+          <div class="gh-empty">
+            <p>Nincs megjeleníthető asztal.</p>
+          </div>
+        } @else {
+          <div class="waiter-tables-grid">
+            @for (t of tables; track t.id) {
+              <button
+                type="button"
+                class="waiter-table-tile"
+                (click)="selectTable(t)"
+                [disabled]="t.status === 'FREE'"
+                [class.waiter-table-tile--selected]="selected?.id === t.id"
+                [class.waiter-table-tile--free]="t.status === 'FREE'"
+                [class.waiter-table-tile--pay]="t.status === 'NEEDS_PAYMENT'"
+                [class.waiter-table-tile--closed]="t.status === 'CLOSED'"
+              >
+                <div class="waiter-table-tile__top">
+                  <strong>{{ t.name }}</strong>
+                  @if (t.status === 'NEEDS_PAYMENT') {
+                    <span class="gh-tag gh-tag--accent">PAY</span>
+                  }
+                  @if (t.status === 'CLOSED') {
+                    <span class="gh-tag gh-tag--muted">CLOSED</span>
+                  }
+                </div>
 
-        <div class="gh-empty" *ngIf="!loading && !!errorMessage">
-          {{ errorMessage }}
-        </div>
+                <div class="waiter-table-tile__mid">
+                  <span>{{ t.guests || 0 }} fő</span>
+                  <span>{{ t.updatedAt }}</span>
+                </div>
 
-        <div class="gh-empty" *ngIf="!loading && !errorMessage && tables.length === 0">
-          Nincs megjeleníthető asztal.
-        </div>
-
-        <div class="waiter-tables-grid" *ngIf="!loading && !errorMessage && tables.length > 0">
-          <button
-            type="button"
-            class="waiter-table-tile"
-            *ngFor="let t of tables"
-            (click)="selectTable(t)"
-            [class.waiter-table-tile--selected]="selected?.id === t.id"
-            [class.waiter-table-tile--free]="t.status === 'FREE'"
-            [class.waiter-table-tile--pay]="t.status === 'NEEDS_PAYMENT'"
-            [class.waiter-table-tile--closed]="t.status === 'CLOSED'"
-          >
-            <div class="waiter-table-tile__top">
-              <strong>{{ t.name }}</strong>
-
-              <span class="gh-tag gh-tag--accent" *ngIf="t.status === 'NEEDS_PAYMENT'">
-                PAY
-              </span>
-
-              <span class="gh-tag gh-tag--muted" *ngIf="t.status === 'CLOSED'">
-                CLOSED
-              </span>
-            </div>
-
-            <div class="waiter-table-tile__mid">
-              <span>{{ t.guests }} fő</span>
-              <span>{{ t.updatedAt }}</span>
-            </div>
-
-            <div class="waiter-table-tile__bottom">
-              <strong>{{ calcTotal(t) | currency:'USD':'symbol':'1.0-0' }}</strong>
-              <small>{{ t.status }}</small>
-            </div>
-          </button>
-        </div>
+                <div class="waiter-table-tile__bottom">
+                  <strong>{{ calcTotal(t) | currency:'USD':'symbol':'1.0-0' }}</strong>
+                  <small>{{ t.status }}</small>
+                </div>
+              </button>
+            }
+          </div>
+        }
       </section>
 
-      <ng-container *ngIf="selected as s; else emptyWaiterDetail">
+      @if (selected; as s) {
         <section class="gh-panel">
-          <ng-container *ngIf="mode === 'payment'; else waiterDetailsView">
+          @if (mode === 'payment') {
             <div class="panel-head panel-head--row">
               <div>
                 <h2>Fizetés · {{ s.name }}</h2>
                 <p>Összeg: {{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</p>
               </div>
-
               <div class="action-row">
                 <button type="button" class="gh-btn gh-btn--ghost" (click)="backToDetails()">Vissza</button>
                 <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
@@ -139,10 +141,11 @@
                 <div class="summary-box">
                   <span>Borravaló</span>
                   <div class="tip-chip-row">
-                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 0" (click)="setTipPreset(0)">0%</button>
-                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 10" (click)="setTipPreset(10)">10%</button>
-                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 12" (click)="setTipPreset(12)">12%</button>
-                    <button type="button" class="tip-chip" [class.tip-chip--active]="tipPreset === 15" (click)="setTipPreset(15)">15%</button>
+                    @for (tip of tipPresets; track tip) {
+                      <button type="button" class="tip-chip"
+                        [class.tip-chip--active]="tipPreset === tip"
+                        (click)="setTipPreset(tip)">{{tip}}%</button>
+                    }
                   </div>
                   <small>{{ tipAmount(s) | currency:'USD':'symbol':'1.2-2' }}</small>
                 </div>
@@ -164,20 +167,13 @@
 
               <div class="summary-box">
                 <span>Split bill</span>
-
                 <div class="detail-line">
                   <span>Vendégek</span>
                   <strong>{{ s.guests }}</strong>
                 </div>
-
                 <div class="detail-line">
                   <span>Fizetendő / fő</span>
                   <strong>{{ perGuest(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
-                </div>
-
-                <div class="detail-line">
-                  <span>Mód</span>
-                  <strong>{{ paymentMethod }}</strong>
                 </div>
               </div>
 
@@ -188,15 +184,12 @@
                 </button>
               </div>
             </div>
-          </ng-container>
-
-          <ng-template #waiterDetailsView>
+          } @else {
             <div class="panel-head panel-head--row">
               <div>
                 <h2>{{ s.name }} részletek</h2>
                 <p>Státusz: {{ s.status }}</p>
               </div>
-
               <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
             </div>
 
@@ -205,17 +198,14 @@
                 <span>Vendégek</span>
                 <strong>{{ s.guests }} fő</strong>
               </div>
-
               <div class="summary-box">
                 <span>Pincér</span>
                 <strong>{{ s.server }}</strong>
               </div>
-
               <div class="summary-box">
                 <span>Frissítés</span>
                 <strong>{{ s.updatedAt }}</strong>
               </div>
-
               <div class="summary-box summary-box--accent">
                 <span>Összeg</span>
                 <strong>{{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
@@ -223,62 +213,47 @@
             </div>
 
             <div class="order-list">
-              <div class="order-item" *ngFor="let it of s.items">
-                <div>
-                  <strong>{{ it.name }}</strong>
-                  <small>x{{ it.qty }} · {{ it.price | currency:'USD':'symbol':'1.0-0' }}</small>
+              @for (it of s.items; track it.menuItemId) {
+                <div class="order-item">
+                  <div>
+                    <strong>{{ it.name }}</strong>
+                    <small>x{{ it.qty }} · {{ it.price | currency:'USD':'symbol':'1.0-0' }}</small>
+                  </div>
+                  <strong>{{ (it.qty * it.price) | currency:'USD':'symbol':'1.2-2' }}</strong>
                 </div>
-                <strong>{{ (it.qty * it.price) | currency:'USD':'symbol':'1.2-2' }}</strong>
-              </div>
-
-              <div class="gh-empty" *ngIf="s.items.length === 0">
-                Nincs aktív rendelés.
-              </div>
+              } @empty {
+                <div class="gh-empty">Nincs aktív rendelés.</div>
+              }
             </div>
 
-            <div class="summary-box" *ngIf="s.note">
-              <span>Megjegyzés</span>
-              <p>{{ s.note }}</p>
-            </div>
+            @if (s.note) {
+              <div class="summary-box">
+                <span>Megjegyzés</span>
+                <p>{{ s.note }}</p>
+              </div>
+            }
 
             <div class="action-row action-row--end">
               <button type="button" class="gh-btn gh-btn--primary" (click)="addItem(s.id)">+ Tétel</button>
-
-              <button
-                type="button"
-                class="gh-btn gh-btn--ghost"
-                (click)="markReady(s.id)"
-                [disabled]="!s.orderId || s.items.length === 0"
-              >
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="markReady(s.id)" [disabled]="!s.orderId || s.items.length === 0">
                 Fizetésre kész
               </button>
-
-              <button
-                type="button"
-                class="gh-btn gh-btn--ghost"
-                (click)="openPayment(s.id)"
-                [disabled]="s.status === 'CLOSED' || !s.orderId"
-              >
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status === 'CLOSED' || !s.orderId">
                 Fizetés
               </button>
-
               <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
             </div>
-          </ng-template>
+          }
         </section>
-      </ng-container>
-
-      <ng-template #emptyWaiterDetail>
+      } @else {
         <section class="gh-panel gh-panel--centered">
           <div class="gh-empty">
             <div class="gh-empty__icon">🍽️</div>
             <div class="gh-empty__title">Válassz egy asztalt</div>
-            <div class="gh-empty__text">
-              A jobb oldali részletek itt jelennek meg.
-            </div>
+            <div class="gh-empty__text">A jobb oldali részletek itt jelennek meg.</div>
           </div>
         </section>
-      </ng-template>
+      }
     </div>
   </main>
 </div>

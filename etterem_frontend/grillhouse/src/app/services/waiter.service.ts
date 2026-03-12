@@ -23,6 +23,24 @@ export interface OrderDto {
   status: 'in_progress' | 'ready_to_pay' | 'done';
 }
 
+export interface TableOrderItemDto {
+  id: number;
+  menu_item_id: number;
+  name: string | null;
+  price: number | null;
+  quantity: number;
+  line_total: number | null;
+}
+
+export interface TableOrderDetailsDto {
+  order_id: number;
+  table_id: number;
+  reservation_id: number | null;
+  status: 'in_progress' | 'ready_to_pay' | 'done';
+  total_price: number;
+  items: TableOrderItemDto[];
+}
+
 export interface MenuCategoryDto {
   id: number;
   name: string;
@@ -43,7 +61,7 @@ export class WaiterService {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
 
-getTables(): Observable<TableInfo[]> {
+  getTables(): Observable<TableInfo[]> {
   return this.http
     .get(`${this.config.apiUrl}/tables`)
     .pipe(
@@ -67,6 +85,10 @@ getTables(): Observable<TableInfo[]> {
 
   openOrder(tableId: number): Observable<OrderDto> {
     return this.http.post<OrderDto>(`${this.config.apiUrl}/tables/${tableId}/orders`, {});
+  }
+
+  getTableOrder(tableId: number): Observable<TableOrderDetailsDto> {
+    return this.http.get<TableOrderDetailsDto>(`${this.config.apiUrl}/tables/${tableId}/orders`);
   }
 
   addOrderItem(orderId: number, menuItemId: number, quantity: number): Observable<unknown> {

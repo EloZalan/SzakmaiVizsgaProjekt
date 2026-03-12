@@ -286,7 +286,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### Get all order from a table
-GET {{baseUrl}}/tables/12/orders
+GET {{baseUrl}}/tables/2/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
