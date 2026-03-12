@@ -50,6 +50,56 @@ class OrderController extends Controller
         return response()->json($order, 201);
     }
 
+    public function getAllOrder(Request $request, Table $table) {
+        $now = Carbon::now();
+
+        $activeReservation = $table->reservations()
+            ->where('start_time', '<=', $now)
+            ->where('end_time', '>', $now)
+            ->latest('start_time')
+            ->first();
+
+        if (!$activeReservation) {
+            return response()->json([
+                'message' => 'Nincs érvényes foglalás ebben az időpontban.'
+            ], 400);
+        }
+
+        $order = Order::with(['orderItems.menuItem'])
+            ->where('reservation_id', $activeReservation->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Ehhez a foglaláshoz még nincs rendelés.',
+                'items' => [],
+                'total_price' => 0,
+            ], 200);
+        }
+
+        $items = $order->orderItems->map(function (OrderItem $orderItem) {
+            $menuItem = $orderItem->menuItem;
+
+            return [
+                'id' => $orderItem->id,
+                'menu_item_id' => $orderItem->menu_item_id,
+                'name' => $menuItem?->name,
+                'price' => $menuItem?->price,
+                'quantity' => $orderItem->quantity,
+                'line_total' => $menuItem ? $menuItem->price * $orderItem->quantity : null,
+            ];
+        });
+
+        return response()->json([
+            'order_id' => $order->id,
+            'table_id' => $order->table_id,
+            'reservation_id' => $order->reservation_id,
+            'status' => $order->status,
+            'total_price' => $order->total_price,
+            'items' => $items,
+        ], 200);
+    }
+
     public function addItem(Request $request, Order $order) {
         if ($order->status !== 'in_progress') {
             return response()->json([
