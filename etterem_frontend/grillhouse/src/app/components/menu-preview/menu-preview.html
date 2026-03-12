@@ -1,17 +1,25 @@
 <div class="gh-container">
   <div class="menu-head">
-    <div class="menu-head__icon">🔥</div>
+    <img class="menu-icon" src="../../../assets/images/logo1024A.png" alt="">
     <h2 class="menu-head__title">Our Signature Menu</h2>
     <p class="menu-head__subtitle">Premium cuts, expertly grilled</p>
   </div>
 
-  <div class="menu-grid">
+  <div *ngIf="loading" class="menu-loading">
+    Menü betöltése...
+  </div>
+
+  <div *ngIf="errorMessage" class="menu-error">
+    {{ errorMessage }}
+  </div>
+
+  <div class="menu-grid" *ngIf="!loading && !errorMessage">
     <article class="menu-card" *ngFor="let m of items">
       <div class="menu-card__top">
         <div class="menu-card__name">{{ m.name }}</div>
-        <div class="menu-card__price">\${{ m.price }}</div>
+        <div class="menu-card__price">${{ m.price }}</div>
       </div>
-      <div class="menu-card__desc">{{ m.desc }}</div>
+      <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
     </article>
   </div>
 
@@ -21,57 +29,57 @@
     </button>
   </div>
 
-  <div class="menu-full-box" *ngIf="isFullMenuVisible()">
+  <div class="menu-full-box" *ngIf="isFullMenuVisible() && !loading && !errorMessage">
     <h3 class="menu-full-box__title">Full Menu</h3>
 
-    <div class="menu-section">
+    <div class="menu-section" *ngIf="starters.length > 0">
       <h4 class="menu-section__title">Starters</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of starters">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">\${{ m.price }}</div>
+            <div class="menu-card__price">${{ m.price }}</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc }}</div>
+          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
       </div>
     </div>
 
-    <div class="menu-section">
+    <div class="menu-section" *ngIf="sides.length > 0">
       <h4 class="menu-section__title">Sides</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of sides">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">\${{ m.price }}</div>
+            <div class="menu-card__price">${{ m.price }}</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc }}</div>
+          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
       </div>
     </div>
 
-    <div class="menu-section">
+    <div class="menu-section" *ngIf="desserts.length > 0">
       <h4 class="menu-section__title">Desserts</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of desserts">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">\${{ m.price }}</div>
+            <div class="menu-card__price">${{ m.price }}</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc }}</div>
+          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
       </div>
     </div>
 
-    <div class="menu-section">
+    <div class="menu-section" *ngIf="drinks.length > 0">
       <h4 class="menu-section__title">Drinks</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of drinks">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">\${{ m.price }}</div>
+            <div class="menu-card__price">${{ m.price }}</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc }}</div>
+          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
       </div>
     </div>

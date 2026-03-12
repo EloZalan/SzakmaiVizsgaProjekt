@@ -1,5 +1,7 @@
 export interface MenuCard {
+  id: number;
   name: string;
   price: number;
-  desc: string;
+  desc: string | null;
+  categoryId: number;
 }

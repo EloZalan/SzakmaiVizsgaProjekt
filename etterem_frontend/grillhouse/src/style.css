@@ -562,6 +562,12 @@ input {
   margin-bottom: 34px;
 }
 
+.menu-icon{
+  width: 100px;
+  height: 100px;
+  
+}
+
 .menu-head__icon {
   color: var(--gh-accent);
   font-size: 22px;
@@ -711,6 +717,11 @@ input {
   padding: 44px 0 60px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.65);
+}
+
+.footer-icon{
+  width: 40px;
+  height: 40px;
 }
 
 .footer-shell__inner {
