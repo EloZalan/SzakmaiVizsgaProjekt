@@ -61,6 +61,36 @@ class ReservationController extends Controller
         return response()->json($reservation, 201);
     }
 
+    public function storeWalkIn(Request $request)
+    {
+        $request->validate([
+            'guest_count' => 'required|integer|min:1',
+        ]);
+
+        $startTime = Carbon::now();
+        $endTime = $startTime->copy()->addHours(2);
+
+        $table = $this->reservationService->findAvailableTable(
+            $startTime,
+            $request->guest_count
+        );
+
+        if (!$table) {
+            return response()->json(['message' => 'Sajnos nincs szabad asztal jelenleg.'], 422);
+        }
+
+        $reservation = Reservation::create([
+            'table_id' => $table->id,
+            'guest_name' => 'Walk-in guest',
+            'phone_number' => null,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'guest_count' => $request->guest_count,
+        ]);
+
+        return response()->json($reservation, 201);
+    }
+
     public function update(Request $request, Reservation $reservation)
     {
         $request->validate([
