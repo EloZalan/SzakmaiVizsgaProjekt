@@ -21,22 +21,28 @@ Route::get('/menu-items/{menu_item}', [MenuItemController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
+    Route::post('/take-shift', [AuthController::class, 'takeShift']);
     Route::put('/user', [AuthController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/take-shift', [AuthController::class, 'takeShift']);
 
-    Route::get('/reservations', [ReservationController::class, 'index']);
-    Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
-    Route::put('/reservations/{reservation}', [ReservationController::class, 'update']);
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);
+    Route::middleware('waiter.shift')->group(function () {
+        Route::post('/reservations/walk-in', [ReservationController::class, 'storeWalkIn']);
 
-    Route::get('/tables', [TableController::class, 'index']);
-    Route::get('tables/{table}', [TableController::class, 'show']);
-    Route::post('/tables/{table}/orders', [OrderController::class, 'openOrder']);
+        Route::get('/reservations', [ReservationController::class, 'index']);
+        Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
+        Route::put('/reservations/{reservation}', [ReservationController::class, 'update']);
+        Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);
 
+        Route::get('/tables', [TableController::class, 'index']);
+        Route::get('tables/{table}', [TableController::class, 'show']);
+        Route::post('/tables/{table}/orders', [OrderController::class, 'openOrder']);
+        Route::get('/tables/{table}/orders', [OrderController::class, 'getAllOrder']);
 
-    Route::post('/orders/{order}/items', [OrderController::class, 'addItem']);
-    Route::post('/orders/{order}/simulate-ready', [OrderController::class, 'simulateReadyToPay']);
-    Route::post('/orders/{order}/pay', [PaymentController::class, 'pay']);
+        Route::post('/orders/{order}/items', [OrderController::class, 'addItem']);
+        Route::post('/orders/{order}/simulate-ready', [OrderController::class, 'simulateReadyToPay']);
+        Route::post('/orders/{order}/pay', [PaymentController::class, 'pay']);
+    });
 
     Route::middleware('admin')->group(function () {
         Route::get('admin/waiters', [AdminActionsController::class, 'getAllWaiter']);

@@ -19,7 +19,8 @@ class AdminActionsController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'waiter'
+            'role' => 'waiter',
+            'on_shift' => false,
         ]);
 
 
@@ -40,7 +41,15 @@ class AdminActionsController extends Controller
 
     public function getAllWaiter(Request $request) {
         $users = User::where('role', 'waiter')->get();
-        return response()->json($users, 200);
+        return response()->json($users->map(function (User $user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'on_shift' => $user->on_shift,
+            ];
+        }), 200);
     }
 
 }

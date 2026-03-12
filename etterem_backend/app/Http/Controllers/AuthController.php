@@ -33,6 +33,7 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'on_shift' => $user->on_shift,
         ]);
     }
 
@@ -58,8 +59,29 @@ class AuthController extends Controller
         return response()->json($user, 200);
     }
 
+    public function takeShift(Request $request) {
+        $user = $request->user();
+
+        if ($user->role !== 'waiter') {
+            return response()->json(['message' => 'Csak pincér vehet fel műszakot.'], 403);
+        }
+
+        $user->on_shift = true;
+        $user->save();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'on_shift' => $user->on_shift,
+        ], 200);
+    }
+
     public function logout(Request $request) {
         $user = $request->user();
+        $user->on_shift = false;
+        $user->save();
         $user->currentAccessToken()->delete();
 
         return response()->json([
