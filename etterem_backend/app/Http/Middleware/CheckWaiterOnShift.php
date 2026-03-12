@@ -13,7 +13,7 @@ class CheckWaiterOnShift
     {
         $user = Auth::user();
 
-        if ($user && $user->role === 'waiter' && $user->on_shift) {
+        if (($user && $user->role === 'waiter' && $user->on_shift) || $user->role === 'admin') {
             return $next($request);
         }
 
