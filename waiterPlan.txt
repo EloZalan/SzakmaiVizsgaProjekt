@@ -1,0 +1,1 @@
+login -> userData oldal(modositas, munkaba allas) -> munkaba allas -> dashboard felulet -> munka leadasa gomb -> vissza navigal a userData oldalra

@@ -12,9 +12,8 @@
 
     <div class="panel-top__right">
       <div class="gh-pill">Bejelentkezve: <b>{{ auth.user?.name }}</b></div>
-      @if (!auth.isOnShift) {
-        <button class="gh-btn gh-btn--primary" (click)="takeShift()">Munkába állás</button>
-      }
+
+
       <button class="gh-btn gh-btn--ghost" (click)="onLogout()">Logout</button>
     </div>
   </header>

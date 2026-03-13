@@ -349,19 +349,7 @@ export class WaiterPageComponent implements OnInit {
     this.router.navigateByUrl('/');
   }
 
-  takeShift(): void {
-    this.auth.takeShift().subscribe({
-      next: () => {
-        // Sikeres munkába állás, frissítjük az oldalt vagy értesítjük a felhasználót
-        alert('Sikeresen munkába álltál!');
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('TAKE SHIFT ERROR:', err);
-        alert('Nem sikerült munkába állni.');
-      },
-    });
-  }
+
 
   private mergeOrderItem(items: TableOrderItem[], incoming: TableOrderItem): TableOrderItem[] {
     const existing = items.find((i) => i.menuItemId === incoming.menuItemId);

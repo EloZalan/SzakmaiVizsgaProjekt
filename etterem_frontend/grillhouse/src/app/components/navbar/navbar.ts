@@ -21,4 +21,18 @@ export class NavbarComponent {
   onReserveTable(): void {
     this.actions.reserveTable();
   }
+
+  scrollToSection(fragment: string): void {
+    const element = document.getElementById(fragment);
+    if (element) {
+      const navbarHeight = 72; // navbar min-height
+      const elementPosition = element.offsetTop;
+      const offsetPosition = elementPosition - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  }
 }
