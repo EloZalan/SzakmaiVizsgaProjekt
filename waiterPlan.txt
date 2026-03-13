@@ -1,1 +1,1 @@
-login -> userData oldal(modositas, munkaba allas) -> munkaba allas -> dashboard felulet -> munka leadasa gomb -> vissza navigal a userData oldalra
+login -> userData oldal(modositas, munkaba allas) -> munkaba allas, munka statusz aktiv -> dashboard felulet -> munka leadasa gomb -> vissza navigal a userData oldalra, es leadja a munka statust
