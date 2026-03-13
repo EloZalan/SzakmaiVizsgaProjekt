@@ -8,10 +8,18 @@ export interface TableDto {
   id: number;
   capacity: number;
   status: string;
+  waiter_name?: string | null;
+  reservation?: ReservationDto | null;
 }
 
-interface TableListResponse {
-  data: TableDto[];
+export interface ReservationDto {
+  id: number;
+  table_id: number;
+  guest_name: string;
+  phone_number: string;
+  start_time: string;
+  end_time: string;
+  guest_count: number;
 }
 
 export interface OrderDto {
@@ -33,12 +41,14 @@ export interface TableOrderItemDto {
 }
 
 export interface TableOrderDetailsDto {
-  order_id: number;
-  table_id: number;
+  order_id?: number;
+  table_id?: number;
   reservation_id: number | null;
-  status: 'in_progress' | 'ready_to_pay' | 'done';
+  status?: 'in_progress' | 'ready_to_pay' | 'done';
   total_price: number;
+  opened_at?: string | null;
   items: TableOrderItemDto[];
+  message?: string;
 }
 
 export interface MenuCategoryDto {
@@ -62,19 +72,21 @@ export class WaiterService {
   private config = inject(ConfigService);
 
   getTables(): Observable<TableInfo[]> {
-  return this.http
-    .get(`${this.config.apiUrl}/tables`)
-    .pipe(
-      tap((response) => console.log('RAW /tables RESPONSE:', response)),
-      map((response: any) => {
-        const rows = Array.isArray(response) ? response : response?.data ?? [];
+    return this.http
+      .get(`${this.config.apiUrl}/tables`)
+      .pipe(
+        tap((response) => console.log('RAW /tables RESPONSE:', response)),
+        map((response: unknown) => {
+          const rows = Array.isArray(response)
+            ? (response as TableDto[])
+            : [];
 
-        return rows
-          .sort((a: any, b: any) => a.id - b.id)
-          .map((table: any, index: number) => this.mapTableDto(table, index + 1));
-      })
-    );
-}
+          return rows
+            .sort((a, b) => a.id - b.id)
+            .map((table, index) => this.mapTableDto(table, index + 1));
+        })
+      );
+  }
 
   getMenuData(): Observable<{ categories: MenuCategoryDto[]; items: MenuItemDto[] }> {
     return forkJoin({
@@ -109,15 +121,17 @@ export class WaiterService {
   }
 
   private mapTableDto(table: TableDto, displayIndex: number): TableInfo {
+    const guests = table.reservation?.guest_count ?? 0;
+
     return {
       id: table.id,
       name: `Table ${displayIndex}`,
       status: this.mapTableStatus(table.status),
-      guests: 0,
-      server: '-',
+      guests,
+      server: table.waiter_name ?? '-',
       updatedAt: '-',
       items: [],
-      note: undefined,
+      note: this.mapReservationNote(table.reservation),
       orderId: null,
     };
   }
@@ -127,6 +141,10 @@ export class WaiterService {
 
     if (normalized === 'free' || normalized === 'available') {
       return 'FREE';
+    }
+
+    if (normalized === 'reserved') {
+      return 'RESERVED';
     }
 
     if (normalized === 'closed' || normalized === 'disabled') {
@@ -142,5 +160,13 @@ export class WaiterService {
     }
 
     return 'OCCUPIED';
+  }
+
+  private mapReservationNote(reservation?: ReservationDto | null): string | undefined {
+    if (!reservation) {
+      return undefined;
+    }
+
+    return `${reservation.guest_name} · ${reservation.start_time} - ${reservation.end_time}`;
   }
 }

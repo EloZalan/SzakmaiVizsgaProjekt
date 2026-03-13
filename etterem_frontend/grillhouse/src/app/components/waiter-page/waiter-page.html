@@ -62,6 +62,7 @@
 
           <div class="legend-row">
             <span class="gh-tag gh-tag--green">FREE</span>
+            <span class="gh-tag">RESERVED</span>
             <span class="gh-tag">OCCUPIED</span>
             <span class="gh-tag gh-tag--accent">PAY</span>
             <span class="gh-tag gh-tag--muted">CLOSED</span>
@@ -96,6 +97,9 @@
               >
                 <div class="waiter-table-tile__top">
                   <strong>{{ t.name }}</strong>
+                  @if (t.status === 'RESERVED') {
+                    <span class="gh-tag">RESERVED</span>
+                  }
                   @if (t.status === 'NEEDS_PAYMENT') {
                     <span class="gh-tag gh-tag--accent">PAY</span>
                   }
@@ -110,7 +114,7 @@
                 </div>
 
                 <div class="waiter-table-tile__bottom">
-                  <strong>{{ calcTotal(t) | currency:'USD':'symbol':'1.0-0' }}</strong>
+                  <strong>{{ formatFt(calcTotal(t)) }}</strong>
                   <small>{{ t.status }}</small>
                 </div>
               </button>
@@ -125,7 +129,7 @@
             <div class="panel-head panel-head--row">
               <div>
                 <h2>Fizetés · {{ s.name }}</h2>
-                <p>Összeg: {{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</p>
+                <p>Összeg: {{ formatFt(calcTotal(s)) }}</p>
               </div>
               <div class="action-row">
                 <button type="button" class="gh-btn gh-btn--ghost" (click)="backToDetails()">Vissza</button>
@@ -137,7 +141,7 @@
               <div class="payment-summary-grid">
                 <div class="summary-box">
                   <span>Alapösszeg</span>
-                  <strong>{{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
+                  <strong>{{ formatFt(calcTotal(s)) }}</strong>
                 </div>
 
                 <div class="summary-box">
@@ -149,12 +153,12 @@
                         (click)="setTipPreset(tip)">{{tip}}%</button>
                     }
                   </div>
-                  <small>{{ tipAmount(s) | currency:'USD':'symbol':'1.2-2' }}</small>
+                  <small>{{ formatFt(tipAmount(s)) }}</small>
                 </div>
 
                 <div class="summary-box summary-box--accent">
                   <span>Fizetendő</span>
-                  <strong>{{ grandTotal(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
+                  <strong>{{ formatFt(grandTotal(s)) }}</strong>
                 </div>
               </div>
 
@@ -175,7 +179,7 @@
                 </div>
                 <div class="detail-line">
                   <span>Fizetendő / fő</span>
-                  <strong>{{ perGuest(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
+                  <strong>{{ formatFt(perGuest(s)) }}</strong>
                 </div>
               </div>
 
@@ -205,12 +209,12 @@
                 <strong>{{ s.server }}</strong>
               </div>
               <div class="summary-box">
-                <span>Frissítés</span>
+                <span>Nyitás ideje</span>
                 <strong>{{ s.updatedAt }}</strong>
               </div>
               <div class="summary-box summary-box--accent">
                 <span>Összeg</span>
-                <strong>{{ calcTotal(s) | currency:'USD':'symbol':'1.2-2' }}</strong>
+                <strong>{{ formatFt(calcTotal(s)) }}</strong>
               </div>
             </div>
 
@@ -219,9 +223,9 @@
                 <div class="order-item">
                   <div>
                     <strong>{{ it.name }}</strong>
-                    <small>x{{ it.qty }} · {{ it.price | currency:'USD':'symbol':'1.0-0' }}</small>
+                    <small>x{{ it.qty }} · {{ formatFt(it.price) }}</small>
                   </div>
-                  <strong>{{ (it.qty * it.price) | currency:'USD':'symbol':'1.2-2' }}</strong>
+                  <strong>{{ formatFt(it.qty * it.price) }}</strong>
                 </div>
               } @empty {
                 <div class="gh-empty">Nincs aktív rendelés.</div>
@@ -236,13 +240,14 @@
             }
 
             <div class="action-row action-row--end">
-              <button type="button" class="gh-btn gh-btn--primary" (click)="addItem(s.id)">+ Tétel</button>
-              <button type="button" class="gh-btn gh-btn--ghost" (click)="markReady(s.id)" [disabled]="!s.orderId || s.items.length === 0">
-                Fizetésre kész
-              </button>
-              <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status === 'CLOSED' || !s.orderId">
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'NEEDS_PAYMENT' || !s.orderId">
                 Fizetés
               </button>
+              @if (s.status === 'CLOSED') {
+                <button type="button" class="gh-btn gh-btn--ghost" (click)="setClosedTableToFree(s.id)">
+                  Asztal felszabadítása
+                </button>
+              }
               <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
             </div>
           }

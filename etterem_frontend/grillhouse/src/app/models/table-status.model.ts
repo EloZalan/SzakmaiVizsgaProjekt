@@ -1,1 +1,1 @@
-export type TableStatus = 'FREE' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
+export type TableStatus = 'FREE' | 'RESERVED' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';

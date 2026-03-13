@@ -1,4 +1,4 @@
-export type WaiterTableStatus = 'FREE' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
+export type WaiterTableStatus = 'FREE' | 'RESERVED' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
 
 export interface TableOrderItem {
   menuItemId: number;

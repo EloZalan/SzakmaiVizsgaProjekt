@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin, firstValueFrom } from 'rxjs';
 
@@ -16,7 +15,7 @@ import {
 @Component({
   selector: 'app-waiter-page',
   standalone: true,
-  imports: [CurrencyPipe],
+  imports: [],
   templateUrl: './waiter-page.html',
   styleUrl: './waiter-page.css',
 })
@@ -32,6 +31,9 @@ export class WaiterPageComponent implements OnInit {
   paymentMethod: PaymentMethod = 'CARD';
   tipPreset: 0 | 10 | 12 | 15 = 10;
   readonly tipPresets: ReadonlyArray<0 | 10 | 12 | 15> = [0, 10, 12, 15];
+  private readonly ftFormatter = new Intl.NumberFormat('hu-HU', {
+    maximumFractionDigits: 0,
+  });
 
   tables: TableInfo[] = [];
   selected: TableInfo | null = null;
@@ -76,7 +78,7 @@ export class WaiterPageComponent implements OnInit {
       .subscribe({
         next: ({ tables, menuData }) => {
           this.loading = false;
-          this.tables = this.restoreLocalState(tables);
+          this.tables = tables;
           this.menuCategories = menuData.categories;
           this.menuItems = menuData.items;
 
@@ -100,8 +102,15 @@ export class WaiterPageComponent implements OnInit {
   }
 
   selectTable(t: TableInfo): void {
-    // A pincér felület nem indíthat új rendelést; csak meglévő rendeléshez lehet váltani.
     if (t.status === 'FREE') {
+      return;
+    }
+
+    if (t.status === 'RESERVED') {
+      this.mode = 'details';
+      this.detailsLoading = false;
+      this.selected = t;
+      this.cdr.markForCheck();
       return;
     }
 
@@ -118,12 +127,11 @@ export class WaiterPageComponent implements OnInit {
           price: it.price ?? 0,
         }));
 
-        const status: TableInfo['status'] =
-          order.status === 'ready_to_pay'
-            ? 'NEEDS_PAYMENT'
-            : order.status === 'done'
-            ? 'CLOSED'
-            : 'OCCUPIED';
+        const hasOrder = typeof order.order_id === 'number' && !!order.status;
+
+        const status: TableInfo['status'] = hasOrder
+          ? this.mapOrderStatus(order.status)
+          : 'OCCUPIED';
 
         this.tables = this.tables.map((tbl) =>
           tbl.id !== t.id
@@ -132,8 +140,8 @@ export class WaiterPageComponent implements OnInit {
                 ...tbl,
                 status,
                 items,
-                orderId: order.order_id,
-                updatedAt: this.nowTime(),
+                orderId: hasOrder ? order.order_id : null,
+                updatedAt: hasOrder ? this.formatOpenedAt(order.opened_at) : '-',
               }
         );
 
@@ -142,21 +150,28 @@ export class WaiterPageComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        // Ha nincs aktív rendelés (400), akkor az asztal szabad marad, üres tételekkel
-        if (err?.status === 400) {
+        const status = this.getHttpStatus(err);
+        const message = this.getErrorMessage(err);
+
+        if (status === 400 && message?.includes('Nincs érvényes foglalás')) {
           this.tables = this.tables.map((tbl) =>
             tbl.id !== t.id
               ? tbl
               : {
                   ...tbl,
                   status: 'FREE',
+                  guests: 0,
                   items: [],
+                  note: undefined,
                   orderId: null,
-                  updatedAt: this.nowTime(),
+                  updatedAt: '-',
                 }
           );
-          this.selected = this.tables.find((tbl) => tbl.id === t.id) ?? null;
+          this.selected = null;
+        } else if (message) {
+          alert(message);
         }
+
         this.detailsLoading = false;
         console.error('GET TABLE ORDER ERROR:', err);
         this.cdr.markForCheck();
@@ -175,6 +190,10 @@ export class WaiterPageComponent implements OnInit {
     return (t.items || []).reduce((sum, it) => sum + it.qty * it.price, 0);
   }
 
+  formatFt(value: number): string {
+    return `${this.ftFormatter.format(value)} Ft`;
+  }
+
   tipAmount(t: TableInfo): number {
     return this.calcTotal(t) * (this.tipPreset / 100);
   }
@@ -190,7 +209,7 @@ export class WaiterPageComponent implements OnInit {
 
   openPayment(tableId: number): void {
     const table = this.tables.find((x) => x.id === tableId);
-    if (!table || table.status === 'CLOSED' || !table.orderId) return;
+    if (!table || table.status !== 'NEEDS_PAYMENT' || !table.orderId) return;
 
     this.selected = table;
     this.mode = 'payment';
@@ -214,8 +233,8 @@ export class WaiterPageComponent implements OnInit {
 
   confirmPayment(tableId: number): void {
     const table = this.tables.find((t) => t.id === tableId);
-    if (!table?.orderId) {
-      alert('Ehhez az asztalhoz nincs aktív rendelés.');
+    if (!table?.orderId || table.status !== 'NEEDS_PAYMENT') {
+      alert('Csak fizetésre kész rendelést lehet lezárni.');
       return;
     }
 
@@ -233,97 +252,54 @@ export class WaiterPageComponent implements OnInit {
                 items: [],
                 note: undefined,
                 orderId: null,
-                updatedAt: this.nowTime(),
+                updatedAt: '-',
               }
         );
 
-        this.persistLocalState();
         this.selected = this.tables.find((t) => t.id === tableId) ?? null;
         this.mode = 'details';
         this.cdr.markForCheck();
       },
       error: (err) => {
+        if (this.getHttpStatus(err) === 404) {
+          this.clearOrderReference(tableId);
+        }
+
         console.error('CONFIRM PAYMENT ERROR:', err);
-        alert('Nem sikerült a fizetést véglegesíteni.');
+        alert(this.getErrorMessage(err) ?? 'Nem sikerült a fizetést véglegesíteni.');
         this.cdr.markForCheck();
       },
     });
+  }
+
+  setClosedTableToFree(tableId: number): void {
+    this.tables = this.tables.map((table) =>
+      table.id !== tableId
+        ? table
+        : {
+            ...table,
+            status: 'FREE',
+            guests: 0,
+            items: [],
+            note: undefined,
+            orderId: null,
+            updatedAt: '-',
+          }
+    );
+
+    this.selected = null;
+    this.mode = 'details';
+    this.cdr.markForCheck();
   }
 
   async addItem(tableId: number): Promise<void> {
-    const table = this.tables.find((t) => t.id === tableId);
-    if (!table) return;
-
-    // ... (promptok és validációk változatlanul)
-    const menuItemIdInput = prompt('Add meg a menü tétel ID-ját:');
-    if (menuItemIdInput === null) return;
-    const quantityInput = prompt('Mennyiség:', '1');
-    if (quantityInput === null) return;
-    const menuItemId = Number(menuItemIdInput);
-    const quantity = Number(quantityInput);
-
-    const menuItem = this.menuItems.find((m) => m.id === menuItemId);
-    if (!menuItem) return;
-
-    try {
-      let orderId = table.orderId ?? null;
-      if (!orderId) {
-        const order = await firstValueFrom(this.waiterService.openOrder(table.id));
-        orderId = order.id;
-      }
-
-      await firstValueFrom(this.waiterService.addOrderItem(orderId, menuItemId, quantity));
-
-      const updatedItems = this.mergeOrderItem(table.items, {
-        menuItemId: menuItem.id,
-        name: menuItem.name,
-        qty: quantity,
-        price: menuItem.price,
-      });
-
-      this.tables = this.tables.map((t) =>
-        t.id !== tableId
-          ? t
-          : {
-              ...t,
-              orderId,
-              items: updatedItems,
-              status: 'OCCUPIED',
-              guests: Math.max(1, t.guests || 1),
-              server: this.auth.user?.name ?? '-',
-              updatedAt: this.nowTime(),
-            }
-      );
-
-      this.persistLocalState();
-      this.selected = this.tables.find((t) => t.id === tableId) ?? null;
-      this.cdr.markForCheck();
-    } catch (err) {
-      console.error('ADD ITEM ERROR:', err);
-      this.cdr.markForCheck();
-    }
+    void tableId;
+    alert('A rendelésfelvétel mobil appban történik. Ezen a felületen csak fizettetés lehetséges.');
   }
 
   markReady(tableId: number): void {
-    const table = this.tables.find((t) => t.id === tableId);
-    if (!table?.orderId) return;
-
-    this.waiterService.markReadyToPay(table.orderId).subscribe({
-      next: () => {
-        this.tables = this.tables.map((t) =>
-          t.id !== tableId
-            ? t
-            : { ...t, status: 'NEEDS_PAYMENT', updatedAt: this.nowTime() }
-        );
-        this.persistLocalState();
-        this.selected = this.tables.find((t) => t.id === tableId) ?? null;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('MARK READY ERROR:', err);
-        this.cdr.markForCheck();
-      },
-    });
+    void tableId;
+    alert('A rendelés státuszát mobil app kezeli. Ezen a felületen csak kész fizetések zárhatók.');
   }
 
   // ... (a többi privát metódus változatlan)
@@ -336,9 +312,9 @@ export class WaiterPageComponent implements OnInit {
       `${table.name}`,
       `Állapot: ${table.status}`,
       '',
-      ...table.items.map((it) => `${it.name} x${it.qty} = $${it.qty * it.price}`),
+      ...table.items.map((it) => `${it.name} x${it.qty} = ${this.formatFt(it.qty * it.price)}`),
       '',
-      `Összesen: $${this.calcTotal(table)}`,
+      `Összesen: ${this.formatFt(this.calcTotal(table))}`,
     ];
 
     alert(lines.join('\n'));
@@ -364,19 +340,97 @@ export class WaiterPageComponent implements OnInit {
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 
-  private persistLocalState(): void {
-    localStorage.setItem('waiter_table_state', JSON.stringify(this.tables));
+  private formatOpenedAt(openedAt?: string | null): string {
+    if (!openedAt) {
+      return '-';
+    }
+
+    const date = new Date(openedAt);
+
+    if (Number.isNaN(date.getTime())) {
+      return '-';
+    }
+
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
-  private restoreLocalState(baseTables: TableInfo[]): TableInfo[] {
-    const raw = localStorage.getItem('waiter_table_state');
-    if (!raw) return baseTables;
+  private mapOrderStatus(status?: 'in_progress' | 'ready_to_pay' | 'done'): TableInfo['status'] {
+    if (status === 'ready_to_pay') {
+      return 'NEEDS_PAYMENT';
+    }
+
+    if (status === 'done') {
+      return 'CLOSED';
+    }
+
+    return 'OCCUPIED';
+  }
+
+  private async openOrResolveOrderId(tableId: number): Promise<number> {
     try {
-      const saved: any[] = JSON.parse(raw);
-      return baseTables.map(table => {
-        const local = saved.find(x => x.id === table.id);
-        return local ? { ...table, ...local } : table;
-      });
-    } catch { return baseTables; }
+      const order = await firstValueFrom(this.waiterService.openOrder(tableId));
+      return order.id;
+    } catch (err) {
+      const existingOrderId = this.getExistingOrderId(err);
+
+      if (existingOrderId !== null) {
+        return existingOrderId;
+      }
+
+      throw err;
+    }
+  }
+
+  private clearOrderReference(tableId: number): void {
+    this.tables = this.tables.map((table) =>
+      table.id !== tableId
+        ? table
+        : {
+            ...table,
+            orderId: null,
+            items: [],
+            status: table.status === 'CLOSED' ? 'CLOSED' : 'OCCUPIED',
+            updatedAt: '-',
+          }
+    );
+
+    this.selected = this.tables.find((table) => table.id === tableId) ?? this.selected;
+  }
+
+  private getHttpStatus(error: unknown): number | null {
+    const status = (error as { status?: unknown })?.status;
+    return typeof status === 'number' ? status : null;
+  }
+
+  private getErrorMessage(error: unknown): string | null {
+    const errorObj = (error as { error?: unknown })?.error;
+
+    if (!errorObj || typeof errorObj !== 'object') {
+      return null;
+    }
+
+    const message = (errorObj as { message?: unknown }).message;
+    return typeof message === 'string' ? message : null;
+  }
+
+  private getExistingOrderId(error: unknown): number | null {
+    const errorObj = (error as { error?: unknown })?.error;
+
+    if (!errorObj || typeof errorObj !== 'object') {
+      return null;
+    }
+
+    const orderId = (errorObj as { order_id?: unknown }).order_id;
+
+    if (typeof orderId === 'number') {
+      return orderId;
+    }
+
+    if (typeof orderId === 'string') {
+      const parsed = Number(orderId);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    return null;
   }
 }
