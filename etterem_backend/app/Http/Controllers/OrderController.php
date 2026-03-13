@@ -74,6 +74,7 @@ class OrderController extends Controller
                 'message' => 'Ehhez a foglaláshoz még nincs rendelés.',
                 'items' => [],
                 'total_price' => 0,
+                'opened_at' => null,
             ], 200);
         }
 
@@ -96,11 +97,18 @@ class OrderController extends Controller
             'reservation_id' => $order->reservation_id,
             'status' => $order->status,
             'total_price' => $order->total_price,
+            'opened_at' => $order->created_at?->toIso8601String(),
             'items' => $items,
         ], 200);
     }
 
-    public function addItem(Request $request, Order $order) {
+    public function addItem(Request $request, int $order) {
+        $order = Order::find($order);
+
+        if (!$order) {
+            return response()->json(['message' => 'A rendelés nem található.'], 404);
+        }
+
         if ($order->status !== 'in_progress') {
             return response()->json([
                 'message' => 'Ehhez a rendeléshez már nem vehetsz fel új tételt.'
@@ -130,7 +138,13 @@ class OrderController extends Controller
         ], 201);
     }
 
-    public function simulateReadyToPay(Order $order) {
+    public function simulateReadyToPay(int $order) {
+        $order = Order::find($order);
+
+        if (!$order) {
+            return response()->json(['message' => 'A rendelés nem található.'], 404);
+        }
+
         if ($order->orderItems->isEmpty() || $order->status === "done") {
             return response()->json([
                 'message' => 'Nincs fizetendő rendelés.'
