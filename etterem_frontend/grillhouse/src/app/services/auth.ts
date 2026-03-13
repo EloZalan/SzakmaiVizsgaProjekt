@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 
 export type UserRole = 'admin' | 'waiter' | 'customer';
@@ -10,6 +10,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  on_shift?: boolean;
 }
 
 export interface LoginResponse {
@@ -27,12 +28,9 @@ export class AuthService {
   user: User | null = this.getStoredUser();
   token: string | null = localStorage.getItem('token');
 
-  login(email: string, password: string) {
+  login(email: string, password: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.config.apiUrl}/login`, {
-        email,
-        password,
-      })
+      .post<LoginResponse>(`${this.config.apiUrl}/login`, { email, password })
       .pipe(
         tap((res) => {
           this.token = res.token;
@@ -44,15 +42,23 @@ export class AuthService {
       );
   }
 
-  logout() {
-    this.http.post(`${this.config.apiUrl}/logout`, {}).subscribe({
-      next: () => {
-        this.clearAuth();
-      },
-      error: () => {
-        this.clearAuth();
-      },
-    });
+  fetchCurrentUser(): Observable<User> {
+    return this.http.get<User>(`${this.config.apiUrl}/user`).pipe(
+      tap((user) => this.setUser(user))
+    );
+  }
+
+  takeShift(): Observable<User> {
+    return this.http.post<User>(`${this.config.apiUrl}/take-shift`, {}).pipe(
+      tap((user) => this.setUser(user))
+    );
+  }
+
+  logout(): void {
+    this.token = null;
+    this.user = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 
   isLoggedIn(): boolean {
@@ -61,6 +67,10 @@ export class AuthService {
 
   get role(): UserRole | null {
     return this.user?.role ?? null;
+  }
+
+  get isOnShift(): boolean {
+    return !!this.user?.on_shift;
   }
 
   getHomeRouteByRole(): string {
@@ -76,15 +86,13 @@ export class AuthService {
     }
   }
 
+  private setUser(user: User): void {
+    this.user = user;
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
   private getStoredUser(): User | null {
     const raw = localStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
-  }
-
-  private clearAuth(): void {
-    this.token = null;
-    this.user = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   }
 }

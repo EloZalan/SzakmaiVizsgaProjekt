@@ -1,10 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { NgFor, NgIf, CurrencyPipe } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+
 import { AuthService } from '../../services/auth';
+import { AdminTablesService } from '../../services/admin-tables.service';
+import {
+  AdminDashboardService,
+  AdminWaiterDto,
+} from '../../services/admin-dashboard.service';
 import { StaffMember } from '../../models/staff-member.model';
 import { RestaurantTable } from '../../models/restaurant-table.model';
-import { AdminTablesService } from '../../services/admin-tables.service';
 
 @Component({
   selector: 'app-admin-page',
@@ -17,69 +23,165 @@ export class AdminPageComponent implements OnInit {
   constructor(
     public auth: AuthService,
     private router: Router,
-    private adminTablesService: AdminTablesService
+    private adminTablesService: AdminTablesService,
+    private adminDashboardService: AdminDashboardService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  dailyRevenue = 4280;
-  todayGuests = 136;
+  dailyRevenue = 0;
+  todayGuests = 0;
 
-  staffMembers: StaffMember[] = [
-    { id: 1, name: 'Alex Kovács', role: 'PINCER', status: 'ACTIVE', shift: 'Délelőtt' },
-    { id: 2, name: 'Sam Nagy', role: 'PINCER', status: 'ACTIVE', shift: 'Este' },
-    { id: 3, name: 'Bence Tóth', role: 'ADMIN', status: 'ACTIVE', shift: 'Egész nap' },
-    { id: 4, name: 'Lili Kiss', role: 'PINCER', status: 'INACTIVE', shift: 'Szabadnap' },
-  ];
-
+  staffMembers: StaffMember[] = [];
   tables: RestaurantTable[] = [];
 
   selectedStaff: StaffMember | null = null;
   selectedTable: RestaurantTable | null = null;
 
+  loading = false;
   tablesLoading = false;
+  staffLoading = false;
+
+  dashboardError = '';
   tablesError = '';
+  staffError = '';
 
   ngOnInit(): void {
-    this.loadTables();
+    this.loadAdminPage();
   }
 
   get activeWaiters(): number {
-    return this.staffMembers.filter((s) => s.role === 'PINCER' && s.status === 'ACTIVE').length;
+    return this.staffMembers.filter(
+      (s) => s.role === 'PINCER' && s.status === 'ACTIVE'
+    ).length;
+  }
+
+  loadAdminPage(selectedTableId?: number | null, selectedStaffId?: number | null): void {
+    this.loading = true;
+    this.dashboardError = '';
+    this.tablesError = '';
+    this.staffError = '';
+
+    forkJoin({
+      tables: this.adminTablesService.getTables(),
+      waiters: this.adminDashboardService.getWaiters(),
+      todayGuests: this.adminDashboardService.getTodayGuestCount(),
+    }).subscribe({
+      next: ({ tables, waiters, todayGuests }) => {
+        this.loading = false;
+
+        this.tables = this.restoreLocalTables(tables);
+        this.staffMembers = waiters.map((w) => this.mapWaiterToStaffMember(w));
+        this.todayGuests = todayGuests;
+
+        // Swagger alapján nincs olyan listázó endpoint, amiből timestamp alapján
+        // pontos napi revenue számolható lenne, ezért ez itt 0 marad,
+        // amíg a backend nem ad pl. payments/orders history végpontot timestamp-pel.
+        this.dailyRevenue = 0;
+
+        const targetTableId = selectedTableId ?? this.selectedTable?.id ?? null;
+        const targetStaffId = selectedStaffId ?? this.selectedStaff?.id ?? null;
+
+        this.selectedTable =
+          targetTableId !== null
+            ? this.tables.find((t) => t.id === targetTableId) ?? null
+            : null;
+
+        this.selectedStaff =
+          targetStaffId !== null
+            ? this.staffMembers.find((s) => s.id === targetStaffId) ?? null
+            : null;
+
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.dashboardError = 'Nem sikerült betölteni az admin felület adatait.';
+        console.error('ADMIN PAGE LOAD ERROR:', err);
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   selectStaff(staff: StaffMember): void {
     this.selectedStaff = staff;
     this.selectedTable = null;
+    this.cdr.markForCheck();
   }
 
   selectTable(table: RestaurantTable): void {
     this.selectedTable = table;
     this.selectedStaff = null;
+    this.cdr.markForCheck();
   }
 
-  loadTables(selectedTableId?: number | null): void {
-    this.tablesLoading = true;
-    this.tablesError = '';
+  addWaiter(): void {
+    const name = prompt('Új pincér neve:');
+    if (!name || !name.trim()) return;
 
-    this.adminTablesService.getTables().subscribe({
-      next: (tables) => {
-        this.tables = this.withDisplayNames(tables);
-        this.tablesLoading = false;
+    const email = prompt('Email cím:');
+    if (!email || !email.trim()) {
+      alert('Email megadása kötelező.');
+      return;
+    }
 
-        const targetId = selectedTableId ?? this.selectedTable?.id ?? null;
+    const password = prompt('Jelszó:');
+    if (!password || password.length < 6) {
+      alert('A jelszó legalább 6 karakter legyen.');
+      return;
+    }
 
-        if (targetId !== null) {
-          this.selectedTable = this.tables.find((t) => t.id === targetId) ?? null;
-        } else {
-          this.selectedTable = null;
+    const passwordConfirmation = prompt('Jelszó megerősítése:');
+    if (passwordConfirmation !== password) {
+      alert('A két jelszó nem egyezik.');
+      return;
+    }
+
+    this.adminDashboardService
+      .createWaiter({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        password_confirmation: passwordConfirmation,
+      })
+      .subscribe({
+        next: (created) => {
+          this.loadAdminPage(
+            this.selectedTable?.id ?? null,
+            created?.id ?? null
+          );
+        },
+        error: (err) => {
+          console.error('CREATE WAITER ERROR:', err);
+          alert('Nem sikerült létrehozni a pincért.');
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  removeStaff(staffId: number): void {
+    const staff = this.staffMembers.find((s) => s.id === staffId);
+    if (!staff) return;
+
+    const confirmed = confirm(`Biztosan eltávolítod őt: ${staff.name}?`);
+    if (!confirmed) return;
+
+    this.adminDashboardService.deleteWaiter(staffId).subscribe({
+      next: () => {
+        if (this.selectedStaff?.id === staffId) {
+          this.selectedStaff = null;
         }
+
+        this.loadAdminPage(this.selectedTable?.id ?? null, null);
       },
       error: (err) => {
-        this.tablesLoading = false;
-        this.tablesError = 'Nem sikerült betölteni az asztalokat.';
-        console.error('Tables loading error:', err);
+        console.error('DELETE WAITER ERROR:', err);
+        alert('Nem sikerült törölni a pincért.');
+        this.cdr.markForCheck();
       },
     });
   }
+
+
 
   addTable(): void {
     const seatsInput = prompt('Férőhelyek száma:', '4');
@@ -94,14 +196,19 @@ export class AdminPageComponent implements OnInit {
 
     this.adminTablesService.createTable(seats).subscribe({
       next: (createdTableId) => {
-        this.selectedStaff = null;
-        this.loadTables(createdTableId);
+          this.selectedStaff = null;
+          this.loadAdminPage(createdTableId, null);
       },
       error: (err) => {
-        console.error('Create table error:', err);
+        console.error('CREATE TABLE ERROR:', err);
         alert('Nem sikerült létrehozni az asztalt.');
+        this.cdr.markForCheck();
       },
     });
+  }
+
+  editTable(table: RestaurantTable): void {
+    this.changeSeats(table.id);
   }
 
   changeSeats(tableId: number): void {
@@ -120,17 +227,14 @@ export class AdminPageComponent implements OnInit {
 
     this.adminTablesService.updateTable(tableId, seats).subscribe({
       next: () => {
-        this.loadTables(tableId);
+        this.loadAdminPage(tableId, this.selectedStaff?.id ?? null);
       },
       error: (err) => {
-        console.error('Update table error:', err);
+        console.error('UPDATE TABLE ERROR:', err);
         alert('Nem sikerült módosítani a férőhelyeket.');
+        this.cdr.markForCheck();
       },
     });
-  }
-
-  editTable(table: RestaurantTable): void {
-    this.changeSeats(table.id);
   }
 
   deleteTable(tableId: number): void {
@@ -145,11 +249,13 @@ export class AdminPageComponent implements OnInit {
         if (this.selectedTable?.id === tableId) {
           this.selectedTable = null;
         }
-        this.loadTables(null);
+
+        this.loadAdminPage(null, this.selectedStaff?.id ?? null);
       },
       error: (err) => {
-        console.error('Delete table error:', err);
+        console.error('DELETE TABLE ERROR:', err);
         alert('Nem sikerült törölni az asztalt.');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -159,68 +265,29 @@ export class AdminPageComponent implements OnInit {
     this.router.navigateByUrl('/');
   }
 
-  private withDisplayNames(tables: RestaurantTable[]): RestaurantTable[] {
-    const sorted = [...tables].sort((a, b) => a.id - b.id);
-
-    return sorted.map((table, index) => ({
-      ...table,
-      name: `Asztal ${index + 1}`,
-    }));
-  }
-
-  addWaiter(): void {
-    const name = prompt('Új dolgozó neve:');
-    if (!name || !name.trim()) return;
-
-    const roleInput = prompt('Szerepkör (PINCER / ADMIN):', 'PINCER');
-    const role = roleInput?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'PINCER';
-
-    const shift = prompt('Műszak:', 'Délelőtt') || 'Délelőtt';
-
-    const newStaff: StaffMember = {
-      id: this.getNextStaffId(),
-      name: name.trim(),
-      role,
-      status: 'ACTIVE',
-      shift: shift.trim(),
+  private mapWaiterToStaffMember(waiter: AdminWaiterDto): StaffMember {
+    return {
+      id: waiter.id,
+      name: waiter.name,
+      role: waiter.role === 'admin' ? 'ADMIN' : 'PINCER',
+      status: waiter.on_shift === false ? 'INACTIVE' : 'ACTIVE',
+      shift: waiter.on_shift === false ? 'Szabadnap' : 'Műszakban',
     };
-
-    this.staffMembers = [...this.staffMembers, newStaff];
-    this.selectedStaff = newStaff;
-    this.selectedTable = null;
   }
 
-  removeStaff(staffId: number): void {
-    const staff = this.staffMembers.find((s) => s.id === staffId);
-    if (!staff) return;
+  private restoreLocalTables(baseTables: RestaurantTable[]): RestaurantTable[] {
+    const raw = localStorage.getItem('admin_table_state');
+    if (!raw) return baseTables;
 
-    const confirmed = confirm(`Biztosan eltávolítod őt: ${staff.name}?`);
-    if (!confirmed) return;
+    try {
+      const saved: Array<Partial<RestaurantTable> & { id: number }> = JSON.parse(raw);
 
-    this.staffMembers = this.staffMembers.filter((s) => s.id !== staffId);
-
-    if (this.selectedStaff?.id === staffId) {
-      this.selectedStaff = null;
+      return baseTables.map((table) => {
+        const local = saved.find((x) => x.id === table.id);
+        return local ? { ...table, ...local, name: table.name } : table;
+      });
+    } catch {
+      return baseTables;
     }
-  }
-
-  toggleRole(staffId: number): void {
-    this.staffMembers = this.staffMembers.map((staff) => {
-      if (staff.id !== staffId) return staff;
-
-      return {
-        ...staff,
-        role: staff.role === 'PINCER' ? 'ADMIN' : 'PINCER',
-      };
-    });
-
-    if (this.selectedStaff?.id === staffId) {
-      this.selectedStaff = this.staffMembers.find((s) => s.id === staffId) ?? null;
-    }
-  }
-
-  private getNextStaffId(): number {
-    if (this.staffMembers.length === 0) return 1;
-    return Math.max(...this.staffMembers.map((s) => s.id)) + 1;
   }
 }

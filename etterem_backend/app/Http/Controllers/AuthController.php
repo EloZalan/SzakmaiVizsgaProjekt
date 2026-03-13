@@ -23,6 +23,9 @@ class AuthController extends Controller
 
         $token = $user->createToken('myapptoken')->plainTextToken;
 
+        $user->on_shift = true;
+        $user->save();
+
         return response(['user' => $user, 'token' => $token], 200);
     }
 

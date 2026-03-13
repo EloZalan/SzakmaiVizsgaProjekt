@@ -1,13 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ConfigService } from './config.service';
 import { RestaurantTable } from '../models/restaurant-table.model';
 
-interface TableDto {
+export interface TableDto {
   id: number;
   capacity: number;
   status: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface TableListResponse {
@@ -30,14 +32,11 @@ export class AdminTablesService {
       .get<TableDto[] | TableListResponse>(`${this.config.apiUrl}/tables`)
       .pipe(
         map((response) => {
-          const rows = Array.isArray(response) ? response : response.data ?? [];
+          const rows = Array.isArray(response) ? response : response?.data ?? [];
 
-          return rows.map((table) => ({
-            id: table.id,
-            name: '',
-            seats: table.capacity,
-            status: table.status,
-          }));
+          return rows
+            .sort((a, b) => a.id - b.id)
+            .map((table, index) => this.mapDtoToViewModel(table, index + 1));
         })
       );
   }
@@ -63,6 +62,25 @@ export class AdminTablesService {
     return this.http
       .delete(`${this.config.apiUrl}/admin/tables/${tableId}`)
       .pipe(map(() => void 0));
+  }
+
+  private mapDtoToViewModel(table: TableDto, displayIndex: number): RestaurantTable {
+    return {
+      id: table.id,
+      name: `Asztal ${displayIndex}`,
+      seats: table.capacity,
+      status: this.mapStatus(table.status),
+    };
+  }
+
+  private mapStatus(status: string): string {
+    const normalized = (status ?? '').trim().toLowerCase();
+
+    if (normalized === 'disabled' || normalized === 'closed') {
+      return 'DISABLED';
+    }
+
+    return 'ACTIVE';
   }
 
   private isWrappedSingle(response: TableDto | TableSingleResponse): response is TableSingleResponse {
