@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin, firstValueFrom } from 'rxjs';
 
@@ -11,6 +11,7 @@ import {
   MenuItemDto,
   TableOrderDetailsDto,
 } from '../../services/waiter.service';
+import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-waiter-page',
@@ -19,11 +20,12 @@ import {
   templateUrl: './waiter-page.html',
   styleUrl: './waiter-page.css',
 })
-export class WaiterPageComponent implements OnInit {
+export class WaiterPageComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private router: Router,
     private waiterService: WaiterService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -44,9 +46,20 @@ export class WaiterPageComponent implements OnInit {
   loading = false;
   errorMessage = '';
   detailsLoading = false;
+  private stopTableStatusListening: (() => void) | null = null;
 
   ngOnInit(): void {
     this.loadWaiterPage();
+
+    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+      const tableToKeepSelected = this.selected?.id ?? event.table_id;
+      this.loadWaiterPage(tableToKeepSelected);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopTableStatusListening?.();
+    this.stopTableStatusListening = null;
   }
 
   get occupiedCount(): number {

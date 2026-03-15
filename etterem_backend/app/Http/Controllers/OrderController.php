@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TableStatusChanged;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -46,6 +47,8 @@ class OrderController extends Controller
             'total_price' => 0,
             'status' => 'in_progress'
         ]);
+
+        event(new TableStatusChanged($table->id));
 
         return response()->json($order, 201);
     }
@@ -152,6 +155,8 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => 'ready_to_pay']);
+
+        event(new TableStatusChanged($order->table_id));
 
         return response()->json([
             'order_id' => $order->id,

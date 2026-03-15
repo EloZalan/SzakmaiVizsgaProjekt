@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Table extends Model
@@ -29,11 +28,16 @@ class Table extends Model
     {
         $now = now();
 
-        $hasActiveOrder = $this->orders()
-            ->where('status', '!=', 'done')
-            ->exists();
+        $activeOrderStatus = $this->orders()
+            ->whereIn('status', ['in_progress', 'ready_to_pay', 'pay'])
+            ->latest('updated_at')
+            ->value('status');
 
-        if ($hasActiveOrder) {
+        if ($activeOrderStatus === 'ready_to_pay' || $activeOrderStatus === 'pay') {
+            return 'needs_payment';
+        }
+
+        if ($activeOrderStatus !== null) {
             return 'occupied';
         }
 
