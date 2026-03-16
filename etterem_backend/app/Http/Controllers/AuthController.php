@@ -23,9 +23,9 @@ class AuthController extends Controller
 
         $token = $user->createToken('myapptoken')->plainTextToken;
 
-        $user->on_shift = true;
-        $user->save();
-
+        // Do not automatically set on_shift during login. The frontend should
+        // direct the waiter to the user data page where they can explicitly
+        // start their shift.
         return response(['user' => $user, 'token' => $token], 200);
     }
 
@@ -70,6 +70,25 @@ class AuthController extends Controller
         }
 
         $user->on_shift = true;
+        $user->save();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'on_shift' => $user->on_shift,
+        ], 200);
+    }
+
+    public function endShift(Request $request) {
+        $user = $request->user();
+
+        if ($user->role !== 'waiter') {
+            return response()->json(['message' => 'Csak pincér adhat le műszakot.'], 403);
+        }
+
+        $user->on_shift = false;
         $user->save();
 
         return response()->json([

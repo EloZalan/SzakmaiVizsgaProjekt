@@ -338,6 +338,19 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/');
   }
 
+  onEndShift(): void {
+    // End the current shift (without logging out) and navigate to user data page
+    this.auth.endShift().subscribe({
+      next: () => {
+        this.router.navigateByUrl('/waiter/user');
+      },
+      error: (err) => {
+        console.error('END SHIFT ERROR:', err);
+        alert('A műszak leadása sikertelen.');
+      }
+    });
+  }
+
 
 
   private mergeOrderItem(items: TableOrderItem[], incoming: TableOrderItem): TableOrderItem[] {

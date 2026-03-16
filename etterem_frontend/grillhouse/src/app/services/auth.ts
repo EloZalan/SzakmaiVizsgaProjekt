@@ -54,6 +54,18 @@ export class AuthService {
     );
   }
 
+  endShift(): Observable<User> {
+    return this.http.post<User>(`${this.config.apiUrl}/end-shift`, {}).pipe(
+      tap((user) => this.setUser(user))
+    );
+  }
+
+  updateUser(payload: { email?: string; password?: string; password_confirmation?: string }): Observable<User> {
+    return this.http.put<User>(`${this.config.apiUrl}/user`, payload).pipe(
+      tap((user) => this.setUser(user))
+    );
+  }
+
   logout(): void {
     this.token = null;
     this.user = null;
@@ -78,7 +90,9 @@ export class AuthService {
       case 'admin':
         return '/admin';
       case 'waiter':
-        return '/waiter';
+        // After waiter login we want them to land on the user-data page
+        // where they can modify their details and explicitly start shift.
+        return '/waiter/user';
       case 'customer':
         return '/';
       default:

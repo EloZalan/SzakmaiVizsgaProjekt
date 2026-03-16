@@ -1182,3 +1182,11 @@ input {
     align-items: center;
   }
 }
+
+
+.login-field{display:block;margin-bottom:0.75rem}
+.login-field span{display:block;font-size:.9rem;color:#444;margin-bottom:.25rem}
+.login-field input{width:100%;padding:.5rem;border:1px solid #ddd;border-radius:4px}
+.detail-grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.action-row{display:flex;align-items:center}
+.action-row--end{justify-content:flex-end}

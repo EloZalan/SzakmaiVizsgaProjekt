@@ -22,6 +22,7 @@ Route::get('/menu-items/{menu_item}', [MenuItemController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/take-shift', [AuthController::class, 'takeShift']);
+    Route::post('/end-shift', [AuthController::class, 'endShift']);
     Route::put('/user', [AuthController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/take-shift', [AuthController::class, 'takeShift']);

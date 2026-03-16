@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 1|11idQXkIWVdUMZXTXzAvjC10kvAnPILfjI6f9y1Xe85427e9
+@token = 10|wjKvt90rP1GeHfSeHkVlsBYjeSZBNnEnM5ukgpi666eb76e9
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -251,7 +251,7 @@ Accept: application/json
 {}
 
 ### Get reservation by id
-GET {{baseUrl}}/reservations/1
+GET {{baseUrl}}/reservations/7
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
@@ -280,7 +280,7 @@ Accept: application/json
 {}
 
 ### Waiter to table
-POST {{baseUrl}}/tables/12/orders
+POST {{baseUrl}}/tables/7/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 

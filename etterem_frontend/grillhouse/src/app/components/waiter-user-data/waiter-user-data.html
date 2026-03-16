@@ -1,0 +1,47 @@
+<main class="gh-container panel-page">
+    <link rel="stylesheet" href="../../../style.css">
+  <section class="gh-panel">
+    <div class="panel-head panel-head--row">
+      <div>
+        <h2>Pincér adatai</h2>
+        <p>Itt módosíthatod az adataidat és beállíthatod, hogy munkába állsz.</p>
+      </div>
+      <div class="action-row">
+        <span class="gh-tag">Státusz: <b>{{ auth.isOnShift ? 'Munkában' : 'Nincs műszak' }}</b></span>
+      </div>
+    </div>
+
+    <form #userForm="ngForm" (ngSubmit)="save(userForm)" novalidate>
+      <div class="detail-grid-two">
+        <label class="login-field">
+          <span>Név</span>
+          <input type="text" name="name" [(ngModel)]="name" disabled />
+        </label>
+
+        <label class="login-field">
+          <span>Email</span>
+          <input type="email" name="email" [(ngModel)]="email" required />
+        </label>
+
+        <label class="login-field">
+          <span>Új jelszó</span>
+          <input type="password" name="password" [(ngModel)]="password" placeholder="Hagyjuk üresen, ha nem változik" />
+        </label>
+
+        <label class="login-field">
+          <span>Jelszó ismét</span>
+          <input type="password" name="password_confirmation" [(ngModel)]="passwordConfirmation" />
+        </label>
+      </div>
+
+      <div class="action-row action-row--end" style="margin-top:1rem; gap:8px;">
+        <button class="gh-btn gh-btn--ghost"  type="button" (click)="startShift()" [disabled]="auth.isOnShift">Munkába állás</button>
+        <button class="gh-btn gh-btn--primary" type="submit">Mentés</button>
+      </div>
+
+      @if (message) {
+        <p style="margin-top: .5rem">{{ message }}</p>
+      }
+    </form>
+  </section>
+</main>
