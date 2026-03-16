@@ -15,6 +15,7 @@ export class WaiterUserDataComponent {
   name = '';
   password = '';
   passwordConfirmation = '';
+  isEditMode = false;
   loading = false;
   message = '';
 
@@ -29,14 +30,39 @@ export class WaiterUserDataComponent {
     }
   }
 
+  enterEditMode(): void {
+    this.message = '';
+    this.password = '';
+    this.passwordConfirmation = '';
+    this.isEditMode = true;
+  }
+
+  cancelEdit(): void {
+    this.isEditMode = false;
+    this.message = '';
+    this.password = '';
+    this.passwordConfirmation = '';
+    this.syncFromAuth();
+  }
+
   save(form: NgForm): void {
+    if (!this.isEditMode || this.loading) {
+      return;
+    }
+
     if (form.invalid) {
       form.control.markAllAsTouched();
       return;
     }
 
+    if (this.password && this.password !== this.passwordConfirmation) {
+      this.message = 'A két jelszó nem egyezik.';
+      return;
+    }
+
     this.loading = true;
-    const payload: any = { };
+    this.message = '';
+    const payload: { email?: string; password?: string; password_confirmation?: string } = {};
     if (this.email && this.email !== this.auth.user?.email) payload.email = this.email;
     if (this.password) {
       payload.password = this.password;
@@ -46,13 +72,17 @@ export class WaiterUserDataComponent {
     if (Object.keys(payload).length === 0) {
       this.loading = false;
       this.message = 'Nincs módosítás.';
+      this.isEditMode = false;
       return;
     }
 
     this.auth.updateUser(payload).subscribe({
-      next: (user) => {
+      next: () => {
         this.loading = false;
         this.message = 'Sikeres mentés.';
+        this.isEditMode = false;
+        this.password = '';
+        this.passwordConfirmation = '';
         this.syncFromAuth();
       },
       error: (err) => {
@@ -64,57 +94,32 @@ export class WaiterUserDataComponent {
   }
 
   startShift(): void {
-    // Optimistic UX: set on_shift locally and navigate immediately to dashboard.
-    const prevOnShift = this.auth.user?.on_shift ?? false;
-
-    if (this.auth.user) {
-      this.auth.user.on_shift = true;
-      try {
-        localStorage.setItem('user', JSON.stringify(this.auth.user));
-      } catch (e) {
-        // ignore storage errors
-      }
+    if (this.loading || this.auth.isOnShift) {
+      return;
     }
 
-    // Navigate right away so the user sees the dashboard instantly.
-    this.router.navigateByUrl('/waiter').then((ok) => {
-      if (!ok) {
-        console.error('Navigation to /waiter was prevented by the router.');
-        // revert optimistic change
-        if (this.auth.user) {
-          this.auth.user.on_shift = prevOnShift;
-          try { localStorage.setItem('user', JSON.stringify(this.auth.user)); } catch (e) {}
-        }
-        alert('Nem sikerült átirányítani a dashboardra.');
-      }
-    }).catch((navErr) => {
-      console.error('Navigation error:', navErr);
-      if (this.auth.user) {
-        this.auth.user.on_shift = prevOnShift;
-        try { localStorage.setItem('user', JSON.stringify(this.auth.user)); } catch (e) {}
-      }
-      alert('Hiba történt az átirányítás során.');
-    });
+    this.loading = true;
+    this.message = '';
 
-    // Fire the API call in background to persist the shift. If it fails,
-    // revert the optimistic change and navigate back to the user page.
     this.auth.takeShift().subscribe({
       next: () => {
-        // success - nothing further required here; dashboard will load normally
+        this.loading = false;
+        this.router.navigateByUrl('/waiter');
       },
       error: (err) => {
+        this.loading = false;
+        this.message = 'Műszak felvétele sikertelen.';
         console.error('TAKE SHIFT ERROR', err);
-        // revert
-        if (this.auth.user) {
-          this.auth.user.on_shift = prevOnShift;
-          try {
-            localStorage.setItem('user', JSON.stringify(this.auth.user));
-          } catch (e) {}
-        }
-        // Inform the user and navigate back so they can retry
-        alert('Műszak felvétele sikertelen.');
-        this.router.navigateByUrl('/waiter/user');
       }
     });
+  }
+
+  goToWaiterPage(): void {
+    this.router.navigateByUrl('/waiter');
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
   }
 }

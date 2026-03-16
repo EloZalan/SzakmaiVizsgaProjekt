@@ -26,7 +26,7 @@ export class AuthService {
   private config = inject(ConfigService);
 
   user: User | null = this.getStoredUser();
-  token: string | null = localStorage.getItem('token');
+  token: string | null = sessionStorage.getItem('token');
 
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http
@@ -36,8 +36,8 @@ export class AuthService {
           this.token = res.token;
           this.user = res.user;
 
-          localStorage.setItem('token', res.token);
-          localStorage.setItem('user', JSON.stringify(res.user));
+          sessionStorage.setItem('token', res.token);
+          sessionStorage.setItem('user', JSON.stringify(res.user));
         })
       );
   }
@@ -67,8 +67,30 @@ export class AuthService {
   }
 
   logout(): void {
+    const currentToken = this.token ?? sessionStorage.getItem('token');
+
+    this.clearSession();
+
+    if (!currentToken) {
+      return;
+    }
+
+    this.http.post(`${this.config.apiUrl}/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+      },
+    }).subscribe({
+      error: (err) => {
+        console.error('LOGOUT ERROR:', err);
+      },
+    });
+  }
+
+  private clearSession(): void {
     this.token = null;
     this.user = null;
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
@@ -102,11 +124,11 @@ export class AuthService {
 
   private setUser(user: User): void {
     this.user = user;
-    localStorage.setItem('user', JSON.stringify(user));
+    sessionStorage.setItem('user', JSON.stringify(user));
   }
 
   private getStoredUser(): User | null {
-    const raw = localStorage.getItem('user');
+    const raw = sessionStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   }
 }

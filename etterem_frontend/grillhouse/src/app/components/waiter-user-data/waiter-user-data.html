@@ -1,47 +1,104 @@
 <main class="gh-container panel-page">
-    <link rel="stylesheet" href="../../../style.css">
   <section class="gh-panel">
     <div class="panel-head panel-head--row">
       <div>
         <h2>Pincér adatai</h2>
-        <p>Itt módosíthatod az adataidat és beállíthatod, hogy munkába állsz.</p>
+        @if (!auth.isOnShift) {
+          <p>Itt láthatod az adataidat, módosíthatod őket, majd munkába állhatsz.</p>
+        } @else {
+          <p>Már műszakban vagy. Innen egyből visszamehetsz a pincér oldalra.</p>
+        }
       </div>
       <div class="action-row">
         <span class="gh-tag">Státusz: <b>{{ auth.isOnShift ? 'Munkában' : 'Nincs műszak' }}</b></span>
       </div>
     </div>
 
-    <form #userForm="ngForm" (ngSubmit)="save(userForm)" novalidate>
+    @if (!auth.isOnShift) {
+      @if (!isEditMode) {
+        <div class="detail-grid-two">
+          <label class="login-field">
+            <span>Név</span>
+            <input type="text" [value]="name" disabled />
+          </label>
+
+          <label class="login-field">
+            <span>Email</span>
+            <input type="text" [value]="email" disabled />
+          </label>
+        </div>
+
+        <div class="action-row action-row--end" style="margin-top:1rem; gap:8px;">
+          <button class="gh-btn gh-btn--ghost" type="button" (click)="enterEditMode()">Módosítás</button>
+          <button class="gh-btn gh-btn--primary" type="button" (click)="startShift()" [disabled]="loading">
+            {{ loading ? 'Betöltés...' : 'Munkába állás' }}
+          </button>
+          <button class="gh-btn gh-btn--ghost" type="button" (click)="logout()">Kijelentkezés</button>
+        </div>
+      } @else {
+        <form #userForm="ngForm" (ngSubmit)="save(userForm)" novalidate>
+          <div class="detail-grid-two">
+            <label class="login-field">
+              <span>Név</span>
+              <input type="text" [value]="name" disabled />
+            </label>
+
+            <label class="login-field">
+              <span>Email</span>
+              <input type="email" name="email" [(ngModel)]="email" #emailRef="ngModel" required email />
+
+              @if (emailRef.touched && emailRef.invalid) {
+                <small>
+                  @if (emailRef.errors?.['required']) {
+                    <span>Az email megadása kötelező.</span>
+                  }
+                  @if (emailRef.errors?.['email']) {
+                    <span>Az email formátuma hibás.</span>
+                  }
+                </small>
+              }
+            </label>
+
+            <label class="login-field">
+              <span>Új jelszó</span>
+              <input type="password" name="password" [(ngModel)]="password" placeholder="Hagyd üresen, ha nem változik" />
+            </label>
+
+            <label class="login-field">
+              <span>Jelszó ismét</span>
+              <input type="password" name="password_confirmation" [(ngModel)]="passwordConfirmation" />
+            </label>
+          </div>
+
+          <div class="action-row action-row--end" style="margin-top:1rem; gap:8px;">
+            <button class="gh-btn gh-btn--ghost" type="button" (click)="cancelEdit()" [disabled]="loading">Mégse</button>
+            <button class="gh-btn gh-btn--primary" type="submit" [disabled]="loading">
+              {{ loading ? 'Mentés...' : 'Mentés' }}
+            </button>
+          </div>
+        </form>
+      }
+    } @else {
       <div class="detail-grid-two">
         <label class="login-field">
           <span>Név</span>
-          <input type="text" name="name" [(ngModel)]="name" disabled />
+          <input type="text" [value]="name" disabled />
         </label>
 
         <label class="login-field">
           <span>Email</span>
-          <input type="email" name="email" [(ngModel)]="email" required />
-        </label>
-
-        <label class="login-field">
-          <span>Új jelszó</span>
-          <input type="password" name="password" [(ngModel)]="password" placeholder="Hagyjuk üresen, ha nem változik" />
-        </label>
-
-        <label class="login-field">
-          <span>Jelszó ismét</span>
-          <input type="password" name="password_confirmation" [(ngModel)]="passwordConfirmation" />
+          <input type="text" [value]="email" disabled />
         </label>
       </div>
 
       <div class="action-row action-row--end" style="margin-top:1rem; gap:8px;">
-        <button class="gh-btn gh-btn--ghost"  type="button" (click)="startShift()" [disabled]="auth.isOnShift">Munkába állás</button>
-        <button class="gh-btn gh-btn--primary" type="submit">Mentés</button>
+        <button class="gh-btn gh-btn--primary" type="button" (click)="goToWaiterPage()">Pincér oldal</button>
+        <button class="gh-btn gh-btn--ghost" type="button" (click)="logout()">Kijelentkezés</button>
       </div>
+    }
 
-      @if (message) {
-        <p style="margin-top: .5rem">{{ message }}</p>
-      }
-    </form>
+    @if (message) {
+      <p style="margin-top: .5rem">{{ message }}</p>
+    }
   </section>
 </main>
