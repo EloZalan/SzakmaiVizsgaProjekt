@@ -1,0 +1,102 @@
+<section class="gh-panel">
+  <div class="panel-head panel-head--row">
+    <div>
+      <h2>Pincérek kezelése</h2>
+      <p>Pincérek felvétele, módosítása, törlése</p>
+    </div>
+    <button class="gh-btn gh-btn--primary" (click)="addWaiter()">+ Pincér felvétele</button>
+  </div>
+
+  @if (loading) {
+    <div class="gh-empty">
+      <div class="spinner"></div> <p>Betöltés...</p>
+    </div>
+  } @else if (error) {
+    <div class="gh-empty">
+      <p class="error-text">{{ error }}</p>
+      <button class="gh-btn gh-btn--ghost" (click)="loadStaff()">Újrapróbálkozás</button>
+    </div>
+  } @else if (staffMembers.length === 0) {
+    <div class="gh-empty">
+      Nincs megjeleníthető pincér.
+    </div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Név</th>
+            <th>Szerepkör</th>
+            <th>Státusz</th>
+            <th>Műszak</th>
+            <th>Művelet</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (staff of staffMembers; track staff.id) {
+            <tr [class.admin-table__row--selected]="selectedStaff?.id === staff.id">
+              <td>{{ staff.name }}</td>
+              <td>
+                <span class="gh-tag" [class.gh-tag--accent]="staff.role === 'ADMIN'">
+                  {{ staff.role }}
+                </span>
+              </td>
+              <td>
+                <span class="gh-tag" [class.gh-tag--muted]="staff.status === 'INACTIVE'">
+                  {{ staff.status }}
+                </span>
+              </td>
+              <td>{{ staff.shift }}</td>
+              <td>
+                <div class="action-row">
+                  <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="selectStaff(staff)">
+                    Részletek
+                  </button>
+                  <button class="gh-btn gh-btn--danger gh-btn--sm" (click)="removeStaff(staff.id)">
+                    Kirúgás
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (selectedStaff) {
+  <section class="gh-panel">
+    <div class="panel-head">
+      <h2>Kiválasztott pincér</h2>
+      <p>Részletes információk</p>
+    </div>
+
+    <div class="summary-box">
+      <div class="detail-line">
+        <span>Név</span>
+        <strong>{{ selectedStaff.name }}</strong>
+      </div>
+
+      <div class="detail-line">
+        <span>Szerepkör</span>
+        <strong>{{ selectedStaff.role }}</strong>
+      </div>
+
+      <div class="detail-line">
+        <span>Státusz</span>
+        <strong>{{ selectedStaff.status }}</strong>
+      </div>
+
+      <div class="detail-line">
+        <span>Műszak</span>
+        <strong>{{ selectedStaff.shift }}</strong>
+      </div>
+
+      <div class="action-row action-row--end" style="margin-top: 1rem;">
+        <button class="gh-btn gh-btn--danger" (click)="removeStaff(selectedStaff.id)">Eltávolítás</button>
+      </div>
+    </div>
+  </section>
+}
