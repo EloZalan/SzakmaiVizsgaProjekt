@@ -1,0 +1,43 @@
+<section class="gh-panel">
+  <div class="panel-head">
+    <h2>Statisztikák</h2>
+    <p>Étterem teljesítmény áttekintés</p>
+  </div>
+
+  @if (loading) {
+    <div class="gh-empty">
+      <div class="spinner"></div> <p>Betöltés...</p>
+    </div>
+  } @else if (error) {
+    <div class="gh-empty">
+      <p class="error-text">{{ error }}</p>
+      <button class="gh-btn gh-btn--ghost" (click)="loadStats()">Újrapróbálkozás</button>
+    </div>
+  } @else {
+    <div class="stat-grid">
+      <div class="stat-box stat-box--accent">
+        <span>Mai bevétel</span>
+        <strong>{{ dailyRevenue | currency:'USD':'symbol':'1.0-0' }}</strong>
+        <small>Nem elérhető a backend-en</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Mai vendégek</span>
+        <strong>{{ todayGuests }}</strong>
+        <small>Mai dátumra szűrve</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Aktív pincérek</span>
+        <strong>{{ activeWaiters }}</strong>
+        <small>Műszakban lévők</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Asztalok száma</span>
+        <strong>{{ totalTables }}</strong>
+        <small>Összes konfigurált</small>
+      </div>
+    </div>
+  }
+</section>
