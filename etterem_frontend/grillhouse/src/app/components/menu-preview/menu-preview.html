@@ -17,7 +17,7 @@
     <article class="menu-card" *ngFor="let m of items">
       <div class="menu-card__top">
         <div class="menu-card__name">{{ m.name }}</div>
-        <div class="menu-card__price">${{ m.price }}</div>
+        <div class="menu-card__price">{{ m.price }} Ft</div>
       </div>
       <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
     </article>
@@ -38,7 +38,7 @@
         <article class="menu-card" *ngFor="let m of starters">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">${{ m.price }}</div>
+            <div class="menu-card__price">{{ m.price }} Ft</div>
           </div>
           <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
@@ -51,7 +51,7 @@
         <article class="menu-card" *ngFor="let m of sides">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">${{ m.price }}</div>
+            <div class="menu-card__price">{{ m.price }} Ft</div>
           </div>
           <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
@@ -64,7 +64,7 @@
         <article class="menu-card" *ngFor="let m of desserts">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">${{ m.price }}</div>
+            <div class="menu-card__price">{{ m.price }} Ft</div>
           </div>
           <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
@@ -77,7 +77,7 @@
         <article class="menu-card" *ngFor="let m of drinks">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">${{ m.price }}</div>
+            <div class="menu-card__price">{{ m.price }} Ft</div>
           </div>
           <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
         </article>
