@@ -1,6 +1,7 @@
 import { Component, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -11,7 +12,18 @@ import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 export class NavbarComponent {
   scrolled = false;
 
-  constructor(private actions: GrillhouseActionsService) {}
+  constructor(
+    private actions: GrillhouseActionsService,
+    public auth: AuthService
+  ) {}
+
+  get homeActionLabel(): string {
+    return this.auth.isLoggedIn() ? 'Dashboard' : 'Login';
+  }
+
+  get homeActionRoute(): string {
+    return this.auth.isLoggedIn() ? this.auth.getHomeRouteByRole() : '/login';
+  }
 
   @HostListener('window:scroll')
   onScroll(): void {
