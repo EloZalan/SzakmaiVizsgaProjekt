@@ -4,6 +4,10 @@ import { LoginPageComponent } from './components/login-page/login-page';
 import { WaiterPageComponent } from './components/waiter-page/waiter-page';
 import { WaiterUserDataComponent } from './components/waiter-user-data/waiter-user-data';
 import { AdminPageComponent } from './components/admin-page/admin-page';
+import { AdminStatsComponent } from './components/admin-stats/admin-stats';
+import { AdminStaffComponent } from './components/admin-staff/admin-staff';
+import { AdminTablesComponent } from './components/admin-tables/admin-tables';
+import { AdminMenuComponent } from './components/admin-menu/admin-menu';
 import { ReservePageComponent } from './components/reserve-page/reserve-page';
 import { roleGuard } from './guards/role-guard';
 
@@ -25,6 +29,13 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminPageComponent,
     canActivate: [roleGuard(['admin'])],
+    children: [
+      { path: 'stats', component: AdminStatsComponent },
+      { path: 'staff', component: AdminStaffComponent },
+      { path: 'tables', component: AdminTablesComponent },
+      { path: 'menu', component: AdminMenuComponent },
+      { path: '', redirectTo: 'stats', pathMatch: 'full' },
+    ],
   },
   { path: '**', redirectTo: '' },
 ];
