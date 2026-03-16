@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/waiters', [AdminActionsController::class, 'addWaiter']);
         Route::delete('/admin/waiters/{id}', [AdminActionsController::class, 'deleteWaiter']);
 
+        Route::get('/admin/tables', [TableController::class, 'index']);
         Route::post('/admin/tables', [TableController::class, 'store']);
         Route::put('/admin/tables/{table}', [TableController::class, 'update']);
         Route::delete('/admin/tables/{table}', [TableController::class, 'destroy']);

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Table;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class TableController extends Controller
 {
@@ -69,6 +68,10 @@ class TableController extends Controller
     }
 
     public function update(Request $request, Table $table) {
+        if ($response = $this->ensureTableIsAvailable($table)) {
+            return $response;
+        }
+
         $request->validate([
             'capacity' => 'required|integer|min:1',
         ]);
@@ -81,8 +84,23 @@ class TableController extends Controller
     }
 
     public function destroy(Table $table) {
+        if ($response = $this->ensureTableIsAvailable($table)) {
+            return $response;
+        }
+
         $table->delete();
 
         return response()->json('', 204);
+    }
+
+    private function ensureTableIsAvailable(Table $table)
+    {
+        if (!in_array($table->status, ['available', 'free'], true)) {
+            return response()->json([
+                'message' => 'Csak szabad asztal modosithato vagy torolheto.',
+            ], 409);
+        }
+
+        return null;
     }
 }
