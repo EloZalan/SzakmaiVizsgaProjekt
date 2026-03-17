@@ -31,6 +31,11 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
   ) {}
 
   mode: 'details' | 'payment' = 'details';
+  showCardModal = false;
+  showCashModal = false;
+  pendingPaymentTableId: number | null = null;
+  pendingPaymentOrderId: number | null = null;
+  processingPayment = false;
   paymentMethod: PaymentMethod = 'CARD';
   tipPreset: 0 | 10 | 12 | 15 = 10;
   readonly tipPresets: ReadonlyArray<0 | 10 | 12 | 15> = [0, 10, 12, 15];
@@ -244,7 +249,6 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
   cancelPayment(): void {
     this.mode = 'details';
   }
-
   confirmPayment(tableId: number): void {
     const table = this.tables.find((t) => t.id === tableId);
     if (!table?.orderId || table.status !== 'Fizetésre vár') {
@@ -254,36 +258,91 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
     const backendMethod = this.paymentMethod === 'CARD' ? 'card' : 'cash';
 
-    this.waiterService.payOrder(table.orderId, backendMethod).subscribe({
-      next: () => {
-        this.tables = this.tables.map((t) =>
-          t.id !== tableId
-            ? t
-            : {
-                ...t,
-                status: 'CLOSED',
-                guests: 0,
-                items: [],
-                note: undefined,
-                orderId: null,
-                updatedAt: '-',
-              }
-        );
+    // Open appropriate modal. We'll store pending IDs to complete the flow
+    this.pendingPaymentTableId = tableId;
+    this.pendingPaymentOrderId = table.orderId;
 
-        this.selected = this.tables.find((t) => t.id === tableId) ?? null;
-        this.mode = 'details';
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        if (this.getHttpStatus(err) === 404) {
-          this.clearOrderReference(tableId);
+    if (backendMethod === 'card') {
+      this.showCardModal = true;
+      // start processing automatically
+      this.processCardPayment();
+    } else {
+      this.showCashModal = true;
+      this.processCashPayment();
+    }
+  }
+
+  private processCardPayment(): void {
+    if (!this.pendingPaymentOrderId || !this.pendingPaymentTableId) return;
+    this.processingPayment = true;
+    const tip = this.tipAmount(this.tables.find((t) => t.id === this.pendingPaymentTableId) ?? ({} as any));
+
+    // Artificial delay so the modal spinner is visible for a short while
+    const delayMs = 3500; // 3.5 seconds
+    setTimeout(() => {
+      this.waiterService.payOrderWithTip(this.pendingPaymentOrderId!, 'card', tip).subscribe({
+        next: () => {
+          this.finalizePayment(this.pendingPaymentTableId!);
+        },
+        error: (err) => {
+          console.error('CARD PAYMENT ERROR:', err);
+          alert(this.getErrorMessage(err) ?? 'Nem sikerült a banki fizetést.');
+          // hide modal on error
+          this.showCardModal = false;
+        },
+        complete: () => {
+          this.processingPayment = false;
+          this.showCardModal = false;
         }
+      });
+    }, delayMs);
+  }
 
-        console.error('CONFIRM PAYMENT ERROR:', err);
-        alert(this.getErrorMessage(err) ?? 'Nem sikerült a fizetést véglegesíteni.');
-        this.cdr.markForCheck();
-      },
-    });
+  private processCashPayment(): void {
+    if (!this.pendingPaymentOrderId || !this.pendingPaymentTableId) return;
+    this.processingPayment = true;
+    const tip = this.tipAmount(this.tables.find((t) => t.id === this.pendingPaymentTableId) ?? ({} as any));
+
+    // Artificial delay so the modal spinner is visible for a short while
+    const delayMs = 3500; // 3.5 seconds
+    setTimeout(() => {
+      this.waiterService.payOrderWithTip(this.pendingPaymentOrderId!, 'cash', tip).subscribe({
+        next: () => {
+          this.finalizePayment(this.pendingPaymentTableId!);
+        },
+        error: (err) => {
+          console.error('CASH PAYMENT ERROR:', err);
+          alert(this.getErrorMessage(err) ?? 'Nem sikerült a készpénzes fizetést.');
+          this.showCashModal = false;
+        },
+        complete: () => {
+          this.processingPayment = false;
+          this.showCashModal = false;
+        }
+      });
+    }, delayMs);
+  }
+
+  private finalizePayment(tableId: number): void {
+    this.tables = this.tables.map((t) =>
+      t.id !== tableId
+        ? t
+        : {
+            ...t,
+            status: 'CLOSED',
+            guests: 0,
+            items: [],
+            note: undefined,
+            orderId: null,
+            updatedAt: '-',
+          }
+    );
+
+    this.selected = this.tables.find((t) => t.id === tableId) ?? null;
+    this.mode = 'details';
+    this.pendingPaymentOrderId = null;
+    this.pendingPaymentTableId = null;
+    this.cdr.markForCheck();
   }
 
   setClosedTableToFree(tableId: number): void {
@@ -560,4 +619,5 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
     return null;
   }
+
 }

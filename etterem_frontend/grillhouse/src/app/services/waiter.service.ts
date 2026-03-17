@@ -120,6 +120,13 @@ export class WaiterService {
     });
   }
 
+  payOrderWithTip(orderId: number, paymentMethod: 'cash' | 'card', tip: number): Observable<unknown> {
+    return this.http.post(`${this.config.apiUrl}/orders/${orderId}/pay`, {
+      payment_method: paymentMethod,
+      tip: Math.round(tip || 0),
+    });
+  }
+
   private mapTableDto(table: TableDto, displayIndex: number): TableInfo {
     const guests = table.reservation?.guest_count ?? 0;
 

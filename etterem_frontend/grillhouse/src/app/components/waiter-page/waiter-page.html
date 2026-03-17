@@ -266,4 +266,42 @@
       }
     </div>
   </main>
+
+  @if (showCardModal) {
+    <div class="gh-modal-overlay">
+      <div class="gh-modal">
+        <div class="panel-head">
+          <h3>Banki terminál</h3>
+        </div>
+        <div class="gh-panel__body">
+          <div class="modal-body-row">
+            <div class="spinner"></div>
+            <div>
+              <p><strong>Átirányítás a terminálra</strong></p>
+              <p class="muted">Kérem várjon, a tranzakció elindul...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCashModal) {
+    <div class="gh-modal-overlay">
+      <div class="gh-modal">
+        <div class="panel-head">
+          <h3>Köszönjük a vásárlást</h3>
+        </div>
+        <div class="gh-panel__body">
+          <div class="modal-body-row">
+            <div class="spinner"></div>
+            <div>
+              <p><strong>Sikeres kommunikáció a pénztárgéppel</strong></p>
+              <p class="muted">A fizetés feldolgozása folyamatban...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>
