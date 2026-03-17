@@ -61,6 +61,7 @@ components:
           type: string
         phone_number:
           type: string
+          nullable: true
         start_time:
           type: string
           format: date-time
@@ -79,6 +80,11 @@ components:
           type: integer
         status:
           type: string
+        waiter_name:
+          type: string
+          nullable: true
+        reservation:
+          $ref: '#/components/schemas/Reservation'
 
     MenuCategory:
       type: object
@@ -227,6 +233,25 @@ paths:
         '403':
           description: Nem pincér próbál műszakot felvenni
 
+  /end-shift:
+    post:
+      tags: [Auth]
+      summary: Pincér műszak leadása
+      description: >
+        A bejelentkezett pincér műszakját inaktívra állítja (`on_shift = false`).
+        Csak `waiter` szerepkörű felhasználó érheti el.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Műszak sikeresen leadva
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Nem pincér próbál műszakot leadni
+
   /logout:
     post:
       tags: [Auth]
@@ -236,6 +261,13 @@ paths:
       responses:
         '200':
           description: Sikeres kijelentkezés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
   /reservations:
     get:
@@ -458,44 +490,63 @@ paths:
             type: integer
       responses:
         '200':
-          description: Rendelés és tételek listája
+          description: Rendelés adatai, vagy üres rendelés válasz
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  order_id:
-                    type: integer
-                  table_id:
-                    type: integer
-                  reservation_id:
-                    type: integer
-                    nullable: true
-                  status:
-                    type: string
-                    enum: [in_progress, ready_to_pay, done]
-                  total_price:
-                    type: integer
-                  items:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        menu_item_id:
-                          type: integer
-                        name:
-                          type: string
-                          nullable: true
-                        price:
-                          type: integer
-                          nullable: true
-                        quantity:
-                          type: integer
-                        line_total:
-                          type: integer
-                          nullable: true
+                oneOf:
+                  - type: object
+                    properties:
+                      order_id:
+                        type: integer
+                      table_id:
+                        type: integer
+                      reservation_id:
+                        type: integer
+                        nullable: true
+                      status:
+                        type: string
+                        enum: [in_progress, ready_to_pay, done]
+                      total_price:
+                        type: integer
+                      opened_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            menu_item_id:
+                              type: integer
+                            name:
+                              type: string
+                              nullable: true
+                            price:
+                              type: integer
+                              nullable: true
+                            quantity:
+                              type: integer
+                            line_total:
+                              type: integer
+                              nullable: true
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          type: object
+                      total_price:
+                        type: integer
+                      opened_at:
+                        type: string
+                        format: date-time
+                        nullable: true
         '400':
           description: Nincs érvényes foglalás ehhez az asztalhoz
 
@@ -591,8 +642,21 @@ paths:
       responses:
         '201':
           description: Tétel hozzáadva
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    type: string
+                  quantity:
+                    type: integer
+                  current_total:
+                    type: integer
         '400':
           description: A rendelés már nem módosítható
+        '404':
+          description: A rendelés nem található
 
   /orders/{order}/simulate-ready:
     post:
@@ -609,8 +673,22 @@ paths:
       responses:
         '200':
           description: Státusz frissítve
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id:
+                    type: integer
+                  new_status:
+                    type: string
+                    enum: [ready_to_pay]
+                  total_amount:
+                    type: integer
         '422':
           description: Nincs fizetendő rendelés
+        '404':
+          description: A rendelés nem található
 
   /orders/{order}/pay:
     post:
@@ -705,6 +783,20 @@ paths:
           description: Nem található ilyen azonosítójú pincér
 
   /admin/tables:
+    get:
+      tags: [Admin]
+      summary: Asztalok listázása admin nézetben
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Asztalok listája
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
     post:
       tags: [Admin]
       summary: Új asztal létrehozása
@@ -759,6 +851,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Table'
+        '409':
+          description: Csak szabad asztal módosítható
     delete:
       tags: [Admin]
       summary: Asztal törlése
@@ -773,6 +867,8 @@ paths:
       responses:
         '204':
           description: Sikeres törlés
+        '409':
+          description: Csak szabad asztal törölhető
 
   /admin/menu-categories:
     post:
