@@ -65,7 +65,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
   get occupiedCount(): number {
     return this.tables.filter(
-      (t) => t.status === 'OCCUPIED' || t.status === 'NEEDS_PAYMENT'
+      (t) => t.status === 'Asztalnál' || t.status === 'Fizetésre vár'
     ).length;
   }
 
@@ -74,7 +74,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
   }
 
   get needsPaymentCount(): number {
-    return this.tables.filter((t) => t.status === 'NEEDS_PAYMENT').length;
+    return this.tables.filter((t) => t.status === 'Fizetésre vár').length;
   }
 
   get guestsTotal(): number {
@@ -120,7 +120,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (t.status === 'RESERVED') {
+    if (t.status === 'Foglalt') {
       this.mode = 'details';
       this.detailsLoading = false;
       this.selected = t;
@@ -145,7 +145,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
         const status: TableInfo['status'] = hasOrder
           ? this.mapOrderStatus(order.status)
-          : 'OCCUPIED';
+          : 'Asztalnál';
 
         this.tables = this.tables.map((tbl) =>
           tbl.id !== t.id
@@ -223,7 +223,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
   openPayment(tableId: number): void {
     const table = this.tables.find((x) => x.id === tableId);
-    if (!table || table.status !== 'NEEDS_PAYMENT' || !table.orderId) return;
+    if (!table || table.status !== 'Fizetésre vár' || !table.orderId) return;
 
     this.selected = table;
     this.mode = 'payment';
@@ -247,7 +247,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
   confirmPayment(tableId: number): void {
     const table = this.tables.find((t) => t.id === tableId);
-    if (!table?.orderId || table.status !== 'NEEDS_PAYMENT') {
+    if (!table?.orderId || table.status !== 'Fizetésre vár') {
       alert('Csak fizetésre kész rendelést lehet lezárni.');
       return;
     }
@@ -483,14 +483,14 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
 
   private mapOrderStatus(status?: 'in_progress' | 'ready_to_pay' | 'done'): TableInfo['status'] {
     if (status === 'ready_to_pay') {
-      return 'NEEDS_PAYMENT';
+      return 'Fizetésre vár';
     }
 
     if (status === 'done') {
       return 'CLOSED';
     }
 
-    return 'OCCUPIED';
+    return 'Asztalnál';
   }
 
   private async openOrResolveOrderId(tableId: number): Promise<number> {
@@ -516,7 +516,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
             ...table,
             orderId: null,
             items: [],
-            status: table.status === 'CLOSED' ? 'CLOSED' : 'OCCUPIED',
+            status: table.status === 'CLOSED' ? 'CLOSED' : 'Asztalnál',
             updatedAt: '-',
           }
     );

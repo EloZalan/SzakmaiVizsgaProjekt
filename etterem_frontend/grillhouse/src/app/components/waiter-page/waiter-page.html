@@ -51,7 +51,7 @@
           <div class="stat-box">
             <span>Fizetésre vár</span>
             <strong>{{ needsPaymentCount }}</strong>
-            <small>PAY asztalok</small>
+            <small>Fizetésre vár asztalok</small>
           </div>
         </div>
       </section>
@@ -64,10 +64,10 @@
           </div>
 
           <div class="legend-row">
-            <span class="gh-tag gh-tag--green">FREE</span>
-            <span class="gh-tag">RESERVED</span>
-            <span class="gh-tag">OCCUPIED</span>
-            <span class="gh-tag gh-tag--accent">PAY</span>
+            <span class="gh-tag gh-tag--green">Szabad</span>
+            <span class="gh-tag">Foglalt</span>
+            <span class="gh-tag">Asztalnál</span>
+            <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
             <span class="gh-tag gh-tag--muted">CLOSED</span>
           </div>
         </div>
@@ -92,19 +92,19 @@
                 type="button"
                 class="waiter-table-tile"
                 (click)="selectTable(t)"
-                [disabled]="t.status === 'FREE'"
+                [disabled]="t.status === 'Szabad'"
                 [class.waiter-table-tile--selected]="selected?.id === t.id"
-                [class.waiter-table-tile--free]="t.status === 'FREE'"
-                [class.waiter-table-tile--pay]="t.status === 'NEEDS_PAYMENT'"
+                [class.waiter-table-tile--free]="t.status === 'Szabad'"
+                [class.waiter-table-tile--pay]="t.status === 'Fizetésre vár'"
                 [class.waiter-table-tile--closed]="t.status === 'CLOSED'"
               >
                 <div class="waiter-table-tile__top">
                   <strong>{{ t.name }}</strong>
-                  @if (t.status === 'RESERVED') {
-                    <span class="gh-tag">RESERVED</span>
+                  @if (t.status === 'Foglalt') {
+                    <span class="gh-tag">Foglalt</span>
                   }
-                  @if (t.status === 'NEEDS_PAYMENT') {
-                    <span class="gh-tag gh-tag--accent">PAY</span>
+                  @if (t.status === 'Fizetésre vár') {
+                    <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
                   }
                   @if (t.status === 'CLOSED') {
                     <span class="gh-tag gh-tag--muted">CLOSED</span>
@@ -243,7 +243,7 @@
             }
 
             <div class="action-row action-row--end">
-              <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'NEEDS_PAYMENT' || !s.orderId">
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'Fizetésre vár' || !s.orderId">
                 Fizetés
               </button>
               @if (s.status === 'CLOSED') {
