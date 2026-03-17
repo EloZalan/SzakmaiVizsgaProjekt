@@ -200,15 +200,15 @@ export class AdminTablesComponent implements OnInit {
   }
 
   get reservedCount(): number {
-    return this.tables.filter((table) => table.status === 'RESERVED').length;
+    return this.tables.filter((table) => table.status === 'Foglalt').length;
   }
 
   get occupiedCount(): number {
-    return this.tables.filter((table) => table.status === 'OCCUPIED').length;
+    return this.tables.filter((table) => table.status === 'Asztalnál').length;
   }
 
   get paymentCount(): number {
-    return this.tables.filter((table) => table.status === 'NEEDS_PAYMENT').length;
+    return this.tables.filter((table) => table.status === 'Fizetésre vár').length;
   }
 
   get closedCount(): number {

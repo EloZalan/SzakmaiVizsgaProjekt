@@ -47,9 +47,9 @@
 
     <div class="legend-row admin-tables-legend">
       <span class="gh-tag gh-tag--green">Szabad</span>
-      <span class="gh-tag">RESERVED</span>
-      <span class="gh-tag">OCCUPIED</span>
-      <span class="gh-tag gh-tag--accent">PAY</span>
+      <span class="gh-tag">Foglalt</span>
+      <span class="gh-tag">Asztalnál</span>
+      <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
       <span class="gh-tag gh-tag--muted">CLOSED</span>
     </div>
 
@@ -69,21 +69,21 @@
                 (click)="selectTable(table)"
                 [class.waiter-table-tile--selected]="selectedTable?.id === table.id"
                 [class.waiter-table-tile--free]="table.status === 'Szabad'"
-                [class.waiter-table-tile--pay]="table.status === 'NEEDS_PAYMENT'"
+                [class.waiter-table-tile--pay]="table.status === 'Fizetésre vár'"
                 [class.waiter-table-tile--closed]="table.status === 'CLOSED'"
               >
                 <div class="waiter-table-tile__top">
                   <strong>{{ table.name }}</strong>
                   @if (table.status === 'Szabad') {
                     <span class="gh-tag gh-tag--green">Szabad</span>
-                  } @else if (table.status === 'RESERVED') {
-                    <span class="gh-tag">RESERVED</span>
-                  } @else if (table.status === 'NEEDS_PAYMENT') {
-                    <span class="gh-tag gh-tag--accent">PAY</span>
+                  } @else if (table.status === 'Foglalt') {
+                    <span class="gh-tag">Foglalt</span>
+                  } @else if (table.status === 'Fizetésre vár') {
+                    <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
                   } @else if (table.status === 'CLOSED') {
                     <span class="gh-tag gh-tag--muted">CLOSED</span>
                   } @else {
-                    <span class="gh-tag">OCCUPIED</span>
+                    <span class="gh-tag">Asztalnál</span>
                   }
                 </div>
 
@@ -135,14 +135,14 @@
 
             @if (table.status === 'Szabad') {
               <span class="gh-tag gh-tag--green">Szabad</span>
-            } @else if (table.status === 'RESERVED') {
-              <span class="gh-tag">RESERVED</span>
-            } @else if (table.status === 'NEEDS_PAYMENT') {
-              <span class="gh-tag gh-tag--accent">PAY</span>
+            } @else if (table.status === 'Foglalt') {
+              <span class="gh-tag">Foglalt</span>
+            } @else if (table.status === 'Fizetésre vár') {
+              <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
             } @else if (table.status === 'CLOSED') {
               <span class="gh-tag gh-tag--muted">CLOSED</span>
             } @else {
-              <span class="gh-tag">OCCUPIED</span>
+              <span class="gh-tag">Asztalnál</span>
             }
           </div>
 
