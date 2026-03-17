@@ -1,1 +1,1 @@
-export type TableStatus = 'Szabad' | 'RESERVED' | 'OCCUPIED' | 'NEEDS_PAYMENT' | 'CLOSED';
+export type TableStatus = 'Szabad' | 'Foglalt' | 'Asztalnál' | 'Fizetésre vár' | 'CLOSED';
