@@ -192,11 +192,11 @@ export class AdminTablesComponent implements OnInit {
   }
 
   isEditable(table: AdminLiveTable): boolean {
-    return table.status === 'FREE';
+    return table.status === 'Szabad';
   }
 
   get freeCount(): number {
-    return this.tables.filter((table) => table.status === 'FREE').length;
+    return this.tables.filter((table) => table.status === 'Szabad').length;
   }
 
   get reservedCount(): number {

@@ -46,7 +46,7 @@
     </div>
 
     <div class="legend-row admin-tables-legend">
-      <span class="gh-tag gh-tag--green">FREE</span>
+      <span class="gh-tag gh-tag--green">Szabad</span>
       <span class="gh-tag">RESERVED</span>
       <span class="gh-tag">OCCUPIED</span>
       <span class="gh-tag gh-tag--accent">PAY</span>
@@ -68,14 +68,14 @@
                 class="waiter-table-tile admin-table-tile"
                 (click)="selectTable(table)"
                 [class.waiter-table-tile--selected]="selectedTable?.id === table.id"
-                [class.waiter-table-tile--free]="table.status === 'FREE'"
+                [class.waiter-table-tile--free]="table.status === 'Szabad'"
                 [class.waiter-table-tile--pay]="table.status === 'NEEDS_PAYMENT'"
                 [class.waiter-table-tile--closed]="table.status === 'CLOSED'"
               >
                 <div class="waiter-table-tile__top">
                   <strong>{{ table.name }}</strong>
-                  @if (table.status === 'FREE') {
-                    <span class="gh-tag gh-tag--green">FREE</span>
+                  @if (table.status === 'Szabad') {
+                    <span class="gh-tag gh-tag--green">Szabad</span>
                   } @else if (table.status === 'RESERVED') {
                     <span class="gh-tag">RESERVED</span>
                   } @else if (table.status === 'NEEDS_PAYMENT') {
@@ -133,8 +133,8 @@
               <p>Csak a szabad asztalok módosíthatók vagy törölhetők.</p>
             </div>
 
-            @if (table.status === 'FREE') {
-              <span class="gh-tag gh-tag--green">FREE</span>
+            @if (table.status === 'Szabad') {
+              <span class="gh-tag gh-tag--green">Szabad</span>
             } @else if (table.status === 'RESERVED') {
               <span class="gh-tag">RESERVED</span>
             } @else if (table.status === 'NEEDS_PAYMENT') {

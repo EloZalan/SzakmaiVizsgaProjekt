@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 21|ErOOIShBXTVktfhfFOgX0SyWNFBFACEa5kHIfO4Ofeda48b1
+@token = 36|ImhG0ruSD3lRgWBm8U2nYEizaWv4Fk4nkszc8QpQ0c4d4591
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json

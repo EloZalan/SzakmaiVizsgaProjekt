@@ -70,7 +70,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
   }
 
   get freeCount(): number {
-    return this.tables.filter((t) => t.status === 'FREE').length;
+    return this.tables.filter((t) => t.status === 'Szabad').length;
   }
 
   get needsPaymentCount(): number {
@@ -116,7 +116,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
   }
 
   selectTable(t: TableInfo): void {
-    if (t.status === 'FREE') {
+    if (t.status === 'Szabad') {
       return;
     }
 
@@ -173,7 +173,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
               ? tbl
               : {
                   ...tbl,
-                  status: 'FREE',
+                  status: 'Szabad',
                   guests: 0,
                   items: [],
                   note: undefined,
@@ -292,7 +292,7 @@ export class WaiterPageComponent implements OnInit, OnDestroy {
         ? table
         : {
             ...table,
-            status: 'FREE',
+            status: 'Szabad',
             guests: 0,
             items: [],
             note: undefined,

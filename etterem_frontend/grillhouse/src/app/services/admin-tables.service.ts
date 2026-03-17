@@ -138,7 +138,7 @@ export class AdminTablesService {
     const normalized = (status ?? '').trim().toLowerCase();
 
     if (normalized === 'free' || normalized === 'available') {
-      return 'FREE';
+      return 'Szabad';
     }
 
     if (normalized === 'reserved') {
