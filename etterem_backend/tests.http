@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 36|ImhG0ruSD3lRgWBm8U2nYEizaWv4Fk4nkszc8QpQ0c4d4591
+@token = 4|iuxJdAGYJKCM3YBjAo5sMJvARx8JB6ovLlABPaiD98ac730f
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -280,7 +280,7 @@ Accept: application/json
 {}
 
 ### Waiter to table
-POST {{baseUrl}}/tables/13/orders
+POST {{baseUrl}}/tables/3/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 

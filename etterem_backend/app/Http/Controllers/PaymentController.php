@@ -7,12 +7,14 @@ use App\Models\Order;
 use App\Models\Table;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class PaymentController extends Controller
 {
     public function pay(Request $request, Order $order) {
         $request->validate([
             'payment_method' => 'required|in:cash,card',
+            'tip' => 'sometimes|nullable|integer|min:0',
         ]);
 
         if ($order->status === "done") {
@@ -27,12 +29,20 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        $payment = Payment::create([
+        $tip = (int)($request->input('tip', 0));
+        $amount = $order->total_price + $tip;
+
+        $paymentData = [
             'order_id' => $order->id,
-            'amount' => $order->total_price,
+            'amount' => $amount,
             'payment_method' => $request->payment_method,
-            'paid_at' => now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('payments', 'paid_at')) {
+            $paymentData['paid_at'] = now();
+        }
+
+        $payment = Payment::create($paymentData);
 
         $order->update(['status' => 'done']);
 
