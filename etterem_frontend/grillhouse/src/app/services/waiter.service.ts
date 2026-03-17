@@ -144,7 +144,7 @@ export class WaiterService {
     }
 
     if (normalized === 'reserved') {
-      return 'RESERVED';
+      return 'Foglalt';
     }
 
     if (normalized === 'closed' || normalized === 'disabled') {
@@ -156,10 +156,10 @@ export class WaiterService {
       normalized === 'ready_to_pay' ||
       normalized === 'pay'
     ) {
-      return 'NEEDS_PAYMENT';
+      return 'Fizetésre vár';
     }
 
-    return 'OCCUPIED';
+    return 'Asztalnál';
   }
 
   private mapReservationNote(reservation?: ReservationDto | null): string | undefined {

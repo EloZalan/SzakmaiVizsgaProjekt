@@ -142,18 +142,18 @@ export class AdminTablesService {
     }
 
     if (normalized === 'reserved') {
-      return 'RESERVED';
+      return 'Foglalt';
     }
 
     if (normalized === 'needs_payment' || normalized === 'ready_to_pay' || normalized === 'pay') {
-      return 'NEEDS_PAYMENT';
+      return 'Fizetésre vár';
     }
 
     if (normalized === 'closed' || normalized === 'disabled') {
       return 'CLOSED';
     }
 
-    return 'OCCUPIED';
+    return 'Asztalnál';
   }
 
   private mapReservationNote(reservation?: TableReservationDto | null): string | undefined {
