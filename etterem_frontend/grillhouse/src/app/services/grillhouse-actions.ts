@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+export type TravelMode = 'driving' | 'walking' | 'transit';
+
 @Injectable({ providedIn: 'root' })
 export class GrillhouseActionsService {
   private fullMenuVisible = false;
@@ -25,11 +27,15 @@ export class GrillhouseActionsService {
     return this.fullMenuVisible;
   }
 
-  getDirections(): void {
-  const destination = 'Gízai piramismező';
+  /**
+   * Opens Google Maps directions in a new tab using the selected travel mode.
+   */
+  getDirections(mode: TravelMode = 'driving'): void {
+    const destination = 'Gízai piramismező';
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+      destination
+    )}&travelmode=${mode}`;
 
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
-
-  window.open(url, '_blank');
+    window.open(url, '_blank');
   }
 }
