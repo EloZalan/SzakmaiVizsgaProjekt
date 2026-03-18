@@ -1,9 +1,12 @@
 <section class="hero-shell">
-  <div
-    class="hero-shell__bg"
-    [style.backgroundImage]="'url(' + slides[activeIndex].imageUrl + ')'"
-    aria-hidden="true"
-  ></div>
+  <div class="hero-shell__bg" aria-hidden="true">
+    <div
+      *ngFor="let slide of slides; let i = index"
+      class="hero-shell__bg-slide"
+      [class.hero-shell__bg-slide--active]="i === activeIndex"
+      [style.backgroundImage]="'url(' + slide.imageUrl + ')'"
+    ></div>
+  </div>
 
   <div class="hero-shell__overlay"></div>
 

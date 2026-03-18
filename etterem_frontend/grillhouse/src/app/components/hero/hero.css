@@ -1,0 +1,27 @@
+/* Hero background slides fade in/out when active slide changes */
+.hero-shell__bg {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+}
+
+.hero-shell__bg-slide {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	opacity: 0;
+	transition: opacity 0.8s ease;
+}
+
+.hero-shell__bg-slide--active {
+	opacity: 1;
+}
+
+
+/* Ensure content appears above background slides */
+.hero-shell__content {
+	z-index: 1;
+}
+
