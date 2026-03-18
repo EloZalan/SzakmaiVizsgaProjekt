@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { AuthService } from '../../services/auth';
 import { LanguageService } from '../../services/language.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,11 +17,16 @@ export class NavbarComponent {
   constructor(
     private actions: GrillhouseActionsService,
     public auth: AuthService,
-    public languageService: LanguageService
+    public languageService: LanguageService,
+    public themeService: ThemeService
   ) {}
 
   get currentLanguage(): string {
     return this.languageService.currentLanguageValue;
+  }
+
+  get currentTheme(): string {
+    return this.themeService.currentThemeValue;
   }
 
   get homeActionLabel(): string {
@@ -60,5 +66,9 @@ export class NavbarComponent {
 
   toggleLanguage(): void {
     this.languageService.toggleLanguage();
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 }

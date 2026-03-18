@@ -15,6 +15,7 @@
 
     <div class="nav-actions">
       <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()">{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</button>
+      <button class="gh-btn gh-btn--ghost" (click)="toggleTheme()">{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</button>
       <a class="gh-btn gh-btn--ghost btn-login" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
       <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</a>
     </div>

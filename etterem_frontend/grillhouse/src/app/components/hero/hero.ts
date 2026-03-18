@@ -3,6 +3,7 @@ import { NgFor } from '@angular/common';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
 import { HeroSlide } from '../../models/hero-slide.model';
+import { ThemeService, ThemeMode } from '../../services/theme.service';
 
 @Component({
   selector: 'app-hero',
@@ -38,11 +39,13 @@ export class HeroComponent implements OnInit, OnDestroy {
   activeIndex = 0;
   private intervalId: any;
   currentLanguage: Language = 'hu';
+  currentTheme: ThemeMode = 'dark';
 
   constructor(
     private actions: GrillhouseActionsService,
     private cdr: ChangeDetectorRef,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +54,10 @@ export class HeroComponent implements OnInit, OnDestroy {
       this.currentLanguage = lang;
       this.updateSlides();
       this.cdr.markForCheck();
+    });
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+      this.updateBodyClass();
     });
   }
 
@@ -134,5 +141,12 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   onViewMenu(): void {
     this.actions.viewMenu();
+  }
+
+  private updateBodyClass(): void {
+    const homePage = document.querySelector('.home-page');
+    if (homePage) {
+      homePage.classList.toggle('light-theme', this.currentTheme === 'light');
+    }
   }
 }
