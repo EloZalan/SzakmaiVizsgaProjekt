@@ -1,6 +1,6 @@
 <div class="login-shell">
   <div class="login-card">
-    <h1 class="login-card__title">Login</h1>
+    <h1 class="login-card__title">Bejelentkezés</h1>
 
     <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" novalidate>
       <label class="login-field">
@@ -28,7 +28,7 @@
       </label>
 
       <label class="login-field">
-        <span>Password</span>
+        <span>Jelszó</span>
         <input
           type="password"
           name="password"
@@ -57,7 +57,7 @@
         type="submit"
         [disabled]="loading"
       >
-        {{ loading ? 'Bejelentkezés...' : 'Login' }}
+        {{ loading ? 'Bejelentkezés...' : 'Bejelentkezés' }}
       </button>
     </form>
   </div>
