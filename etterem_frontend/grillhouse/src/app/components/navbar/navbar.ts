@@ -18,7 +18,7 @@ export class NavbarComponent {
   ) {}
 
   get homeActionLabel(): string {
-    return this.auth.isLoggedIn() ? 'Dashboard' : 'Login';
+    return this.auth.isLoggedIn() ? 'Vezérlőpult' : 'Bejelentkezés';
   }
 
   get homeActionRoute(): string {

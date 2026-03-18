@@ -517,14 +517,14 @@ input {
 
 .about-title {
   font-size: 54px;
-  margin: 10px 0 14px;
+  margin: 10px 0 30px;
   line-height: 1.05;
 }
 
 .about-text {
   color: rgba(255, 255, 255, 0.75);
   line-height: 1.8;
-  margin: 0 0 14px;
+  margin: 0 0 30px;
   max-width: 560px;
 }
 
@@ -1190,3 +1190,44 @@ input {
 .detail-grid-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .action-row{display:flex;align-items:center}
 .action-row--end{justify-content:flex-end}
+
+.gh-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.gh-modal {
+  width: min(420px, 92vw);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--gh-radius);
+  padding: 1.25rem;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+  color: var(--gh-text);
+}
+
+.gh-modal .panel-head h3 {
+  margin: 0;
+}
+
+.gh-modal .modal-body-row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.gh-modal .muted {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.gh-modal .gh-btn--ghost {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+

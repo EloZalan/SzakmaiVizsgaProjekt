@@ -8,14 +8,14 @@
     </a>
 
     <nav class="nav-links">
-      <a (click)="scrollToSection('menu')">Menu</a>
-      <a (click)="scrollToSection('about')">About</a>
-      <a (click)="scrollToSection('location')">Location</a>
+      <a (click)="scrollToSection('menu')">Menü</a>
+      <a (click)="scrollToSection('about')">Rólunk</a>
+      <a (click)="scrollToSection('location')">Helyszín</a>
     </nav>
 
     <div class="nav-actions">
       <a class="gh-btn gh-btn--ghost btn-login" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
-      <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">Reserve Table</a>
+      <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">Asztalfoglalás</a>
     </div>
   </div>
 </header>

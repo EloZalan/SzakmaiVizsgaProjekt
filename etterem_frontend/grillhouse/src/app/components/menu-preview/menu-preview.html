@@ -1,8 +1,8 @@
 <div class="gh-container">
   <div class="menu-head">
     <img class="menu-icon" src="../../../assets/images/logo1024A.png" alt="">
-    <h2 class="menu-head__title">Our Signature Menu</h2>
-    <p class="menu-head__subtitle">Premium cuts, expertly grilled</p>
+    <h2 class="menu-head__title">Kiváló Ételeink</h2>
+    <p class="menu-head__subtitle">Kiváló minőségű, tüzön grillezett ételeink</p>
   </div>
 
   <div *ngIf="loading" class="menu-loading">
@@ -25,15 +25,15 @@
 
   <div class="menu-cta">
     <button class="gh-btn gh-btn--primary" (click)="onViewFullMenu()">
-      {{ isFullMenuVisible() ? 'Hide Full Menu' : 'View Full Menu' }}
+      {{ isFullMenuVisible() ? 'Teljes Menu elrejtése' : 'Teljes Menu megtekintése' }}
     </button>
   </div>
 
   <div class="menu-full-box" *ngIf="isFullMenuVisible() && !loading && !errorMessage">
-    <h3 class="menu-full-box__title">Full Menu</h3>
+    <h3 class="menu-full-box__title">Teljes Menu</h3>
 
     <div class="menu-section" *ngIf="starters.length > 0">
-      <h4 class="menu-section__title">Starters</h4>
+      <h4 class="menu-section__title">Előételek</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of starters">
           <div class="menu-card__top">
@@ -46,7 +46,7 @@
     </div>
 
     <div class="menu-section" *ngIf="sides.length > 0">
-      <h4 class="menu-section__title">Sides</h4>
+      <h4 class="menu-section__title">Köretek</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of sides">
           <div class="menu-card__top">
@@ -59,7 +59,7 @@
     </div>
 
     <div class="menu-section" *ngIf="desserts.length > 0">
-      <h4 class="menu-section__title">Desserts</h4>
+      <h4 class="menu-section__title">Desszertek</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of desserts">
           <div class="menu-card__top">
@@ -72,7 +72,7 @@
     </div>
 
     <div class="menu-section" *ngIf="drinks.length > 0">
-      <h4 class="menu-section__title">Drinks</h4>
+      <h4 class="menu-section__title">Italok</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of drinks">
           <div class="menu-card__top">
