@@ -2,6 +2,7 @@ import { Component, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { AuthService } from '../../services/auth';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,11 +15,20 @@ export class NavbarComponent {
 
   constructor(
     private actions: GrillhouseActionsService,
-    public auth: AuthService
+    public auth: AuthService,
+    public languageService: LanguageService
   ) {}
 
+  get currentLanguage(): string {
+    return this.languageService.currentLanguageValue;
+  }
+
   get homeActionLabel(): string {
-    return this.auth.isLoggedIn() ? 'Vezérlőpult' : 'Bejelentkezés';
+    if (this.auth.isLoggedIn()) {
+      return this.currentLanguage === 'hu' ? 'Vezérlőpult' : 'Dashboard';
+    } else {
+      return this.currentLanguage === 'hu' ? 'Bejelentkezés' : 'Login';
+    }
   }
 
   get homeActionRoute(): string {
@@ -46,5 +56,9 @@ export class NavbarComponent {
         behavior: 'smooth',
       });
     }
+  }
+
+  toggleLanguage(): void {
+    this.languageService.toggleLanguage();
   }
 }

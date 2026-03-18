@@ -8,30 +8,36 @@
           </div>
         </div>
 
-        <h2 class="about-title">Ahol a tűz <br> találkozik az ízzel</h2>
+        <h2 class="about-title">{{ currentLanguage === 'hu' ? 'Ahol a tűz találkozik az ízzel' : 'Where Fire Meets Flavor' }}</h2>
 
         <p class="about-text">
-            A GrillZone egy igazán különleges hely: itt nemcsak az ízek, hanem a látvány is felejthetetlen. Képzeld el, hogy frissen sült grillételeket élvezel, miközben a háttérben a Gízai piramisok időtlen sziluettje magasodik.
+            {{ currentLanguage === 'hu' ?
+              'A GrillZone egy igazán különleges hely: itt nemcsak az ízek, hanem a látvány is felejthetetlen. Képzeld el, hogy frissen sült grillételeket élvezel, miközben a háttérben a Gízai piramisok időtlen sziluettje magasodik.' :
+              'GrillZone is a truly special place: here not only the flavors, but the view is unforgettable. Imagine enjoying freshly grilled dishes while the timeless silhouette of the Giza pyramids rises in the background.'
+            }}
         </p>
 
         <p class="about-text">
-            A GrillZone a hagyományos közel-keleti ízeket ötvözi modern street food hangulattal: szaftos húsok, fűszeres falatok és barátságos, laza légkör vár minden vendégre. Legyen szó egy gyors ebédről vagy egy különleges esti programról naplementében, itt minden falat mellé egy darab történelem is jár.
+            {{ currentLanguage === 'hu' ?
+              'A GrillZone a hagyományos közel-keleti ízeket ötvözi modern street food hangulattal: szaftos húsok, fűszeres falatok és barátságos, laza légkör vár minden vendégre. Legyen szó egy gyors ebédről vagy egy különleges esti programról naplementében, itt minden falat mellé egy darab történelem is jár.' :
+              'GrillZone combines traditional Middle Eastern flavors with modern street food atmosphere: juicy meats, spicy bites and a friendly, relaxed atmosphere await every guest. Whether it\'s a quick lunch or a special evening program at sunset, here every bite comes with a piece of history.'
+            }}
         </p>
 
-        <b>GrillZone – ahol az ízek találkoznak az örökkévalósággal.</b>
+        <b>{{ currentLanguage === 'hu' ? 'GrillZone – ahol az ízek találkoznak az örökkévalósággal.' : 'GrillZone – where flavors meet eternity.' }}</b>
 
         <div class="about-stats">
           <div class="about-stat">
             <div class="about-stat__value">500°C</div>
-            <div class="about-stat__label">Tökéletes hő</div>
+            <div class="about-stat__label">{{ currentLanguage === 'hu' ? 'Tökéletes hő' : 'Perfect Heat' }}</div>
           </div>
           <div class="about-stat">
-            <div class="about-stat__value">14 óra</div>
-            <div class="about-stat__label">Hosszan füstölve</div>
+            <div class="about-stat__value">14 {{ currentLanguage === 'hu' ? 'óra' : 'hours' }}</div>
+            <div class="about-stat__label">{{ currentLanguage === 'hu' ? 'Hosszan füstölve' : 'Long Smoked' }}</div>
           </div>
           <div class="about-stat">
             <div class="about-stat__value">100%</div>
-            <div class="about-stat__label">Természetes alapanyagok</div>
+            <div class="about-stat__label">{{ currentLanguage === 'hu' ? 'Természetes alapanyagok' : 'Natural Ingredients' }}</div>
           </div>
         </div>
       </div>

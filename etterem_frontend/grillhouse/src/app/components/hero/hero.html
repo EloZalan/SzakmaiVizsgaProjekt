@@ -16,7 +16,7 @@
       <p class="hero-shell__subtitle">{{ slides[activeIndex].subline }}</p>
 
       <button class="gh-btn gh-btn--primary gh-btn--lg" (click)="onViewMenu()">
-        View Menu
+        {{ currentLanguage === 'hu' ? 'Menü megtekintése' : 'View Menu' }}
       </button>
 
       <div class="hero-shell__dots">

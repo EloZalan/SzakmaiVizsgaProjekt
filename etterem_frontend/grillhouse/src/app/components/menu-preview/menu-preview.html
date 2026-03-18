@@ -1,12 +1,12 @@
 <div class="gh-container">
   <div class="menu-head">
     <img class="menu-icon" src="../../../assets/images/logo1024A.png" alt="">
-    <h2 class="menu-head__title">Kiváló Ételeink</h2>
-    <p class="menu-head__subtitle">Kiváló minőségű, tüzön grillezett ételeink</p>
+    <h2 class="menu-head__title">{{ currentLanguage === 'hu' ? 'Kiváló Ételeink' : 'Our Excellent Dishes' }}</h2>
+    <p class="menu-head__subtitle">{{ currentLanguage === 'hu' ? 'Kiváló minőségű, tüzön grillezett ételeink' : 'Excellent quality, fire-grilled dishes' }}</p>
   </div>
 
   <div *ngIf="loading" class="menu-loading">
-    Menü betöltése...
+    {{ currentLanguage === 'hu' ? 'Menü betöltése...' : 'Loading menu...' }}
   </div>
 
   <div *ngIf="errorMessage" class="menu-error">
@@ -19,21 +19,21 @@
         <div class="menu-card__name">{{ m.name }}</div>
         <div class="menu-card__price">{{ m.price }} Ft</div>
       </div>
-      <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
+      <div class="menu-card__desc">{{ m.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
     </article>
   </div>
 
   <div class="menu-cta">
     <button class="gh-btn gh-btn--primary" (click)="onViewFullMenu()">
-      {{ isFullMenuVisible() ? 'Teljes Menu elrejtése' : 'Teljes Menu megtekintése' }}
+      {{ isFullMenuVisible() ? (currentLanguage === 'hu' ? 'Teljes Menu elrejtése' : 'Hide Full Menu') : (currentLanguage === 'hu' ? 'Teljes Menu megtekintése' : 'View Full Menu') }}
     </button>
   </div>
 
   <div class="menu-full-box" *ngIf="isFullMenuVisible() && !loading && !errorMessage">
-    <h3 class="menu-full-box__title">Teljes Menu</h3>
+    <h3 class="menu-full-box__title">{{ currentLanguage === 'hu' ? 'Teljes Menu' : 'Full Menu' }}</h3>
 
     <div class="menu-section" *ngIf="starters.length > 0">
-      <h4 class="menu-section__title">Előételek</h4>
+      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Előételek' : 'Starters' }}</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of starters">
           <div class="menu-card__top">
@@ -46,7 +46,7 @@
     </div>
 
     <div class="menu-section" *ngIf="sides.length > 0">
-      <h4 class="menu-section__title">Köretek</h4>
+      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Köretek' : 'Sides' }}</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of sides">
           <div class="menu-card__top">
@@ -59,7 +59,7 @@
     </div>
 
     <div class="menu-section" *ngIf="desserts.length > 0">
-      <h4 class="menu-section__title">Desszertek</h4>
+      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Desszertek' : 'Desserts' }}</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of desserts">
           <div class="menu-card__top">
@@ -72,7 +72,7 @@
     </div>
 
     <div class="menu-section" *ngIf="drinks.length > 0">
-      <h4 class="menu-section__title">Italok</h4>
+      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Italok' : 'Drinks' }}</h4>
       <div class="menu-grid">
         <article class="menu-card" *ngFor="let m of drinks">
           <div class="menu-card__top">

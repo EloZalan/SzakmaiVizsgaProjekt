@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { NgFor } from '@angular/common';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
+import { LanguageService, Language } from '../../services/language.service';
 import { HeroSlide } from '../../models/hero-slide.model';
 
 @Component({
@@ -36,11 +37,21 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   activeIndex = 0;
   private intervalId: any;
+  currentLanguage: Language = 'hu';
 
-  constructor(private actions: GrillhouseActionsService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private actions: GrillhouseActionsService,
+    private cdr: ChangeDetectorRef,
+    private languageService: LanguageService
+  ) {}
 
   ngOnInit(): void {
     this.startAutoSlide();
+    this.languageService.language$.subscribe(lang => {
+      this.currentLanguage = lang;
+      this.updateSlides();
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -50,6 +61,56 @@ export class HeroComponent implements OnInit, OnDestroy {
   select(i: number): void {
     this.activeIndex = i;
     this.resetAutoSlide();
+  }
+
+  private updateSlides(): void {
+    if (this.currentLanguage === 'hu') {
+      this.slides = [
+        {
+          imageUrl: 'assets/images/hero-1.jpg',
+          headline: 'HITELVES BBQ ÍZELÍTŐK',
+          subline: 'Tűzön grillezett tökélyesség 2022 óta',
+        },
+        {
+          imageUrl: 'assets/images/hero-2.jpg',
+          headline: 'FÜST • SÜTÉS • SZOLGÁLTATÁS',
+          subline: 'Házilag készült szószok, első osztályú húsok',
+        },
+        {
+          imageUrl: 'assets/images/hero-3.jpg',
+          headline: 'LASSAN FÜSTÖLT, NAGY ÍZ',
+          subline: 'Pitmaster által készített, minden nap',
+        },
+        {
+          imageUrl: 'assets/images/hero-4.jpg',
+          headline: 'AZ ÖN ASZTALA VÁR',
+          subline: 'Foglaljon másodpercek alatt',
+        },
+      ];
+    } else {
+      this.slides = [
+        {
+          imageUrl: 'assets/images/hero-1.jpg',
+          headline: 'AUTHENTIC BBQ FLAVORS',
+          subline: 'Fire-grilled perfection since 2022',
+        },
+        {
+          imageUrl: 'assets/images/hero-2.jpg',
+          headline: 'SMOKE • SEAR • SERVE',
+          subline: 'House-made sauces, prime cuts',
+        },
+        {
+          imageUrl: 'assets/images/hero-3.jpg',
+          headline: 'SLOW SMOKED, BIG FLAVOR',
+          subline: 'Pitmaster-crafted, every day',
+        },
+        {
+          imageUrl: 'assets/images/hero-4.jpg',
+          headline: 'YOUR TABLE IS WAITING',
+          subline: 'Reserve in seconds',
+        },
+      ];
+    }
   }
 
   private startAutoSlide(): void {

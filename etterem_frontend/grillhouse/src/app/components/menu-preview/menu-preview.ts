@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
+import { LanguageService, Language } from '../../services/language.service';
 import { MenuCard } from '../../models/menu-card.model';
 import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.service';
 
@@ -22,14 +23,19 @@ export class MenuPreviewComponent implements OnInit {
   categories: MenuCategory[] = [];
   loading = false;
   errorMessage = '';
+  currentLanguage: Language = 'hu';
 
   constructor(
     private actions: GrillhouseActionsService,
-    private menuService: MenuService
+    private menuService: MenuService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.loadMenu();
+    this.languageService.language$.subscribe(lang => {
+      this.currentLanguage = lang;
+    });
   }
 
   onViewFullMenu(): void {
@@ -64,7 +70,7 @@ export class MenuPreviewComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = 'Nem sikerült betölteni a menüt.';
+        this.errorMessage = this.currentLanguage === 'hu' ? 'Nem sikerült betölteni a menüt.' : 'Failed to load menu.';
         console.error('Menu loading error:', err);
       },
     });
