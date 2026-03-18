@@ -26,6 +26,10 @@ export class GrillhouseActionsService {
   }
 
   getDirections(): void {
-    // TODO: implement later
+  const destination = 'Gízai piramismező';
+
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+
+  window.open(url, '_blank');
   }
 }
