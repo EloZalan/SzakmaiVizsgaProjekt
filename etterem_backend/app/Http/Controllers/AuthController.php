@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\WaiterStatusChanged;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,8 @@ class AuthController extends Controller
         $user->on_shift = true;
         $user->save();
 
+        event(new WaiterStatusChanged($user->id, $user->on_shift, 'shift_started'));
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
@@ -91,6 +94,8 @@ class AuthController extends Controller
         $user->on_shift = false;
         $user->save();
 
+        event(new WaiterStatusChanged($user->id, $user->on_shift, 'shift_ended'));
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
@@ -104,6 +109,11 @@ class AuthController extends Controller
         $user = $request->user();
         $user->on_shift = false;
         $user->save();
+
+        if ($user->role === 'waiter') {
+            event(new WaiterStatusChanged($user->id, false, 'logout'));
+        }
+
         $user->currentAccessToken()->delete();
 
         return response()->json([

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\WaiterStatusChanged;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -24,6 +25,8 @@ class AdminActionsController extends Controller
             'on_shift' => false,
         ]);
 
+        event(new WaiterStatusChanged($user->id, false, 'created'));
+
 
 
         return response($user, 201);
@@ -37,6 +40,9 @@ class AdminActionsController extends Controller
             ], 404);
         }
         User::destroy($user->id);
+
+        event(new WaiterStatusChanged($user->id, null, 'deleted'));
+
         return response()->json("", 204);
     }
 
