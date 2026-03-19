@@ -40,7 +40,7 @@ export class ReservePageComponent implements OnInit {
   phoneNumber = '';
   date = '';
   time = '';
-  guests = 2;
+  guests: number | null = null;
   note = '';
   minDate = '';
 
@@ -80,8 +80,9 @@ export class ReservePageComponent implements OnInit {
 
     const guestName = this.name.trim();
     const phone = this.phoneNumber.trim();
+    const guestCount = Number(this.guests);
 
-    if (!guestName || !phone || !this.date || !this.time || this.guests < 1) {
+    if (!guestName || !phone || !this.date || !this.time || !guestCount || guestCount < 1) {
       this.errorMessage = 'Kérlek tölts ki minden mezőt helyesen.';
       return;
     }
@@ -96,7 +97,7 @@ export class ReservePageComponent implements OnInit {
     const payload: CreateReservationPayload = {
       guest_name: guestName,
       phone_number: phone,
-      guest_count: this.guests,
+      guest_count: guestCount,
       start_time: startTime,
       note: this.note.trim() || null,
     };
@@ -107,7 +108,7 @@ export class ReservePageComponent implements OnInit {
         next: (reservation: ReservationResponse) => {
           this.successMessage = 'Sikeres foglalás!';
           this.phoneNumber = '';
-          this.guests = 2;
+          this.guests = null;
           this.submitting = false;
           this.redirecting = true;
 
