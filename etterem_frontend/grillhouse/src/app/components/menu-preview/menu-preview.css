@@ -1,0 +1,87 @@
+.menu-card__category {
+	font-size: 11px;
+	font-weight: 900;
+	color: var(--gh-accent);
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
+	margin-bottom: 4px;
+}
+
+.chef-offer__title {
+	text-align: center;
+	font-size: 30px;
+	margin: 0 0 14px;
+}
+
+.chef-offer__days {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+	flex-wrap: wrap;
+	margin-bottom: 18px;
+}
+
+.chef-day-btn {
+	min-width: 92px;
+}
+
+.chef-day-btn--active {
+	background: var(--gh-accent);
+	border-color: var(--gh-accent);
+	color: #120a05;
+}
+
+.menu-full-box--open {
+	transform-origin: top center;
+	animation: menu-grow-in 0.34s ease;
+}
+
+.full-menu-slider__head {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.full-menu-slider__head-center {
+	text-align: center;
+}
+
+.full-menu-slider__head-center .menu-section__title {
+	margin: 0;
+}
+
+.full-menu-slider__meta {
+	margin-top: 4px;
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.62);
+}
+
+.full-menu-slider__grid {
+	margin-top: 12px;
+}
+
+@keyframes menu-grow-in {
+	from {
+		opacity: 0;
+		transform: scaleY(0.92);
+	}
+
+	to {
+		opacity: 1;
+		transform: scaleY(1);
+	}
+}
+
+@media (max-width: 760px) {
+	.chef-offer__title {
+		font-size: 24px;
+	}
+
+	.full-menu-slider__head {
+		grid-template-columns: 1fr;
+		justify-items: center;
+		gap: 10px;
+	}
+}

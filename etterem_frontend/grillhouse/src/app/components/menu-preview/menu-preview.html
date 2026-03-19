@@ -13,14 +13,36 @@
     {{ errorMessage }}
   </div>
 
-  <div class="menu-grid" *ngIf="!loading && !errorMessage">
-    <article class="menu-card" *ngFor="let m of items">
-      <div class="menu-card__top">
-        <div class="menu-card__name">{{ m.name }}</div>
-        <div class="menu-card__price">{{ m.price }} Ft</div>
-      </div>
-      <div class="menu-card__desc">{{ m.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
-    </article>
+  <div class="chef-offer" *ngIf="!loading && !errorMessage && !isFullMenuVisible()">
+    <h3 class="chef-offer__title">{{ currentLanguage === 'hu' ? 'Séf ajánlata' : "Chef's Recommendations" }}</h3>
+
+    <div class="chef-offer__days">
+      <button
+        class="gh-btn gh-btn--ghost gh-btn--sm chef-day-btn"
+        *ngFor="let day of chefDays"
+        [class.chef-day-btn--active]="selectedChefDayKey === day.key"
+        (click)="selectChefDay(day.key)"
+      >
+        {{ getChefDayLabel(day) }}
+      </button>
+    </div>
+
+    <div class="menu-grid">
+      <article class="menu-card" *ngFor="let card of chefRecommendations">
+        <div class="menu-card__top">
+          <div>
+            <div class="menu-card__category">{{ card.category.name }}</div>
+            <div class="menu-card__name">{{ card.item.name }}</div>
+          </div>
+          <div class="menu-card__price">{{ card.item.price }} Ft</div>
+        </div>
+        <div class="menu-card__desc">{{ card.item.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
+      </article>
+    </div>
+
+    <div class="gh-empty" *ngIf="chefRecommendations.length === 0">
+      {{ currentLanguage === 'hu' ? 'Nincs elérhető séf ajánlat.' : 'No chef recommendations available.' }}
+    </div>
   </div>
 
   <div class="menu-cta">
@@ -29,59 +51,38 @@
     </button>
   </div>
 
-  <div class="menu-full-box" *ngIf="isFullMenuVisible() && !loading && !errorMessage">
+  <div class="menu-full-box menu-full-box--open" *ngIf="isFullMenuVisible() && !loading && !errorMessage">
     <h3 class="menu-full-box__title">{{ currentLanguage === 'hu' ? 'Teljes Menu' : 'Full Menu' }}</h3>
 
-    <div class="menu-section" *ngIf="starters.length > 0">
-      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Előételek' : 'Starters' }}</h4>
-      <div class="menu-grid">
-        <article class="menu-card" *ngFor="let m of starters">
+    <div class="menu-section" *ngIf="activeCategorySlide as slide; else noCategoriesTpl">
+      <div class="full-menu-slider__head">
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="prevCategory()" [disabled]="categorySlides.length <= 1" aria-label="Previous category">
+          &#8592;
+        </button>
+
+        <div class="full-menu-slider__head-center">
+          <h4 class="menu-section__title">{{ slide.category.name }}</h4>
+          <div class="full-menu-slider__meta">{{ activeCategoryIndex + 1 }} / {{ categorySlides.length }}</div>
+        </div>
+
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="nextCategory()" [disabled]="categorySlides.length <= 1" aria-label="Next category">
+          &#8594;
+        </button>
+      </div>
+
+      <div class="menu-grid full-menu-slider__grid">
+        <article class="menu-card" *ngFor="let m of slide.items">
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
             <div class="menu-card__price">{{ m.price }} Ft</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
+          <div class="menu-card__desc">{{ m.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
         </article>
       </div>
     </div>
 
-    <div class="menu-section" *ngIf="sides.length > 0">
-      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Köretek' : 'Sides' }}</h4>
-      <div class="menu-grid">
-        <article class="menu-card" *ngFor="let m of sides">
-          <div class="menu-card__top">
-            <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">{{ m.price }} Ft</div>
-          </div>
-          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
-        </article>
-      </div>
-    </div>
-
-    <div class="menu-section" *ngIf="desserts.length > 0">
-      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Desszertek' : 'Desserts' }}</h4>
-      <div class="menu-grid">
-        <article class="menu-card" *ngFor="let m of desserts">
-          <div class="menu-card__top">
-            <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">{{ m.price }} Ft</div>
-          </div>
-          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
-        </article>
-      </div>
-    </div>
-
-    <div class="menu-section" *ngIf="drinks.length > 0">
-      <h4 class="menu-section__title">{{ currentLanguage === 'hu' ? 'Italok' : 'Drinks' }}</h4>
-      <div class="menu-grid">
-        <article class="menu-card" *ngFor="let m of drinks">
-          <div class="menu-card__top">
-            <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">{{ m.price }} Ft</div>
-          </div>
-          <div class="menu-card__desc">{{ m.desc || 'Nincs leírás' }}</div>
-        </article>
-      </div>
-    </div>
+    <ng-template #noCategoriesTpl>
+      <div class="gh-empty">{{ currentLanguage === 'hu' ? 'Nincs elérhető kategória.' : 'No available categories.' }}</div>
+    </ng-template>
   </div>
 </div>
