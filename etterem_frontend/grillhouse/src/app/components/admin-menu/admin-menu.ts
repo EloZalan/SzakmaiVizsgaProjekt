@@ -196,6 +196,8 @@ export class AdminMenuComponent implements OnInit {
   }
 
   startAddUncategorizedMenuItem(): void {
+    this.selectedCategory = null;
+    this.expandedCategoryId = null;
     this.editing = { type: 'item', id: null, name: '', description: '', price: 0, categoryId: null };
   }
 
@@ -209,7 +211,7 @@ export class AdminMenuComponent implements OnInit {
       return;
     }
 
-    const categoryId = this.editing.categoryId ?? this.selectedCategory?.id ?? null;
+    const categoryId = this.editing.categoryId;
 
     if (this.editing.id === null) {
       this.menuService
