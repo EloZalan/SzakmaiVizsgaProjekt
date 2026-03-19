@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -50,6 +51,11 @@ class AdminActionsController extends Controller
                 'on_shift' => $user->on_shift,
             ];
         }), 200);
+    }
+
+    public function getDailyRevenue() {
+        $total = Payment::whereDate('paid_at', today())->sum('amount');
+        return response()->json(['daily_revenue' => (int) $total]);
     }
 
 }
