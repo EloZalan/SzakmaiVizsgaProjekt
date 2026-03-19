@@ -57,7 +57,7 @@
     <div class="menu-section" *ngIf="activeCategorySlide as slide; else noCategoriesTpl">
       <div class="full-menu-slider__head">
         <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="prevCategory()" [disabled]="categorySlides.length <= 1" aria-label="Previous category">
-          &#8592;
+          <mat-icon>chevron_left</mat-icon>
         </button>
 
         <div class="full-menu-slider__head-center">
@@ -66,7 +66,7 @@
         </div>
 
         <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="nextCategory()" [disabled]="categorySlides.length <= 1" aria-label="Next category">
-          &#8594;
+          <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
 

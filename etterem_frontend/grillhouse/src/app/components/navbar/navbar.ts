@@ -1,5 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { AuthService } from '../../services/auth';
 import { LanguageService } from '../../services/language.service';
@@ -8,7 +9,7 @@ import { ThemeService } from '../../services/theme.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MatIconModule],
   templateUrl: './navbar.html',
 })
 export class NavbarComponent {

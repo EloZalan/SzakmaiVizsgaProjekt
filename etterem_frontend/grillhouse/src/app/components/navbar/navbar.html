@@ -14,8 +14,14 @@
     </nav>
 
     <div class="nav-actions">
-      <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()">{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</button>
-      <button class="gh-btn gh-btn--ghost" (click)="toggleTheme()">{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</button>
+      <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()" title="Toggle language">
+        <mat-icon>{{ languageService.currentLanguageValue === 'hu' ? 'language' : 'language' }}</mat-icon>
+        <span>{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</span>
+      </button>
+      <button class="gh-btn gh-btn--ghost" (click)="toggleTheme()" title="Toggle theme">
+        <mat-icon>{{ currentTheme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <span>{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</span>
+      </button>
       <a class="gh-btn gh-btn--ghost btn-login" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
       <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</a>
     </div>
