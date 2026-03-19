@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { HomePageComponent } from './home-page.component';
 import { LoginPageComponent } from './components/login-page/login-page';
 import { WaiterPageComponent } from './components/waiter-page/waiter-page';
+import { WaiterDashboardComponent } from './components/waiter-dashboard/waiter-dashboard';
+import { WaiterReservationsComponent } from './components/waiter-reservations/waiter-reservations';
 import { WaiterUserDataComponent } from './components/waiter-user-data/waiter-user-data';
 import { AdminPageComponent } from './components/admin-page/admin-page';
 import { AdminStatsComponent } from './components/admin-stats/admin-stats';
@@ -16,14 +18,19 @@ export const routes: Routes = [
   { path: 'login', component: LoginPageComponent },
   { path: 'reserve', component: ReservePageComponent },
   {
-    path: 'waiter',
-    component: WaiterPageComponent,
-    canActivate: [roleGuard(['waiter'])],
-  },
-  {
     path: 'waiter/user',
     component: WaiterUserDataComponent,
     canActivate: [roleGuard(['waiter'])],
+  },
+  {
+    path: 'waiter',
+    component: WaiterPageComponent,
+    canActivate: [roleGuard(['waiter'])],
+    children: [
+      { path: 'dashboard', component: WaiterDashboardComponent },
+      { path: 'reservations', component: WaiterReservationsComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
   },
   {
     path: 'admin',
