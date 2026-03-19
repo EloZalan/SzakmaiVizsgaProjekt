@@ -394,6 +394,7 @@ input {
   font-weight: 500;
   position: relative;
   padding-bottom: 3px;
+  cursor: pointer;
 }
 
 .nav-links a::after {
