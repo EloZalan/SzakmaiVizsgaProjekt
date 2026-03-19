@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminDashboardService, AdminWaiterDto } from '../../services/admin-dashboard.service';
 import { StaffMember } from '../../models/staff-member.model';
+import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-admin-staff',
@@ -10,20 +11,31 @@ import { StaffMember } from '../../models/staff-member.model';
   templateUrl: './admin-staff.html',
   styleUrl: './admin-staff.css',
 })
-export class AdminStaffComponent implements OnInit {
+export class AdminStaffComponent implements OnInit, OnDestroy {
   staffMembers: StaffMember[] = [];
   selectedStaff: StaffMember | null = null;
 
   loading = false;
   error = '';
+  private stopWaiterStatusListening: (() => void) | null = null;
 
   constructor(
     private adminDashboardService: AdminDashboardService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadStaff();
+
+    this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+      this.loadStaff();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopWaiterStatusListening?.();
+    this.stopWaiterStatusListening = null;
   }
 
   loadStaff(): void {
@@ -34,6 +46,11 @@ export class AdminStaffComponent implements OnInit {
       next: (waiters) => {
         this.loading = false;
         this.staffMembers = waiters.map((w) => this.mapWaiterToStaffMember(w));
+
+        if (this.selectedStaff) {
+          this.selectedStaff = this.staffMembers.find((staff) => staff.id === this.selectedStaff?.id) ?? null;
+        }
+
         this.cdr.markForCheck();
       },
       error: (err) => {

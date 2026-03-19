@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
 import { MenuCard } from '../../models/menu-card.model';
 import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.service';
+import { RealtimeService } from '../../services/realtime.service';
 
 interface CategorySlide {
   category: MenuCategory;
@@ -30,7 +31,7 @@ interface ChefDayOption {
   templateUrl: './menu-preview.html',
   styleUrl: './menu-preview.css',
 })
-export class MenuPreviewComponent implements OnInit {
+export class MenuPreviewComponent implements OnInit, OnDestroy {
   categorySlides: CategorySlide[] = [];
   activeCategoryIndex = 0;
   selectedChefDayKey = 1;
@@ -49,19 +50,34 @@ export class MenuPreviewComponent implements OnInit {
   loading = false;
   errorMessage = '';
   currentLanguage: Language = 'hu';
+  private languageSubscription: Subscription | null = null;
+  private stopMenuChangesListening: (() => void) | null = null;
 
   constructor(
     private actions: GrillhouseActionsService,
     private menuService: MenuService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private realtimeService: RealtimeService
   ) {}
 
   ngOnInit(): void {
     this.selectedChefDayKey = new Date().getDay();
     this.loadMenu();
-    this.languageService.language$.subscribe(lang => {
+    this.languageSubscription = this.languageService.language$.subscribe(lang => {
       this.currentLanguage = lang;
     });
+
+    this.stopMenuChangesListening = this.realtimeService.listenToMenuChanges(() => {
+      this.loadMenu();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.languageSubscription?.unsubscribe();
+    this.languageSubscription = null;
+
+    this.stopMenuChangesListening?.();
+    this.stopMenuChangesListening = null;
   }
 
   onViewFullMenu(): void {

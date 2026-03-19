@@ -9,6 +9,20 @@ export interface TableStatusChangedEvent {
   emitted_at: string;
 }
 
+export interface WaiterStatusChangedEvent {
+  waiter_id: number;
+  on_shift: boolean | null;
+  action: string;
+  emitted_at: string;
+}
+
+export interface MenuChangedEvent {
+  entity: string;
+  action: string;
+  entity_id: number | null;
+  emitted_at: string;
+}
+
 type WindowWithPusher = Window &
   typeof globalThis & {
     Pusher: typeof Pusher;
@@ -32,6 +46,34 @@ export class RealtimeService {
     return () => {
       channel.stopListening('.table.status.changed');
       echo.leave('tables');
+    };
+  }
+
+  listenToWaiterStatusChanges(
+    onEvent: (event: WaiterStatusChangedEvent) => void
+  ): () => void {
+    const echo = this.getEcho();
+    const channel = echo.channel('waiters');
+
+    channel.listen('.waiter.status.changed', onEvent);
+
+    return () => {
+      channel.stopListening('.waiter.status.changed');
+      echo.leave('waiters');
+    };
+  }
+
+  listenToMenuChanges(
+    onEvent: (event: MenuChangedEvent) => void
+  ): () => void {
+    const echo = this.getEcho();
+    const channel = echo.channel('menu');
+
+    channel.listen('.menu.changed', onEvent);
+
+    return () => {
+      channel.stopListening('.menu.changed');
+      echo.leave('menu');
     };
   }
 

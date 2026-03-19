@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { AdminDashboardService } from '../../services/admin-dashboard.service';
 import { AdminTablesService } from '../../services/admin-tables.service';
+import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-admin-stats',
@@ -11,7 +12,7 @@ import { AdminTablesService } from '../../services/admin-tables.service';
   templateUrl: './admin-stats.html',
   styleUrl: './admin-stats.css',
 })
-export class AdminStatsComponent implements OnInit {
+export class AdminStatsComponent implements OnInit, OnDestroy {
   loading = false;
   error = '';
 
@@ -19,15 +20,34 @@ export class AdminStatsComponent implements OnInit {
   todayGuests = 0;
   activeWaiters = 0;
   totalTables = 0;
+  private stopTableStatusListening: (() => void) | null = null;
+  private stopWaiterStatusListening: (() => void) | null = null;
 
   constructor(
     private adminDashboardService: AdminDashboardService,
     private adminTablesService: AdminTablesService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadStats();
+
+    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges(() => {
+      this.loadStats();
+    });
+
+    this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+      this.loadStats();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopTableStatusListening?.();
+    this.stopTableStatusListening = null;
+
+    this.stopWaiterStatusListening?.();
+    this.stopWaiterStatusListening = null;
   }
 
   loadStats(): void {

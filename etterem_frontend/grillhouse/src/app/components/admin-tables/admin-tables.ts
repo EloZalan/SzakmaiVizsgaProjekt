@@ -1,7 +1,8 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminLiveTable, AdminTablesService } from '../../services/admin-tables.service';
+import { RealtimeService } from '../../services/realtime.service';
 
 type EditorMode = 'create' | 'edit' | null;
 
@@ -12,7 +13,7 @@ type EditorMode = 'create' | 'edit' | null;
   templateUrl: './admin-tables.html',
   styleUrl: './admin-tables.css',
 })
-export class AdminTablesComponent implements OnInit {
+export class AdminTablesComponent implements OnInit, OnDestroy {
   tables: AdminLiveTable[] = [];
   selectedTable: AdminLiveTable | null = null;
 
@@ -24,14 +25,26 @@ export class AdminTablesComponent implements OnInit {
   form = {
     seats: 4,
   };
+  private stopTableStatusListening: (() => void) | null = null;
 
   constructor(
     private adminTablesService: AdminTablesService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadTables();
+
+    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+      const tableToKeepSelected = this.selectedTable?.id ?? event.table_id;
+      this.loadTables(tableToKeepSelected);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopTableStatusListening?.();
+    this.stopTableStatusListening = null;
   }
 
   loadTables(selectedTableId: number | null = this.selectedTable?.id ?? null): void {
