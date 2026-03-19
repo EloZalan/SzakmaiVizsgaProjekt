@@ -1,0 +1,279 @@
+<div class="waiter-layout">
+  <section class="gh-panel">
+    <div class="panel-head">
+      <h2>Vezérlőpult</h2>
+      <p>Gyors áttekintés</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box stat-box--accent">
+        <span>Foglalt asztalok</span>
+        <strong>{{ occupiedCount }}</strong>
+        <small>Aktív rendelések</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Szabad asztalok</span>
+        <strong>{{ freeCount }}</strong>
+        <small>Azonnal ültethető</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Vendégek száma</span>
+        <strong>{{ guestsTotal }}</strong>
+        <small>Összesen bent</small>
+      </div>
+
+      <div class="stat-box">
+        <span>Fizetésre vár</span>
+        <strong>{{ needsPaymentCount }}</strong>
+        <small>Fizetésre vár asztalok</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="gh-panel">
+    <div class="panel-head panel-head--row">
+      <div>
+        <h2>Asztalok</h2>
+        <p>Kattints a részletekhez</p>
+      </div>
+
+      <div class="legend-row">
+        <span class="gh-tag gh-tag--green">Szabad</span>
+        <span class="gh-tag">Foglalt</span>
+        <span class="gh-tag">Asztalnál</span>
+        <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
+        <span class="gh-tag gh-tag--muted">CLOSED</span>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="gh-empty">
+        <div class="spinner"></div> <p>Betöltés...</p>
+      </div>
+    } @else if (errorMessage) {
+      <div class="gh-empty">
+        <p class="error-text">{{ errorMessage }}</p>
+        <button class="gh-btn gh-btn--ghost" (click)="loadWaiterPage()">Újrapróbálkozás</button>
+      </div>
+    } @else if (tables.length === 0) {
+      <div class="gh-empty">
+        <p>Nincs megjeleníthető asztal.</p>
+      </div>
+    } @else {
+      <div class="waiter-tables-grid">
+        @for (t of tables; track t.id) {
+          <button
+            type="button"
+            class="waiter-table-tile"
+            (click)="selectTable(t)"
+            [disabled]="t.status === 'Szabad'"
+            [class.waiter-table-tile--selected]="selected?.id === t.id"
+            [class.waiter-table-tile--free]="t.status === 'Szabad'"
+            [class.waiter-table-tile--pay]="t.status === 'Fizetésre vár'"
+            [class.waiter-table-tile--closed]="t.status === 'CLOSED'"
+          >
+            <div class="waiter-table-tile__top">
+              <strong>{{ t.name }}</strong>
+              @if (t.status === 'Foglalt') {
+                <span class="gh-tag">Foglalt</span>
+              }
+              @if (t.status === 'Fizetésre vár') {
+                <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
+              }
+              @if (t.status === 'CLOSED') {
+                <span class="gh-tag gh-tag--muted">CLOSED</span>
+              }
+            </div>
+
+            <div class="waiter-table-tile__mid">
+              <span>{{ t.guests || 0 }} fő</span>
+              <span>{{ t.updatedAt }}</span>
+            </div>
+
+            <div class="waiter-table-tile__bottom">
+              <strong>{{ formatFt(calcTotal(t)) }}</strong>
+              <small>{{ t.status }}</small>
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  @if (selected; as s) {
+    <section class="gh-panel">
+      @if (mode === 'payment') {
+        <div class="panel-head panel-head--row">
+          <div>
+            <h2>Fizetés · {{ s.name }}</h2>
+            <p>Összeg: {{ formatFt(calcTotal(s)) }}</p>
+          </div>
+          <div class="action-row">
+            <button type="button" class="gh-btn gh-btn--ghost" (click)="backToDetails()">Vissza</button>
+            <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
+          </div>
+        </div>
+
+        <div class="payment-stack">
+          <div class="payment-summary-grid">
+            <div class="summary-box">
+              <span>Alapösszeg</span>
+              <strong>{{ formatFt(calcTotal(s)) }}</strong>
+            </div>
+
+            <div class="summary-box">
+              <span>Borravaló</span>
+              <div class="tip-chip-row">
+                @for (tip of tipPresets; track tip) {
+                  <button type="button" class="tip-chip"
+                    [class.tip-chip--active]="tipPreset === tip"
+                    (click)="setTipPreset(tip)">{{tip}}%</button>
+                }
+              </div>
+              <small>{{ formatFt(tipAmount(s)) }}</small>
+            </div>
+
+            <div class="summary-box summary-box--accent">
+              <span>Fizetendő</span>
+              <strong>{{ formatFt(grandTotal(s)) }}</strong>
+            </div>
+          </div>
+
+          <div class="payment-method-row">
+            <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CARD'" (click)="setPaymentMethod('CARD')">
+              💳 Card
+            </button>
+            <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CASH'" (click)="setPaymentMethod('CASH')">
+              💵 Cash
+            </button>
+          </div>
+
+          <div class="summary-box">
+            <span>Split bill</span>
+            <div class="detail-line">
+              <span>Vendégek</span>
+              <strong>{{ s.guests }}</strong>
+            </div>
+            <div class="detail-line">
+              <span>Fizetendő / fő</span>
+              <strong>{{ formatFt(perGuest(s)) }}</strong>
+            </div>
+          </div>
+
+          <div class="action-row action-row--end">
+            <button type="button" class="gh-btn gh-btn--ghost" (click)="cancelPayment()">Mégse</button>
+            <button type="button" class="gh-btn gh-btn--primary" (click)="confirmPayment(s.id)">
+              Fizetés véglegesítése
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="panel-head panel-head--row">
+          <div>
+            <h2>{{ s.name }} részletek</h2>
+            <p>Státusz: {{ s.status }}</p>
+          </div>
+          <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
+        </div>
+
+        <div class="detail-grid-two">
+          <div class="summary-box">
+            <span>Vendégek</span>
+            <strong>{{ s.guests }} fő</strong>
+          </div>
+          <div class="summary-box">
+            <span>Pincér</span>
+            <strong>{{ s.server }}</strong>
+          </div>
+          <div class="summary-box">
+            <span>Nyitás ideje</span>
+            <strong>{{ s.updatedAt }}</strong>
+          </div>
+          <div class="summary-box summary-box--accent">
+            <span>Összeg</span>
+            <strong>{{ formatFt(calcTotal(s)) }}</strong>
+          </div>
+        </div>
+
+        <div class="order-list">
+          @for (it of s.items; track it.menuItemId) {
+            <div class="order-item">
+              <div>
+                <strong>{{ it.name }}</strong>
+                <small>x{{ it.qty }} · {{ formatFt(it.price) }}</small>
+              </div>
+              <strong>{{ formatFt(it.qty * it.price) }}</strong>
+            </div>
+          } @empty {
+            <div class="gh-empty">Nincs aktív rendelés.</div>
+          }
+        </div>
+
+        <div class="summary-box">
+          <span>Megjegyzés</span>
+          <p>{{ s.note || 'Nincs megjegyzés a foglaláshoz.' }}</p>
+        </div>
+
+        <div class="action-row action-row--end">
+          <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'Fizetésre vár' || !s.orderId">
+            Fizetés
+          </button>
+          @if (s.status === 'CLOSED') {
+            <button type="button" class="gh-btn gh-btn--ghost" (click)="setClosedTableToFree(s.id)">
+              Asztal felszabadítása
+            </button>
+          }
+          <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="gh-panel gh-panel--centered">
+      <div class="gh-empty">
+        <div class="gh-empty__icon">🍽️</div>
+        <div class="gh-empty__title">Válassz egy asztalt</div>
+        <div class="gh-empty__text">A jobb oldali részletek itt jelennek meg.</div>
+      </div>
+    </section>
+  }
+</div>
+
+@if (showCardModal) {
+  <div class="gh-modal-overlay">
+    <div class="gh-modal">
+      <div class="panel-head">
+        <h3>Banki terminál</h3>
+      </div>
+      <div class="gh-panel__body">
+        <div class="modal-body-row">
+          <div class="spinner"></div>
+          <div>
+            <p><strong>Átirányítás a terminálra</strong></p>
+            <p class="muted">Kérem várjon, a tranzakció elindul...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCashModal) {
+  <div class="gh-modal-overlay">
+    <div class="gh-modal">
+      <div class="panel-head">
+        <h3>Köszönjük a vásárlást</h3>
+      </div>
+      <div class="gh-panel__body">
+        <div class="modal-body-row">
+          <div class="spinner"></div>
+          <div>
+            <p><strong>Sikeres kommunikáció a pénztárgéppel</strong></p>
+            <p class="muted">A fizetés feldolgozása folyamatban...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
