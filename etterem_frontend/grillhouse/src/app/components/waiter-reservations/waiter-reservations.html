@@ -1,0 +1,130 @@
+<section class="gh-panel">
+  <div class="panel-head panel-head--row">
+    <div>
+      <h2>Mai foglalások</h2>
+      <p>Lekérdezve a mai napra, rendelésekkel és nyugta nyomtatással</p>
+    </div>
+
+    <button type="button" class="gh-btn gh-btn--ghost" (click)="loadReservations()">
+      Frissítés
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="gh-empty">
+      <div class="spinner"></div> <p>Betöltés...</p>
+    </div>
+  } @else if (errorMessage) {
+    <div class="gh-empty">
+      <p class="error-text">{{ errorMessage }}</p>
+      <button class="gh-btn gh-btn--ghost" (click)="loadReservations()">Újrapróbálkozás</button>
+    </div>
+  } @else if (reservations.length === 0) {
+    <div class="gh-empty">
+      <p>A mai napra nincs foglalás.</p>
+    </div>
+  } @else {
+    <div class="waiter-reservation-list">
+      @for (reservation of reservations; track reservation.reservation_id) {
+        <article
+          class="waiter-reservation-card"
+          [class.waiter-reservation-card--open]="isExpanded(reservation.reservation_id)"
+        >
+          <button
+            type="button"
+            class="waiter-reservation-card__head"
+            (click)="toggleReservation(reservation.reservation_id)"
+          >
+            <div class="waiter-reservation-card__title">
+              <strong>
+                Table {{ reservation.table_id }} · {{ reservation.guest_name }}
+              </strong>
+              <small>
+                Kezdés: {{ formatDateTime(reservation.start_time) }} · {{ reservation.guest_count }} fő
+              </small>
+            </div>
+
+            <div class="waiter-reservation-card__meta">
+              @if (reservation.order; as order) {
+                <span
+                  class="gh-tag"
+                  [class.gh-tag--accent]="order.status === 'ready_to_pay'"
+                  [class.gh-tag--muted]="order.status === 'done'"
+                >
+                  {{ getOrderStatusLabel(order.status) }}
+                </span>
+              } @else {
+                <span class="gh-tag">Nincs rendelés</span>
+              }
+
+              <strong>{{ formatFt(getReservationTotal(reservation)) }}</strong>
+              <span class="waiter-reservation-card__toggle">
+                {{ isExpanded(reservation.reservation_id) ? '−' : '+' }}
+              </span>
+            </div>
+          </button>
+
+          @if (isExpanded(reservation.reservation_id)) {
+            <div class="waiter-reservation-card__body">
+              <div class="detail-grid-two">
+                <div class="summary-box">
+                  <span>Vendégek száma</span>
+                  <strong>{{ reservation.guest_count }} fő</strong>
+                </div>
+
+                <div class="summary-box summary-box--accent">
+                  <span>Összköltség</span>
+                  <strong>{{ formatFt(getReservationTotal(reservation)) }}</strong>
+                </div>
+
+                <div class="summary-box">
+                  <span>Fizetendő / fő</span>
+                  <strong>{{ formatFt(getPerGuestTotal(reservation)) }}</strong>
+                </div>
+
+                <div class="summary-box">
+                  <span>Foglalás vége</span>
+                  <strong>{{ formatDateTime(reservation.end_time) }}</strong>
+                </div>
+              </div>
+
+              @if (reservation.order?.items?.length) {
+                <div class="order-list waiter-reservation-order-list">
+                  @for (item of reservation.order!.items; track item.id) {
+                    <div class="order-item">
+                      <div>
+                        <strong>{{ item.name }}</strong>
+                        <small>x{{ item.quantity }} · {{ formatFt(item.price) }}</small>
+                      </div>
+                      <strong>{{ formatFt(item.line_total) }}</strong>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="gh-empty waiter-reservation-empty">
+                  Ehhez a foglaláshoz még nincs rögzített rendelés.
+                </div>
+              }
+
+              <div class="summary-box waiter-reservation-note">
+                <span>Megjegyzés</span>
+                <p>{{ reservation.note || 'Nincs megjegyzés.' }}</p>
+              </div>
+
+              <div class="action-row action-row--end">
+                <button
+                  type="button"
+                  class="gh-btn gh-btn--ghost"
+                  [disabled]="!reservation.order?.items?.length"
+                  (click)="printReceipt(reservation)"
+                >
+                  Nyugta (PDF)
+                </button>
+              </div>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>
