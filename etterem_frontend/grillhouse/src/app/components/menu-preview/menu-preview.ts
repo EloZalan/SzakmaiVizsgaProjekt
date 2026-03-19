@@ -6,6 +6,22 @@ import { LanguageService, Language } from '../../services/language.service';
 import { MenuCard } from '../../models/menu-card.model';
 import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.service';
 
+interface CategorySlide {
+  category: MenuCategory;
+  items: MenuCard[];
+}
+
+interface CategoryPreviewCard {
+  category: MenuCategory;
+  item: MenuCard;
+}
+
+interface ChefDayOption {
+  key: number;
+  labelHu: string;
+  labelEn: string;
+}
+
 @Component({
   selector: 'app-menu-preview',
   standalone: true,
@@ -14,11 +30,19 @@ import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.serv
   styleUrl: './menu-preview.css',
 })
 export class MenuPreviewComponent implements OnInit {
-  items: MenuCard[] = [];
-  starters: MenuCard[] = [];
-  sides: MenuCard[] = [];
-  desserts: MenuCard[] = [];
-  drinks: MenuCard[] = [];
+  categorySlides: CategorySlide[] = [];
+  activeCategoryIndex = 0;
+  selectedChefDayKey = 1;
+
+  readonly chefDays: ChefDayOption[] = [
+    { key: 1, labelHu: 'Hétfő', labelEn: 'Monday' },
+    { key: 2, labelHu: 'Kedd', labelEn: 'Tuesday' },
+    { key: 3, labelHu: 'Szerda', labelEn: 'Wednesday' },
+    { key: 4, labelHu: 'Csütörtök', labelEn: 'Thursday' },
+    { key: 5, labelHu: 'Péntek', labelEn: 'Friday' },
+    { key: 6, labelHu: 'Szombat', labelEn: 'Saturday' },
+    { key: 0, labelHu: 'Vasárnap', labelEn: 'Sunday' },
+  ];
 
   categories: MenuCategory[] = [];
   loading = false;
@@ -32,6 +56,7 @@ export class MenuPreviewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.selectedChefDayKey = new Date().getDay();
     this.loadMenu();
     this.languageService.language$.subscribe(lang => {
       this.currentLanguage = lang;
@@ -40,10 +65,60 @@ export class MenuPreviewComponent implements OnInit {
 
   onViewFullMenu(): void {
     this.actions.viewFullMenu();
+
+    if (this.isFullMenuVisible() && this.activeCategoryIndex >= this.categorySlides.length) {
+      this.activeCategoryIndex = 0;
+    }
   }
 
   isFullMenuVisible(): boolean {
     return this.actions.isFullMenuVisible();
+  }
+
+  get activeCategorySlide(): CategorySlide | null {
+    if (this.categorySlides.length === 0) {
+      return null;
+    }
+
+    return this.categorySlides[this.activeCategoryIndex] ?? null;
+  }
+
+  get chefRecommendations(): CategoryPreviewCard[] {
+    return this.categorySlides
+      .filter((slide) => !this.isDailyMenuCategory(slide.category.name))
+      .map((slide) => {
+        const index = (this.selectedChefDayKey + slide.category.id) % slide.items.length;
+        return {
+          category: slide.category,
+          item: slide.items[index],
+        };
+      });
+  }
+
+  selectChefDay(dayKey: number): void {
+    this.selectedChefDayKey = dayKey;
+  }
+
+  getChefDayLabel(day: ChefDayOption): string {
+    return this.currentLanguage === 'hu' ? day.labelHu : day.labelEn;
+  }
+
+  prevCategory(): void {
+    if (this.categorySlides.length <= 1) {
+      return;
+    }
+
+    this.activeCategoryIndex =
+      (this.activeCategoryIndex - 1 + this.categorySlides.length) % this.categorySlides.length;
+  }
+
+  nextCategory(): void {
+    if (this.categorySlides.length <= 1) {
+      return;
+    }
+
+    this.activeCategoryIndex =
+      (this.activeCategoryIndex + 1) % this.categorySlides.length;
   }
 
   private loadMenu(): void {
@@ -59,12 +134,16 @@ export class MenuPreviewComponent implements OnInit {
 
         const mappedItems = items.map((item) => this.mapToMenuCard(item));
 
-        this.items = mappedItems.slice(0, 6);
+        this.categorySlides = this.categories
+          .map((category) => ({
+            category,
+            items: mappedItems.filter((item) => item.categoryId === category.id),
+          }))
+          .filter((slide) => slide.items.length > 0);
 
-        this.starters = this.getItemsByCategoryNames(mappedItems, ['starter', 'starters', 'előétel', 'előételek']);
-        this.sides = this.getItemsByCategoryNames(mappedItems, ['side', 'sides', 'köret', 'köretek']);
-        this.desserts = this.getItemsByCategoryNames(mappedItems, ['dessert', 'desserts', 'desszert', 'desszertek']);
-        this.drinks = this.getItemsByCategoryNames(mappedItems, ['drink', 'drinks', 'ital', 'italok']);
+        if (this.activeCategoryIndex >= this.categorySlides.length) {
+          this.activeCategoryIndex = 0;
+        }
 
         this.loading = false;
       },
@@ -86,13 +165,13 @@ export class MenuPreviewComponent implements OnInit {
     };
   }
 
-  private getItemsByCategoryNames(items: MenuCard[], possibleNames: string[]): MenuCard[] {
-    const normalizedNames = possibleNames.map((name) => name.trim().toLowerCase());
+  private isDailyMenuCategory(categoryName: string): boolean {
+    const normalized = categoryName
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '');
 
-    const matchedCategoryIds = this.categories
-      .filter((category) => normalizedNames.includes(category.name.trim().toLowerCase()))
-      .map((category) => category.id);
-
-    return items.filter((item) => item.categoryId !== null && matchedCategoryIds.includes(item.categoryId));
+    return normalized.includes('napi menu') || normalized.includes('daily menu');
   }
 }

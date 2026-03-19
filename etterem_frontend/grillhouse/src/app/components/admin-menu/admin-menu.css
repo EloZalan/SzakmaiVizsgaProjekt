@@ -276,6 +276,7 @@
   font-weight: 600;
   white-space: nowrap;
   font-size: 1.05rem;
+  align-self: center;
 }
 
 .menu-item__actions {

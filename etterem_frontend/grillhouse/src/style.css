@@ -1534,6 +1534,36 @@ body.light-theme .nav-actions .gh-btn--primary:hover,
   color: #ff6a00;
 }
 
+.home-page.light-theme .menu-card__category {
+  color: #c04a00;
+}
+
+.home-page.light-theme .full-menu-slider__meta {
+  color: #78695a;
+}
+
+.home-page.light-theme .chef-offer__title {
+  color: #1a1208;
+}
+
+.home-page.light-theme .chef-day-btn {
+  background: #fff;
+  color: #3d2e0f;
+  border-color: #d6cabb;
+}
+
+.home-page.light-theme .chef-day-btn:hover {
+  background: #f0ebe4;
+  color: #1a1208;
+}
+
+.home-page.light-theme .chef-day-btn--active,
+.home-page.light-theme .chef-day-btn--active:hover {
+  background: #ff6a00;
+  color: #fff;
+  border-color: #ff6a00;
+}
+
 /* --- Visit / Contact section --- */
 .home-page.light-theme .visit-card {
   background: #fff;
