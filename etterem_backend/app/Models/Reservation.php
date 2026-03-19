@@ -14,6 +14,7 @@ class Reservation extends Model
         'start_time',
         'end_time',
         'guest_count',
+        'note',
     ];
 
     protected $casts = [

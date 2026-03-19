@@ -35,7 +35,8 @@ class ReservationController extends Controller
             'guest_name' => 'required|string',
             'phone_number' => ['required', new Phone('HU'), Rule::unique('reservations', 'phone_number')],
             'guest_count' => 'required|integer|min:1',
-            'start_time' => 'required|date|after_or_equal:now'
+            'start_time' => 'required|date|after_or_equal:now',
+            'note' => 'sometimes|nullable|string|max:500',
         ]);
 
         $startTime = Carbon::parse($request->start_time);
@@ -57,6 +58,7 @@ class ReservationController extends Controller
             'start_time' => $startTime,
             'end_time' => $endTime,
             'guest_count' => $request->guest_count,
+            'note' => $request->input('note') ?: null,
         ]);
 
         event(new TableStatusChanged($table->id));
@@ -110,9 +112,13 @@ class ReservationController extends Controller
             ],
             'guest_count' => 'sometimes|required|integer|min:1',
             'start_time' => 'sometimes|required|date|after_or_equal:now',
+            'note' => 'sometimes|nullable|string|max:500',
         ]);
 
-        $reservation->fill($request->only(['guest_name', 'phone_number']));
+        $reservation->fill($request->only(['guest_name', 'phone_number', 'note']));
+        if ($request->has('note') && $request->input('note') === '') {
+            $reservation->note = null;
+        }
 
         $newGuestCount = $request->input('guest_count', $reservation->guest_count);
         $newStartTime = $request->has('start_time')
