@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reservations', [ReservationController::class, 'store']);
+Route::get('/tables/max-capacity', [TableController::class, 'maxCapacity']);
 
 Route::get('/menu-categories', [\App\Http\Controllers\MenuCategoryController::class, 'index']);
 Route::get('/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'show']);
