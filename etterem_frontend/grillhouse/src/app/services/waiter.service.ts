@@ -52,6 +52,38 @@ export interface TableOrderDetailsDto {
   message?: string;
 }
 
+export interface WaiterDailyReservationOrderItemDto {
+  id: number;
+  menu_item_id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  line_total: number;
+}
+
+export interface WaiterDailyReservationOrderDto {
+  order_id: number;
+  status: 'in_progress' | 'ready_to_pay' | 'done';
+  opened_at: string | null;
+  total_price: number;
+  paid_total: number | null;
+  display_total: number;
+  payment_method: 'cash' | 'card' | null;
+  items: WaiterDailyReservationOrderItemDto[];
+}
+
+export interface WaiterDailyReservationDto {
+  reservation_id: number;
+  table_id: number;
+  table_capacity: number | null;
+  guest_name: string;
+  guest_count: number;
+  start_time: string;
+  end_time: string;
+  note: string | null;
+  order: WaiterDailyReservationOrderDto | null;
+}
+
 export interface MenuCategoryDto {
   id: number;
   name: string;
@@ -102,6 +134,10 @@ export class WaiterService {
 
   getTableOrder(tableId: number): Observable<TableOrderDetailsDto> {
     return this.http.get<TableOrderDetailsDto>(`${this.config.apiUrl}/tables/${tableId}/orders`);
+  }
+
+  getTodayReservationsWithOrders(): Observable<WaiterDailyReservationDto[]> {
+    return this.http.get<WaiterDailyReservationDto[]>(`${this.config.apiUrl}/reservations/today-with-orders`);
   }
 
   addOrderItem(orderId: number, menuItemId: number, quantity: number): Observable<unknown> {
