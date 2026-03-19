@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MenuChanged;
 use App\Models\MenuCategory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,8 @@ class MenuCategoryController extends Controller
             'name' => $request->name,
         ]);
 
+        event(new MenuChanged('category', 'created', $category->id));
+
         return response()->json($category, 201);
     }
 
@@ -62,6 +65,8 @@ class MenuCategoryController extends Controller
             'name' => $request->name,
         ]);
 
+        event(new MenuChanged('category', 'updated', $menu_category->id));
+
         return response()->json($menu_category, 200);
     }
 
@@ -70,7 +75,10 @@ class MenuCategoryController extends Controller
      */
     public function destroy(MenuCategory $menu_category)
     {
+        $categoryId = $menu_category->id;
         $menu_category->delete();
+
+        event(new MenuChanged('category', 'deleted', $categoryId));
 
         return response()->json("", 204);
     }
