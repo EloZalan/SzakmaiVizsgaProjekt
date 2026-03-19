@@ -93,6 +93,6 @@ export class MenuPreviewComponent implements OnInit {
       .filter((category) => normalizedNames.includes(category.name.trim().toLowerCase()))
       .map((category) => category.id);
 
-    return items.filter((item) => matchedCategoryIds.includes(item.categoryId));
+    return items.filter((item) => item.categoryId !== null && matchedCategoryIds.includes(item.categoryId));
   }
 }

@@ -13,7 +13,11 @@ class MenuCategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(MenuCategory::all());
+        return response()->json(
+            MenuCategory::where('name', '!=', MenuCategory::UNAVAILABLE_CATEGORY_NAME)
+                ->orderBy('name')
+                ->get()
+        );
     }
 
     /**
@@ -22,7 +26,7 @@ class MenuCategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|unique:menu_categories,name',
+            'name' => 'required|string|unique:menu_categories,name|not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
         ]);
 
         $category = MenuCategory::create([
@@ -49,6 +53,7 @@ class MenuCategoryController extends Controller
             'name' => [
                 'required',
                 'string',
+                'not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
                 Rule::unique('menu_categories', 'name')->ignore($menu_category->id),
             ],
         ]);

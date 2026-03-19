@@ -3,5 +3,5 @@ export interface MenuCard {
   name: string;
   price: number;
   desc: string | null;
-  categoryId: number;
+  categoryId: number | null;
 }

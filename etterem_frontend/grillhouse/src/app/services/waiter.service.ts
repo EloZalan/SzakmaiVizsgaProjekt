@@ -61,7 +61,7 @@ export interface MenuItemDto {
   name: string;
   description: string | null;
   price: number;
-  category_id: number;
+  category_id: number | null;
 }
 
 @Injectable({
