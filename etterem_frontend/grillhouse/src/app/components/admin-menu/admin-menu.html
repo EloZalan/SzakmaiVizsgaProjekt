@@ -244,3 +244,38 @@
     </div>
   }
 </section>
+
+@if (showDropDecisionModal && pendingDrop) {
+  <div class="drag-decision-modal__backdrop" (click)="closeDropDecisionModal()">
+    <div class="drag-decision-modal" (click)="$event.stopPropagation()">
+      <div class="drag-decision-modal__accent"></div>
+
+      <div class="drag-decision-modal__header">
+        <h3>Művelet kiválasztása</h3>
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="closeDropDecisionModal()" [disabled]="decisionLoading">✕</button>
+      </div>
+
+      <div class="drag-decision-modal__body">
+        <p>
+          A(z) <strong>{{ pendingDrop.item.name }}</strong> tételt a
+          <strong>{{ pendingDrop.targetLabel }}</strong> célhelyre húztad.
+        </p>
+        <p class="drag-decision-modal__subtext">
+          Szeretnéd áthelyezni az eredeti tételt, vagy másolatot készíteni róla?
+        </p>
+      </div>
+
+      <div class="drag-decision-modal__actions">
+        <button class="gh-btn gh-btn--primary" (click)="confirmDropAsMove()" [disabled]="decisionLoading">
+          Áthelyezés
+        </button>
+        <button class="gh-btn gh-btn--ghost" (click)="confirmDropAsCopy()" [disabled]="decisionLoading">
+          Másolás
+        </button>
+        <button class="gh-btn gh-btn--danger" (click)="closeDropDecisionModal()" [disabled]="decisionLoading">
+          Mégse
+        </button>
+      </div>
+    </div>
+  </div>
+}

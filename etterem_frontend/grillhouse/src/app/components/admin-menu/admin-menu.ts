@@ -12,6 +12,13 @@ interface MenuItem {
 }
 
 type DragDropZone = number | 'uncategorized' | null;
+type DropAction = 'copy' | 'move';
+
+interface DropDecisionState {
+  item: MenuItem;
+  targetCategoryId: number | null;
+  targetLabel: string;
+}
 
 interface EditingState {
   type: 'category' | 'item' | null;
@@ -38,6 +45,9 @@ export class AdminMenuComponent implements OnInit {
   draggingMenuItem: MenuItem | null = null;
   dragOverZone: DragDropZone = null;
   movingItemId: number | null = null;
+  pendingDrop: DropDecisionState | null = null;
+  showDropDecisionModal = false;
+  decisionLoading = false;
 
   loading = false;
   error = '';
@@ -326,7 +336,12 @@ export class AdminMenuComponent implements OnInit {
       return;
     }
 
-    this.moveItemToCategory(draggedItem, targetCategory);
+    if (draggedItem.categoryId === null) {
+      this.moveItemToCategory(draggedItem, targetCategory.id);
+      return;
+    }
+
+    this.openDropDecisionModal(draggedItem, targetCategory.id, targetCategory.name);
   }
 
   onUncategorizedDragOver(event: DragEvent): void {
@@ -367,7 +382,59 @@ export class AdminMenuComponent implements OnInit {
     this.moveItemToCategory(draggedItem, null);
   }
 
-  private moveItemToCategory(item: MenuItem, targetCategory: MenuCategory | null): void {
+  closeDropDecisionModal(): void {
+    if (this.decisionLoading) {
+      return;
+    }
+
+    this.pendingDrop = null;
+    this.showDropDecisionModal = false;
+    this.draggingMenuItem = null;
+    this.dragOverZone = null;
+    this.cdr.markForCheck();
+  }
+
+  confirmDropAsMove(): void {
+    this.executeDropDecision('move');
+  }
+
+  confirmDropAsCopy(): void {
+    this.executeDropDecision('copy');
+  }
+
+  private openDropDecisionModal(item: MenuItem, targetCategoryId: number | null, targetLabel: string): void {
+    this.pendingDrop = {
+      item,
+      targetCategoryId,
+      targetLabel,
+    };
+    this.showDropDecisionModal = true;
+    this.cdr.markForCheck();
+  }
+
+  private executeDropDecision(action: DropAction): void {
+    if (!this.pendingDrop) {
+      return;
+    }
+
+    const { item, targetCategoryId } = this.pendingDrop;
+
+    if (action === 'move' && item.categoryId === targetCategoryId) {
+      this.closeDropDecisionModal();
+      return;
+    }
+
+    this.decisionLoading = true;
+
+    if (action === 'move') {
+      this.moveItemToCategory(item, targetCategoryId);
+      return;
+    }
+
+    this.copyItemToCategory(item, targetCategoryId);
+  }
+
+  private moveItemToCategory(item: MenuItem, targetCategoryId: number | null): void {
     this.movingItemId = item.id;
 
     this.menuService
@@ -376,27 +443,67 @@ export class AdminMenuComponent implements OnInit {
         item.name,
         item.description || '',
         Math.round(item.price),
-        targetCategory?.id ?? null
+        targetCategoryId
       )
       .subscribe({
         next: () => {
           this.menuItems = this.menuItems.map((menuItem) =>
             menuItem.id === item.id
-              ? { ...menuItem, categoryId: targetCategory?.id ?? null }
+              ? { ...menuItem, categoryId: targetCategoryId }
               : menuItem
           );
 
-          this.selectedCategory = targetCategory;
-          this.expandedCategoryId = targetCategory?.id ?? null;
+          this.selectedCategory = targetCategoryId === null
+            ? null
+            : this.categories.find((category) => category.id === targetCategoryId) || null;
+          this.expandedCategoryId = targetCategoryId;
           this.draggingMenuItem = null;
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
           this.movingItemId = null;
+          this.decisionLoading = false;
           this.cdr.markForCheck();
         },
         error: (err: any) => {
           this.draggingMenuItem = null;
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
           this.movingItemId = null;
+          this.decisionLoading = false;
           console.error('MOVE MENU ITEM ERROR:', err);
           alert('Nem sikerült áthelyezni a menü tételt.');
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private copyItemToCategory(item: MenuItem, targetCategoryId: number | null): void {
+    this.movingItemId = item.id;
+
+    this.menuService
+      .createMenuItem(
+        targetCategoryId,
+        item.name,
+        item.description || '',
+        Math.round(item.price)
+      )
+      .subscribe({
+        next: () => {
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
+          this.decisionLoading = false;
+          this.draggingMenuItem = null;
+          this.movingItemId = null;
+          this.loadMenu();
+        },
+        error: (err: any) => {
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
+          this.decisionLoading = false;
+          this.draggingMenuItem = null;
+          this.movingItemId = null;
+          console.error('COPY MENU ITEM ERROR:', err);
+          alert('Nem sikerült lemásolni a menü tételt.');
           this.cdr.markForCheck();
         },
       });

@@ -283,6 +283,77 @@
   gap: 0.5rem;
 }
 
+.drag-decision-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1300;
+  backdrop-filter: blur(4px);
+}
+
+.drag-decision-modal {
+  width: min(560px, 100%);
+  background: linear-gradient(165deg, #252525 0%, #1a1a1a 100%);
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  border-radius: 14px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.drag-decision-modal__accent {
+  height: 3px;
+  background: linear-gradient(90deg, #ff8c00 0%, #ffc266 100%);
+}
+
+.drag-decision-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+.drag-decision-modal__header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.drag-decision-modal__body {
+  padding: 1.1rem 1.2rem;
+}
+
+.drag-decision-modal__body p {
+  margin: 0;
+  color: #ececec;
+  line-height: 1.45;
+}
+
+.drag-decision-modal__body strong {
+  color: #ffb347;
+}
+
+.drag-decision-modal__subtext {
+  margin-top: 0.6rem !important;
+  color: #bcbcbc !important;
+  font-size: 0.92rem;
+}
+
+.drag-decision-modal__actions {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0 1.2rem 1.2rem;
+}
+
+.drag-decision-modal__actions .gh-btn {
+  flex: 1;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .menu-item {
@@ -321,5 +392,9 @@
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .drag-decision-modal__actions {
+    flex-direction: column;
   }
 }
