@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class TableController extends Controller
 {
+    public function maxCapacity() {
+        return response()->json([
+            'max_capacity' => (int) (Table::max('capacity') ?? 0),
+        ]);
+    }
+
     public function index() {
         $now = now();
         $bufferStart = $now->copy()->subHours(2);

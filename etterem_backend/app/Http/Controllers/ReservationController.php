@@ -39,6 +39,13 @@ class ReservationController extends Controller
             'note' => 'sometimes|nullable|string|max:500',
         ]);
 
+        $maxCapacity = Table::max('capacity');
+        if ($maxCapacity === null || (int) $request->guest_count > (int) $maxCapacity) {
+            return response()->json([
+                'message' => 'Sikertelen foglalas: nincs ekkora asztal az etteremben.',
+            ], 422);
+        }
+
         $startTime = Carbon::parse($request->start_time);
         $endTime = $startTime->copy()->addHours(2);
 
@@ -48,7 +55,9 @@ class ReservationController extends Controller
         );
 
         if (!$table) {
-            return response()->json(['message' => 'Sajnos nincs szabad asztal ebben az időpontban.'], 422);
+            return response()->json([
+                'message' => 'Sikertelen foglalas: nincs szabad asztal ebben az idopontban.',
+            ], 422);
         }
 
         $reservation = Reservation::create([
