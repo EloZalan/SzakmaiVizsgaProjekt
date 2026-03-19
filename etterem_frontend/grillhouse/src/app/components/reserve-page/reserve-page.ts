@@ -9,6 +9,7 @@ interface CreateReservationPayload {
   phone_number: string;
   guest_count: number;
   start_time: string;
+  note?: string | null;
 }
 
 interface ReservationResponse {
@@ -40,6 +41,7 @@ export class ReservePageComponent implements OnInit {
   date = '';
   time = '';
   guests = 2;
+  note = '';
   minDate = '';
 
   submitting = false;
@@ -96,6 +98,7 @@ export class ReservePageComponent implements OnInit {
       phone_number: phone,
       guest_count: this.guests,
       start_time: startTime,
+      note: this.note.trim() || null,
     };
 
     this.http

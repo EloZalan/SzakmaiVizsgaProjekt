@@ -235,12 +235,10 @@
               }
             </div>
 
-            @if (s.note) {
-              <div class="summary-box">
-                <span>Megjegyzés</span>
-                <p>{{ s.note }}</p>
-              </div>
-            }
+            <div class="summary-box">
+              <span>Megjegyzés</span>
+              <p>{{ s.note || 'Nincs megjegyzés a foglaláshoz.' }}</p>
+            </div>
 
             <div class="action-row action-row--end">
               <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'Fizetésre vár' || !s.orderId">

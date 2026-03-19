@@ -20,6 +20,7 @@ export interface ReservationDto {
   start_time: string;
   end_time: string;
   guest_count: number;
+  note?: string | null;
 }
 
 export interface OrderDto {
@@ -173,7 +174,6 @@ export class WaiterService {
     if (!reservation) {
       return undefined;
     }
-
-    return `${reservation.guest_name} · ${reservation.start_time} - ${reservation.end_time}`;
+    return reservation.note ?? undefined;
   }
 }

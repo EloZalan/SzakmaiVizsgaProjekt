@@ -33,6 +33,11 @@
         <input [(ngModel)]="guests" type="number" min="1" />
       </label>
 
+      <label class="reserve-field">
+        <span>Megjegyzés (opcionális)</span>
+        <textarea [(ngModel)]="note" rows="3" placeholder="Pl. születésnap, allergia, különleges kérés..."></textarea>
+      </label>
+
       @if (availableTimes.length === 0) {
         <p class="error-text">Erre a napra már nincs foglalható idősáv. Válassz másik dátumot.</p>
       }
