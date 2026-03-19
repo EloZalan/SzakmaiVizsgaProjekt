@@ -38,15 +38,16 @@ export class AdminStatsComponent implements OnInit {
       waiters: this.adminDashboardService.getWaiters(),
       todayGuests: this.adminDashboardService.getTodayGuestCount(),
       tables: this.adminTablesService.getTables(),
+      dailyRevenue: this.adminDashboardService.getDailyRevenue(),
     }).subscribe({
-      next: ({ waiters, todayGuests, tables }) => {
+      next: ({ waiters, todayGuests, tables, dailyRevenue }) => {
         this.loading = false;
         this.todayGuests = todayGuests;
         this.totalTables = tables.length;
         this.activeWaiters = waiters.filter(
           (w) => w.role === 'waiter' && w.on_shift
         ).length;
-        this.dailyRevenue = 0; // Backend-en nem elérhető
+        this.dailyRevenue = dailyRevenue;
         this.cdr.markForCheck();
       },
       error: (err) => {

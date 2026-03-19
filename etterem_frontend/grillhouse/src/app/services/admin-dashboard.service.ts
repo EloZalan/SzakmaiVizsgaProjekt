@@ -51,6 +51,12 @@ export class AdminDashboardService {
     return this.http.get<ReservationDto[]>(`${this.config.apiUrl}/reservations`);
   }
 
+  getDailyRevenue(): Observable<number> {
+    return this.http
+      .get<{ daily_revenue: number }>(`${this.config.apiUrl}/admin/daily-revenue`)
+      .pipe(map((res) => res.daily_revenue));
+  }
+
   getTodayGuestCount(now: Date = new Date()): Observable<number> {
     return this.getReservations().pipe(
       map((reservations) =>
