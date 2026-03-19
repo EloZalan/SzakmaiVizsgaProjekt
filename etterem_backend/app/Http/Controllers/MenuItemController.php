@@ -2,18 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-
 class MenuItemController extends Controller
 {
+    public function adminIndex()
+    {
+        return response()->json(
+            MenuItem::with('menuCategory')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item))
+        );
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return response()->json(MenuItem::all());
+        return response()->json(
+            MenuItem::with('menuCategory')
+                ->whereHas('menuCategory', function ($query) {
+                    $query->where('name', '!=', MenuCategory::UNAVAILABLE_CATEGORY_NAME);
+                })
+                ->orderBy('category_id')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item))
+        );
     }
 
     /**
@@ -25,17 +43,19 @@ class MenuItemController extends Controller
             'name'        => 'required|string',
             'description' => 'nullable|string',
             'price'       => 'required|integer|min:0',
-            'category_id' => 'required|exists:menu_categories,id',
+            'category_id' => 'nullable|exists:menu_categories,id',
         ]);
 
-        $item = MenuItem::create($request->only([
-            'name',
-            'description',
-            'price',
-            'category_id',
-        ]));
+        $item = MenuItem::create([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'price' => $request->input('price'),
+            'category_id' => $this->resolveCategoryId($request->input('category_id')),
+        ]);
 
-        return response()->json($item, 201);
+        $item->load('menuCategory');
+
+        return response()->json($this->serializeMenuItem($item), 201);
     }
 
     /**
@@ -43,8 +63,8 @@ class MenuItemController extends Controller
      */
     public function show(MenuItem $menu_item)
     {
-        $item = MenuItem::findOrFail($menu_item->id);
-        return response()->json($item, 200);
+        $item = MenuItem::with('menuCategory')->findOrFail($menu_item->id);
+        return response()->json($this->serializeMenuItem($item), 200);
     }
 
     /**
@@ -56,17 +76,19 @@ class MenuItemController extends Controller
             'name'        => 'required|string',
             'description' => 'nullable|string',
             'price'       => 'required|integer|min:0',
-            'category_id' => 'required|exists:menu_categories,id',
+            'category_id' => 'nullable|exists:menu_categories,id',
         ]);
 
-        $menu_item->update($request->only([
-            'name',
-            'description',
-            'price',
-            'category_id',
-        ]));
+        $menu_item->update([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'price' => $request->input('price'),
+            'category_id' => $this->resolveCategoryId($request->input('category_id')),
+        ]);
 
-        return response()->json($menu_item, 200);
+        $menu_item->load('menuCategory');
+
+        return response()->json($this->serializeMenuItem($menu_item), 200);
     }
 
     /**
@@ -77,5 +99,27 @@ class MenuItemController extends Controller
         $menu_item->delete();
 
         return response()->json([], 204);
+    }
+
+    private function resolveCategoryId(mixed $categoryId): int
+    {
+        if ($categoryId === null || $categoryId === '') {
+            return MenuCategory::ensureUnavailableCategory()->id;
+        }
+
+        return (int) $categoryId;
+    }
+
+    private function serializeMenuItem(MenuItem $item): array
+    {
+        $isUnavailable = $item->menuCategory?->name === MenuCategory::UNAVAILABLE_CATEGORY_NAME;
+
+        return [
+            'id' => $item->id,
+            'name' => $item->name,
+            'description' => $item->description,
+            'price' => $item->price,
+            'category_id' => $isUnavailable ? null : $item->category_id,
+        ];
     }
 }

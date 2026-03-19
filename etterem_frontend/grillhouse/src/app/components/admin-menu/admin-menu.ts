@@ -8,7 +8,16 @@ interface MenuItem {
   name: string;
   description?: string;
   price: number;
-  categoryId: number;
+  categoryId: number | null;
+}
+
+type DragDropZone = number | 'uncategorized' | null;
+type DropAction = 'copy' | 'move';
+
+interface DropDecisionState {
+  item: MenuItem;
+  targetCategoryId: number | null;
+  targetLabel: string;
 }
 
 interface EditingState {
@@ -34,8 +43,11 @@ export class AdminMenuComponent implements OnInit {
   selectedMenuItem: MenuItem | null = null;
   expandedCategoryId: number | null = null;
   draggingMenuItem: MenuItem | null = null;
-  dragOverCategoryId: number | null = null;
+  dragOverZone: DragDropZone = null;
   movingItemId: number | null = null;
+  pendingDrop: DropDecisionState | null = null;
+  showDropDecisionModal = false;
+  decisionLoading = false;
 
   loading = false;
   error = '';
@@ -70,7 +82,7 @@ export class AdminMenuComponent implements OnInit {
   }
 
   private loadMenuItems(): void {
-    this.menuService.getMenuItems().subscribe({
+    this.menuService.getAdminMenuItems().subscribe({
       next: (items) => {
         this.menuItems = items.map(item => ({
           id: item.id,
@@ -183,6 +195,10 @@ export class AdminMenuComponent implements OnInit {
     this.editing = { type: 'item', id: null, name: '', description: '', price: 0, categoryId: this.selectedCategory.id };
   }
 
+  startAddUncategorizedMenuItem(): void {
+    this.editing = { type: 'item', id: null, name: '', description: '', price: 0, categoryId: null };
+  }
+
   saveMenuItem(): void {
     if (!this.editing.name.trim()) {
       alert('Add meg a tétel nevét!');
@@ -194,10 +210,6 @@ export class AdminMenuComponent implements OnInit {
     }
 
     const categoryId = this.editing.categoryId ?? this.selectedCategory?.id ?? null;
-    if (!categoryId) {
-      alert('Kategória nélkül nem menthető a tétel.');
-      return;
-    }
 
     if (this.editing.id === null) {
       this.menuService
@@ -264,7 +276,7 @@ export class AdminMenuComponent implements OnInit {
     }
 
     this.draggingMenuItem = item;
-    this.dragOverCategoryId = null;
+    this.dragOverZone = null;
 
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
@@ -276,7 +288,7 @@ export class AdminMenuComponent implements OnInit {
 
   onMenuItemDragEnd(): void {
     this.draggingMenuItem = null;
-    this.dragOverCategoryId = null;
+    this.dragOverZone = null;
     this.cdr.markForCheck();
   }
 
@@ -295,15 +307,15 @@ export class AdminMenuComponent implements OnInit {
       event.dataTransfer.dropEffect = 'move';
     }
 
-    if (this.dragOverCategoryId !== categoryId) {
-      this.dragOverCategoryId = categoryId;
+    if (this.dragOverZone !== categoryId) {
+      this.dragOverZone = categoryId;
       this.cdr.markForCheck();
     }
   }
 
   onCategoryDragLeave(categoryId: number): void {
-    if (this.dragOverCategoryId === categoryId) {
-      this.dragOverCategoryId = null;
+    if (this.dragOverZone === categoryId) {
+      this.dragOverZone = null;
       this.cdr.markForCheck();
     }
   }
@@ -313,7 +325,7 @@ export class AdminMenuComponent implements OnInit {
     event.stopPropagation();
 
     const draggedItem = this.draggingMenuItem;
-    this.dragOverCategoryId = null;
+    this.dragOverZone = null;
 
     if (!draggedItem) {
       return;
@@ -324,10 +336,105 @@ export class AdminMenuComponent implements OnInit {
       return;
     }
 
-    this.moveItemToCategory(draggedItem, targetCategory);
+    if (draggedItem.categoryId === null) {
+      this.moveItemToCategory(draggedItem, targetCategory.id);
+      return;
+    }
+
+    this.openDropDecisionModal(draggedItem, targetCategory.id, targetCategory.name);
   }
 
-  private moveItemToCategory(item: MenuItem, targetCategory: MenuCategory): void {
+  onUncategorizedDragOver(event: DragEvent): void {
+    if (!this.draggingMenuItem || this.draggingMenuItem.categoryId === null) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    if (this.dragOverZone !== 'uncategorized') {
+      this.dragOverZone = 'uncategorized';
+      this.cdr.markForCheck();
+    }
+  }
+
+  onUncategorizedDragLeave(): void {
+    if (this.dragOverZone === 'uncategorized') {
+      this.dragOverZone = null;
+      this.cdr.markForCheck();
+    }
+  }
+
+  onUncategorizedDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const draggedItem = this.draggingMenuItem;
+    this.dragOverZone = null;
+
+    if (!draggedItem || draggedItem.categoryId === null) {
+      return;
+    }
+
+    this.moveItemToCategory(draggedItem, null);
+  }
+
+  closeDropDecisionModal(): void {
+    if (this.decisionLoading) {
+      return;
+    }
+
+    this.pendingDrop = null;
+    this.showDropDecisionModal = false;
+    this.draggingMenuItem = null;
+    this.dragOverZone = null;
+    this.cdr.markForCheck();
+  }
+
+  confirmDropAsMove(): void {
+    this.executeDropDecision('move');
+  }
+
+  confirmDropAsCopy(): void {
+    this.executeDropDecision('copy');
+  }
+
+  private openDropDecisionModal(item: MenuItem, targetCategoryId: number | null, targetLabel: string): void {
+    this.pendingDrop = {
+      item,
+      targetCategoryId,
+      targetLabel,
+    };
+    this.showDropDecisionModal = true;
+    this.cdr.markForCheck();
+  }
+
+  private executeDropDecision(action: DropAction): void {
+    if (!this.pendingDrop) {
+      return;
+    }
+
+    const { item, targetCategoryId } = this.pendingDrop;
+
+    if (action === 'move' && item.categoryId === targetCategoryId) {
+      this.closeDropDecisionModal();
+      return;
+    }
+
+    this.decisionLoading = true;
+
+    if (action === 'move') {
+      this.moveItemToCategory(item, targetCategoryId);
+      return;
+    }
+
+    this.copyItemToCategory(item, targetCategoryId);
+  }
+
+  private moveItemToCategory(item: MenuItem, targetCategoryId: number | null): void {
     this.movingItemId = item.id;
 
     this.menuService
@@ -336,27 +443,67 @@ export class AdminMenuComponent implements OnInit {
         item.name,
         item.description || '',
         Math.round(item.price),
-        targetCategory.id
+        targetCategoryId
       )
       .subscribe({
         next: () => {
           this.menuItems = this.menuItems.map((menuItem) =>
             menuItem.id === item.id
-              ? { ...menuItem, categoryId: targetCategory.id }
+              ? { ...menuItem, categoryId: targetCategoryId }
               : menuItem
           );
 
-          this.selectedCategory = targetCategory;
-          this.expandedCategoryId = targetCategory.id;
+          this.selectedCategory = targetCategoryId === null
+            ? null
+            : this.categories.find((category) => category.id === targetCategoryId) || null;
+          this.expandedCategoryId = targetCategoryId;
           this.draggingMenuItem = null;
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
           this.movingItemId = null;
+          this.decisionLoading = false;
           this.cdr.markForCheck();
         },
         error: (err: any) => {
           this.draggingMenuItem = null;
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
           this.movingItemId = null;
+          this.decisionLoading = false;
           console.error('MOVE MENU ITEM ERROR:', err);
           alert('Nem sikerült áthelyezni a menü tételt.');
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private copyItemToCategory(item: MenuItem, targetCategoryId: number | null): void {
+    this.movingItemId = item.id;
+
+    this.menuService
+      .createMenuItem(
+        targetCategoryId,
+        item.name,
+        item.description || '',
+        Math.round(item.price)
+      )
+      .subscribe({
+        next: () => {
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
+          this.decisionLoading = false;
+          this.draggingMenuItem = null;
+          this.movingItemId = null;
+          this.loadMenu();
+        },
+        error: (err: any) => {
+          this.pendingDrop = null;
+          this.showDropDecisionModal = false;
+          this.decisionLoading = false;
+          this.draggingMenuItem = null;
+          this.movingItemId = null;
+          console.error('COPY MENU ITEM ERROR:', err);
+          alert('Nem sikerült lemásolni a menü tételt.');
           this.cdr.markForCheck();
         },
       });
@@ -365,5 +512,9 @@ export class AdminMenuComponent implements OnInit {
   get filteredMenuItems(): MenuItem[] {
     if (!this.selectedCategory) return [];
     return this.menuItems.filter(item => item.categoryId === this.selectedCategory!.id);
+  }
+
+  get uncategorizedMenuItems(): MenuItem[] {
+    return this.menuItems.filter((item) => item.categoryId === null);
   }
 }

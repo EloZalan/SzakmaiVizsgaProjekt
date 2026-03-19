@@ -4,11 +4,13 @@
       <h2>Menü kezelése</h2>
       <p>Kategóriák és menü tételek szerkesztése</p>
     </div>
-    <button class="gh-btn gh-btn--primary" (click)="startAddCategory()">+ Kategória</button>
+    <div class="menu-toolbar-actions">
+      <button class="gh-btn gh-btn--primary" (click)="startAddCategory()">+ Kategória</button>
+    </div>
   </div>
 
   <p class="drag-hint">
-    Tipp: húzd át a menü tételt egy másik kategória fejlécére az áthelyezéshez.
+    Tipp: húzd át a menü tételt egy másik kategória fejlécére, vagy az alsó nem elérhető zónába az ideiglenes kikapcsoláshoz.
   </p>
 
   @if (loading) {
@@ -93,7 +95,7 @@
               class="category-header"
               (click)="toggleCategory(cat.id)"
               [class.category-header--expanded]="expandedCategoryId === cat.id"
-              [class.category-header--drop-target]="dragOverCategoryId === cat.id"
+              [class.category-header--drop-target]="dragOverZone === cat.id"
               (dragover)="onCategoryDragOver(cat.id, $event)"
               (dragleave)="onCategoryDragLeave(cat.id)"
               (drop)="onCategoryDrop(cat, $event)"
@@ -175,7 +177,105 @@
             }
           </div>
         }
+
+        <div
+          class="uncategorized-zone"
+          [class.uncategorized-zone--drop-target]="dragOverZone === 'uncategorized'"
+          (dragover)="onUncategorizedDragOver($event)"
+          (dragleave)="onUncategorizedDragLeave()"
+          (drop)="onUncategorizedDrop($event)"
+        >
+          <div class="uncategorized-zone__header">
+            <div>
+              <h3>Nem elérhető tételek</h3>
+              <p>Ezek a tételek nem jelennek meg a pincérek rendelésfelvételénél.</p>
+            </div>
+            <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="startAddUncategorizedMenuItem()">
+              + Új tétel
+            </button>
+          </div>
+
+          @if (uncategorizedMenuItems.length === 0) {
+            <div class="gh-empty uncategorized-zone__empty">
+              Nincs kategórián kívüli tétel. Húzz ide egy ételt a letiltáshoz.
+            </div>
+          } @else {
+            <div class="items-list">
+              @for (item of uncategorizedMenuItems; track item.id) {
+                <div
+                  class="menu-item menu-item--uncategorized"
+                  [class.menu-item--dragging]="draggingMenuItem?.id === item.id"
+                  [class.menu-item--moving]="movingItemId === item.id"
+                  [draggable]="movingItemId === null"
+                  (dragstart)="onMenuItemDragStart(item, $event)"
+                  (dragend)="onMenuItemDragEnd()"
+                >
+                  <div class="menu-item__content">
+                    <div class="menu-item__info">
+                      <strong>{{ item.name }}</strong>
+                      @if (item.description) {
+                        <p class="menu-item__description">{{ item.description }}</p>
+                      }
+                    </div>
+                    <div class="menu-item__price">{{ item.price }} Ft</div>
+                  </div>
+                  <div class="menu-item__actions">
+                    <button
+                      class="gh-btn gh-btn--ghost gh-btn--sm"
+                      (click)="startEditMenuItem(item)"
+                      [disabled]="movingItemId === item.id"
+                    >
+                      Szerkesztés
+                    </button>
+                    <button
+                      class="gh-btn gh-btn--danger gh-btn--sm"
+                      (click)="deleteMenuItem(item.id)"
+                      [disabled]="movingItemId === item.id"
+                    >
+                      Törlés
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
   }
 </section>
+
+@if (showDropDecisionModal && pendingDrop) {
+  <div class="drag-decision-modal__backdrop" (click)="closeDropDecisionModal()">
+    <div class="drag-decision-modal" (click)="$event.stopPropagation()">
+      <div class="drag-decision-modal__accent"></div>
+
+      <div class="drag-decision-modal__header">
+        <h3>Művelet kiválasztása</h3>
+        <button class="gh-btn gh-btn--ghost gh-btn--sm" (click)="closeDropDecisionModal()" [disabled]="decisionLoading">✕</button>
+      </div>
+
+      <div class="drag-decision-modal__body">
+        <p>
+          A(z) <strong>{{ pendingDrop.item.name }}</strong> tételt a
+          <strong>{{ pendingDrop.targetLabel }}</strong> célhelyre húztad.
+        </p>
+        <p class="drag-decision-modal__subtext">
+          Szeretnéd áthelyezni az eredeti tételt, vagy másolatot készíteni róla?
+        </p>
+      </div>
+
+      <div class="drag-decision-modal__actions">
+        <button class="gh-btn gh-btn--primary" (click)="confirmDropAsMove()" [disabled]="decisionLoading">
+          Áthelyezés
+        </button>
+        <button class="gh-btn gh-btn--ghost" (click)="confirmDropAsCopy()" [disabled]="decisionLoading">
+          Másolás
+        </button>
+        <button class="gh-btn gh-btn--danger" (click)="closeDropDecisionModal()" [disabled]="decisionLoading">
+          Mégse
+        </button>
+      </div>
+    </div>
+  </div>
+}

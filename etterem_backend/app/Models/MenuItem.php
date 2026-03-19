@@ -14,7 +14,8 @@ class MenuItem extends Model
     ];
 
     protected $casts = [
-        'price' => 'integer'
+        'price' => 'integer',
+        'category_id' => 'integer',
     ];
 
     public function menuCategory() {

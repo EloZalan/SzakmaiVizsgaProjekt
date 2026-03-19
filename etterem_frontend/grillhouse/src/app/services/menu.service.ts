@@ -13,7 +13,7 @@ export interface MenuItemDto {
   name: string;
   description: string | null;
   price: number;
-  category_id: number;
+  category_id: number | null;
 }
 
 @Injectable({
@@ -31,6 +31,10 @@ export class MenuService {
     return this.http.get<MenuItemDto[]>(`${this.config.apiUrl}/menu-items`);
   }
 
+  getAdminMenuItems(): Observable<MenuItemDto[]> {
+    return this.http.get<MenuItemDto[]>(`${this.config.apiUrl}/admin/menu-items`);
+  }
+
   createCategory(name: string): Observable<MenuCategory> {
     return this.http.post<MenuCategory>(`${this.config.apiUrl}/admin/menu-categories`, { name });
   }
@@ -43,7 +47,7 @@ export class MenuService {
     return this.http.delete<void>(`${this.config.apiUrl}/admin/menu-categories/${id}`);
   }
 
-  createMenuItem(categoryId: number, name: string, description: string, price: number): Observable<MenuItemDto> {
+  createMenuItem(categoryId: number | null, name: string, description: string, price: number): Observable<MenuItemDto> {
     return this.http.post<MenuItemDto>(`${this.config.apiUrl}/admin/menu-items`, {
       category_id: categoryId,
       name,
@@ -52,7 +56,7 @@ export class MenuService {
     });
   }
 
-  updateMenuItem(id: number, name: string, description: string, price: number, categoryId: number): Observable<MenuItemDto> {
+  updateMenuItem(id: number, name: string, description: string, price: number, categoryId: number | null): Observable<MenuItemDto> {
     return this.http.put<MenuItemDto>(`${this.config.apiUrl}/admin/menu-items/${id}`, {
       name,
       description,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\TableStatusChanged;
+use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -124,6 +125,14 @@ class OrderController extends Controller
         ]);
 
         $menuItem = MenuItem::findOrFail($fields['menu_item_id']);
+
+        $menuItem->loadMissing('menuCategory');
+
+        if (!$menuItem->menuCategory || $menuItem->menuCategory->name === MenuCategory::UNAVAILABLE_CATEGORY_NAME) {
+            return response()->json([
+                'message' => 'Ez a menü tétel jelenleg nem elérhető.'
+            ], 422);
+        }
 
         $orderItem = OrderItem::create([
             'order_id' => $order->id,

@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/admin/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'update']);
         Route::delete('/admin/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'destroy']);
 
+        Route::get('/admin/menu-items', [MenuItemController::class, 'adminIndex']);
         Route::post('/admin/menu-items', [MenuItemController::class, 'store']);
         Route::put('/admin/menu-items/{menu_item}', [MenuItemController::class, 'update']);
         Route::delete('/admin/menu-items/{menu_item}', [MenuItemController::class, 'destroy']);
