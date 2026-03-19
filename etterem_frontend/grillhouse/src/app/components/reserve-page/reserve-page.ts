@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../services/config.service';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 
 interface CreateReservationPayload {
   guest_name: string;
@@ -22,6 +23,10 @@ interface ReservationResponse {
   guest_count: number;
 }
 
+interface MaxCapacityResponse {
+  max_capacity: number;
+}
+
 @Component({
   selector: 'app-reserve-page',
   standalone: true,
@@ -33,7 +38,8 @@ export class ReservePageComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private config: ConfigService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   name = '';
@@ -45,10 +51,11 @@ export class ReservePageComponent implements OnInit {
   minDate = '';
 
   submitting = false;
-  successMessage = '';
-  errorMessage = '';
-  redirecting = false;
-  private redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  showResultModal = false;
+  resultTitle = '';
+  resultMessage = '';
+  isResultSuccess = false;
+  maxTableCapacity: number | null = null;
 
   readonly allTimes: string[] = this.generateAllTimes();
   availableTimes: string[] = [];
@@ -57,13 +64,7 @@ export class ReservePageComponent implements OnInit {
     this.minDate = this.toDateInputValue(new Date());
     this.date = this.minDate;
     this.refreshTimeOptions();
-  }
-
-  ngOnDestroy(): void {
-    if (this.redirectTimeoutId) {
-      clearTimeout(this.redirectTimeoutId);
-      this.redirectTimeoutId = null;
-    }
+    this.loadMaxTableCapacity();
   }
 
   onDateChange(): void {
@@ -71,25 +72,29 @@ export class ReservePageComponent implements OnInit {
   }
 
   submitReservation(): void {
-    if (this.redirecting) {
-      return;
-    }
-
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.showResultModal = false;
 
     const guestName = this.name.trim();
     const phone = this.phoneNumber.trim();
     const guestCount = Number(this.guests);
 
     if (!guestName || !phone || !this.date || !this.time || !guestCount || guestCount < 1) {
-      this.errorMessage = 'Kérlek tölts ki minden mezőt helyesen.';
+      this.openResultModal(false, 'Sikertelen foglalás', 'Kérlek tölts ki minden mezőt helyesen.');
+      return;
+    }
+
+    if (this.maxTableCapacity !== null && guestCount > this.maxTableCapacity) {
+      this.openResultModal(
+        false,
+        'Sikertelen foglalás',
+        'Nincs ekkora asztal az étteremben a megadott létszámhoz.'
+      );
       return;
     }
 
     const startTime = this.toUtcIso(this.date, this.time);
     if (!startTime) {
-      this.errorMessage = 'Érvénytelen dátum vagy időpont.';
+      this.openResultModal(false, 'Sikertelen foglalás', 'Érvénytelen dátum vagy időpont.');
       return;
     }
 
@@ -104,28 +109,74 @@ export class ReservePageComponent implements OnInit {
 
     this.http
       .post<ReservationResponse>(`${this.config.apiUrl}/reservations`, payload)
+      .pipe(finalize(() => {
+        this.submitting = false;
+        this.cdr.detectChanges();
+      }))
       .subscribe({
-        next: (reservation: ReservationResponse) => {
-          this.successMessage = 'Sikeres foglalás!';
+        next: () => {
+          this.openResultModal(true, 'Sikeres foglalás', 'A foglalás sikeresen rögzítve lett.');
+          this.name = '';
           this.phoneNumber = '';
           this.guests = null;
-          this.submitting = false;
-          this.redirecting = true;
-
-          if (this.redirectTimeoutId) {
-            clearTimeout(this.redirectTimeoutId);
-          }
-
-          this.redirectTimeoutId = setTimeout(() => {
-            this.router.navigateByUrl('/');
-          }, 3000);
+          this.note = '';
+          this.time = this.availableTimes[0] ?? '';
+          this.cdr.detectChanges();
         },
         error: (err: unknown) => {
-          this.errorMessage = this.extractErrorMessage(err);
-          this.submitting = false;
-          this.redirecting = false;
+          const rawMessage = this.extractErrorMessage(err);
+          this.openResultModal(
+            false,
+            'Sikertelen foglalás',
+            this.normalizeReservationError(rawMessage)
+          );
+          this.cdr.detectChanges();
         },
       });
+  }
+
+  closeResultModal(): void {
+    this.showResultModal = false;
+  }
+
+  backToHome(): void {
+    this.showResultModal = false;
+    this.router.navigateByUrl('/');
+  }
+
+  private openResultModal(isSuccess: boolean, title: string, message: string): void {
+    this.isResultSuccess = isSuccess;
+    this.resultTitle = title;
+    this.resultMessage = message;
+    this.showResultModal = true;
+    this.cdr.detectChanges();
+  }
+
+  private loadMaxTableCapacity(): void {
+    this.http
+      .get<MaxCapacityResponse>(`${this.config.apiUrl}/tables/max-capacity`)
+      .subscribe({
+        next: (res) => {
+          this.maxTableCapacity = Number(res?.max_capacity ?? 0);
+        },
+        error: () => {
+          this.maxTableCapacity = null;
+        },
+      });
+  }
+
+  private normalizeReservationError(message: string): string {
+    const normalized = (message || '').toLowerCase();
+
+    if (normalized.includes('nincs ekkora asztal')) {
+      return 'Nincs ekkora asztal az étteremben a megadott létszámhoz.';
+    }
+
+    if (normalized.includes('nincs szabad asztal')) {
+      return 'Nincs szabad asztal ebben az időpontban.';
+    }
+
+    return message;
   }
 
   private toUtcIso(dateValue: string, timeValue: string): string | null {

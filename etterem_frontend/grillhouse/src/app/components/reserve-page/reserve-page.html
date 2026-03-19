@@ -42,18 +42,33 @@
         <p class="error-text">Erre a napra már nincs foglalható idősáv. Válassz másik dátumot.</p>
       }
 
-      @if (errorMessage) {
-        <p class="error-text">{{ errorMessage }}</p>
-      }
-
-      @if (successMessage) {
-        <p>{{ successMessage }}</p>
-        <p>3 másodperc múlva visszairányítunk a főoldalra...</p>
-      }
-
-      <button class="gh-btn gh-btn--primary gh-btn--block" (click)="submitReservation()" [disabled]="submitting || redirecting || availableTimes.length === 0">
+      <button class="gh-btn gh-btn--primary gh-btn--block" (click)="submitReservation()" [disabled]="submitting || availableTimes.length === 0">
         {{ submitting ? 'Küldés...' : 'Foglalás elküldése' }}
       </button>
     </div>
   </div>
+
+  @if (showResultModal) {
+    <div class="gh-modal-overlay" (click)="closeResultModal()">
+      <div class="gh-modal" (click)="$event.stopPropagation()">
+        <div class="panel-head">
+          <h3>{{ resultTitle }}</h3>
+        </div>
+
+        <div class="gh-panel__body">
+          <div class="modal-body-row">
+            <p class="muted">{{ resultMessage }}</p>
+
+            <div class="action-row action-row--end">
+              @if (isResultSuccess) {
+                <button type="button" class="gh-btn gh-btn--primary" (click)="backToHome()">Vissza a főoldalra</button>
+              } @else {
+                <button type="button" class="gh-btn gh-btn--ghost" (click)="closeResultModal()">Bezár</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>
