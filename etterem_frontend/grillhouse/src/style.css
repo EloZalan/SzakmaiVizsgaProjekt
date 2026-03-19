@@ -85,6 +85,10 @@ input {
   color: #120a05;
 }
 
+.btn-login{
+  border: 1px solid #ff6a00;
+}
+
 .btn-login:hover{
   background: #ff6a00;
   color: #120a05;
@@ -388,10 +392,28 @@ input {
 .nav-links a {
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
+  position: relative;
+  padding-bottom: 3px;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #ff6a00;
+  border-radius: 2px;
+  transition: width 0.2s ease;
 }
 
 .nav-links a:hover {
   color: #fff;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
 }
 
 .nav-actions {
@@ -1231,60 +1253,334 @@ input {
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Light theme overrides for homepage */
+/* ======================================================
+   Light theme – tasteful warm-white design
+   ====================================================== */
 .home-page.light-theme {
-  background: #f7f7f7;
-  color: #222;
+  background: #f5f2ee;
+  color: #1a1208;
 }
 
-.home-page.light-theme .gh-container,
-.home-page.light-theme .gh-panel,
-.home-page.light-theme .visit-card,
-.home-page.light-theme .about-card,
-.home-page.light-theme .menu-head,
-.home-page.light-theme .menu-full-box {
-  background: #fff;
-  border-color: #e0e0e0;
-  color: #222;
+/* --- Global text overrides --- */
+.home-page.light-theme *,
+.home-page.light-theme h1,
+.home-page.light-theme h2,
+.home-page.light-theme h3,
+.home-page.light-theme h4,
+.home-page.light-theme p,
+.home-page.light-theme span,
+.home-page.light-theme li {
+  color: inherit;
 }
 
+/* --- Navbar --- */
+body.light-theme .nav-shell,
+.home-page.light-theme .nav-shell {
+  background: rgba(255, 250, 244, 0.95);
+  border-bottom: 2px solid #ff6a00;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(255, 106, 0, 0.08);
+}
+
+body.light-theme .nav-shell--scrolled,
+.home-page.light-theme .nav-shell--scrolled {
+  background: rgba(255, 250, 244, 0.99);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+}
+
+body.light-theme .nav-brand__text,
+.home-page.light-theme .nav-brand__text {
+  color: #1a1208;
+  letter-spacing: 2px;
+}
+
+body.light-theme .nav-links a,
+.home-page.light-theme .nav-links a {
+  color: #3d2e0f;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 3px;
+}
+
+body.light-theme .nav-links a::after,
+.home-page.light-theme .nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #ff6a00;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+body.light-theme .nav-links a:hover,
+.home-page.light-theme .nav-links a:hover {
+  color: #ff6a00;
+}
+
+body.light-theme .nav-links a:hover::after,
+.home-page.light-theme .nav-links a:hover::after {
+  width: 100%;
+}
+
+body.light-theme .nav-actions .gh-btn--ghost,
+.home-page.light-theme .nav-actions .gh-btn--ghost {
+  background: transparent;
+  color: #3d2e0f;
+  border-color: #d6cabb;
+}
+
+body.light-theme .nav-actions .gh-btn--ghost:hover,
+.home-page.light-theme .nav-actions .gh-btn--ghost:hover {
+  background: #f0ebe4;
+  border-color: #c0ae9a;
+  color: #1a1208;
+}
+
+body.light-theme .nav-actions .btn-login,
+.home-page.light-theme .nav-actions .btn-login {
+  border-color: #ff6a00;
+  color: #3d2e0f;
+  background: transparent;
+}
+
+body.light-theme .nav-actions .btn-login:hover,
+.home-page.light-theme .nav-actions .btn-login:hover {
+  background: #ff6a00;
+  color: #fff;
+}
+
+body.light-theme .nav-actions .gh-btn--primary,
+.home-page.light-theme .nav-actions .gh-btn--primary {
+  background: #ff6a00;
+  color: #fff;
+  border-color: #ff6a00;
+  box-shadow: 0 2px 10px rgba(255, 106, 0, 0.28);
+}
+
+body.light-theme .nav-actions .gh-btn--primary:hover,
+.home-page.light-theme .nav-actions .gh-btn--primary:hover {
+  background: #e05c00;
+  border-color: #e05c00;
+  box-shadow: 0 4px 14px rgba(255, 106, 0, 0.40);
+}
+
+/* --- Buttons --- */
 .home-page.light-theme .gh-btn {
   background: #fff;
-  color: #222;
-  border-color: #bbb;
+  color: #1a1208;
+  border-color: #d6cabb;
+}
+
+.home-page.light-theme .gh-btn:hover {
+  background: #f0ebe4;
+  color: #1a1208;
 }
 
 .home-page.light-theme .gh-btn--primary {
-  background: #ffb27a;
-  color: #120a05;
-  border-color: #ffb27a;
+  background: #ff6a00;
+  color: #fff;
+  border-color: #ff6a00;
+}
+
+.home-page.light-theme .gh-btn--primary:hover {
+  background: #e05c00;
+  border-color: #e05c00;
 }
 
 .home-page.light-theme .gh-btn--ghost {
-  background: #f7f7f7;
-  color: #222;
-  border-color: #bbb;
+  background: transparent;
+  color: #1a1208;
+  border-color: #c8bfb5;
 }
 
-.home-page.light-theme .nav-shell,
-.home-page.light-theme .panel-top {
+.home-page.light-theme .btn-login {
+  border-color: #ff6a00;
+  color: #ff6a00;
+}
+
+.home-page.light-theme .btn-login:hover {
+  background: #ff6a00;
+  color: #fff;
+}
+
+.home-page.light-theme .gh-btn--danger {
+  border-color: rgba(200, 50, 50, 0.40);
+  color: #c03030;
+}
+
+/* --- Pills & Tags --- */
+.home-page.light-theme .gh-pill {
   background: #fff;
-  color: #222;
-  border-bottom: 1px solid #e0e0e0;
+  border-color: #d6cabb;
+  color: #3d2e0f;
 }
 
+.home-page.light-theme .gh-tag {
+  background: #f0ebe4;
+  border-color: #d6cabb;
+  color: #3d2e0f;
+}
+
+.home-page.light-theme .gh-tag--accent {
+  border-color: rgba(255, 106, 0, 0.50);
+  color: #c04a00;
+}
+
+.home-page.light-theme .gh-tag--muted {
+  border-color: #d6cabb;
+  color: #78695a;
+}
+
+/* --- Panel / card surfaces --- */
+.home-page.light-theme .gh-panel {
+  background: #fff;
+  border-color: #e4ddd3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+/* --- Hero --- */
 .home-page.light-theme .hero-shell__overlay {
-  background: linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.2));
+  background:
+    radial-gradient(60% 50% at 50% 50%, rgba(0,0,0,0.30), rgba(0,0,0,0.55)),
+    linear-gradient(to bottom, rgba(0,0,0,0.20), rgba(0,0,0,0.55));
 }
 
-.home-page.light-theme .hero-shell__title,
+.home-page.light-theme .hero-shell__title {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.55);
+}
+
 .home-page.light-theme .hero-shell__subtitle {
-  color: #222;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.45);
 }
 
+.home-page.light-theme .hero-shell__dot {
+  background: rgba(0,0,0,0.28);
+}
+
+/* --- About section --- */
+.home-page.light-theme .about-card {
+  background: #fff;
+  border-color: #e4ddd3;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+
+.home-page.light-theme .about-title {
+  color: #1a1208;
+}
+
+.home-page.light-theme .about-text {
+  color: #4a3c26;
+}
+
+.home-page.light-theme .about-stat__label {
+  color: #78695a;
+}
+
+.home-page.light-theme .about-logo-circle {
+  background: #f5f2ee;
+  border-color: #d6cabb;
+  color: #1a1208;
+}
+
+/* --- Menu section --- */
+.home-page.light-theme .menu-head__subtitle {
+  color: #4a3c26;
+}
+
+.home-page.light-theme .menu-card {
+  background: #fff;
+  border-color: #e4ddd3;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.home-page.light-theme .menu-card__name {
+  color: #1a1208;
+}
+
+.home-page.light-theme .menu-card__desc {
+  color: #4a3c26;
+}
+
+.home-page.light-theme .menu-full-box {
+  background: #fff;
+  border-color: #e4ddd3;
+}
+
+.home-page.light-theme .menu-full-box__title {
+  color: #1a1208;
+}
+
+.home-page.light-theme .menu-section__title {
+  color: #ff6a00;
+}
+
+/* --- Visit / Contact section --- */
+.home-page.light-theme .visit-card {
+  background: #fff;
+  border-color: #e4ddd3;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+
+.home-page.light-theme .visit-title {
+  color: #1a1208;
+}
+
+.home-page.light-theme .visit-row__value {
+  color: #4a3c26;
+}
+
+.home-page.light-theme .visit-image {
+  border-color: #e4ddd3;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+/* --- Detail lines --- */
+.home-page.light-theme .detail-line {
+  border-bottom-color: #e8e0d4;
+}
+
+/* --- Stat / Summary boxes --- */
+.home-page.light-theme .stat-box,
+.home-page.light-theme .summary-box {
+  background: #fff;
+  border-color: #e4ddd3;
+}
+
+.home-page.light-theme .stat-box span,
+.home-page.light-theme .summary-box span {
+  color: #78695a;
+}
+
+.home-page.light-theme .stat-box strong,
+.home-page.light-theme .summary-box strong {
+  color: #1a1208;
+}
+
+.home-page.light-theme .stat-box small,
+.home-page.light-theme .summary-box small {
+  color: #78695a;
+}
+
+/* --- Footer --- */
 .home-page.light-theme .footer-shell {
   background: #fff;
-  color: #222;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #e8e0d4;
+}
+
+.home-page.light-theme .footer-brand__text {
+  color: #1a1208;
+}
+
+.home-page.light-theme .footer-shell__sub {
+  color: #4a3c26;
+}
+
+.home-page.light-theme .footer-shell__copy {
+  color: #78695a;
 }
 

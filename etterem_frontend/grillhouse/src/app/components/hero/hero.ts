@@ -182,9 +182,6 @@ export class HeroComponent implements OnInit, OnDestroy {
   }
 
   private updateBodyClass(): void {
-    const homePage = document.querySelector('.home-page');
-    if (homePage) {
-      homePage.classList.toggle('light-theme', this.currentTheme === 'light');
-    }
+    document.body.classList.toggle('light-theme', this.currentTheme === 'light');
   }
 }
