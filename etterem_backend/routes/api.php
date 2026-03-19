@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reservations/walk-in', [ReservationController::class, 'storeWalkIn']);
 
         Route::get('/reservations', [ReservationController::class, 'index']);
+        Route::get('/reservations/today-with-orders', [ReservationController::class, 'todayWithOrders']);
         Route::get('/reservations/{reservation}', [ReservationController::class, 'show']);
         Route::put('/reservations/{reservation}', [ReservationController::class, 'update']);
         Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);

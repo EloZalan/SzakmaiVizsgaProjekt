@@ -25,6 +25,73 @@ class ReservationController extends Controller
         return response()->json(Reservation::all());
     }
 
+    public function todayWithOrders()
+    {
+        $todayStart = Carbon::today();
+        $tomorrowStart = Carbon::tomorrow();
+
+        $reservations = Reservation::query()
+            ->with([
+                'table:id,capacity',
+                'order.orderItems.menuItem:id,name,price',
+                'order.payments:id,order_id,amount,payment_method,created_at',
+            ])
+            ->where('start_time', '>=', $todayStart)
+            ->where('start_time', '<', $tomorrowStart)
+            ->orderBy('start_time')
+            ->get();
+
+        $payload = $reservations->map(function (Reservation $reservation) {
+            $order = $reservation->order;
+            $latestPayment = $order?->payments?->sortByDesc('created_at')->first();
+
+            $items = $order
+                ? $order->orderItems->map(function ($orderItem) {
+                    $menuItem = $orderItem->menuItem;
+                    $price = (int)($menuItem?->price ?? 0);
+
+                    return [
+                        'id' => $orderItem->id,
+                        'menu_item_id' => $orderItem->menu_item_id,
+                        'name' => $menuItem?->name ?? 'Tétel',
+                        'price' => $price,
+                        'quantity' => (int)$orderItem->quantity,
+                        'line_total' => $price * (int)$orderItem->quantity,
+                    ];
+                })->values()
+                : [];
+
+            $orderTotal = (int)($order?->total_price ?? 0);
+            $paidTotal = $latestPayment ? (int)$latestPayment->amount : null;
+            $displayTotal = $paidTotal ?? $orderTotal;
+
+            return [
+                'reservation_id' => $reservation->id,
+                'table_id' => $reservation->table_id,
+                'table_capacity' => $reservation->table?->capacity,
+                'guest_name' => $reservation->guest_name,
+                'guest_count' => (int)$reservation->guest_count,
+                'start_time' => $reservation->start_time?->toIso8601String(),
+                'end_time' => $reservation->end_time?->toIso8601String(),
+                'note' => $reservation->note,
+                'order' => $order
+                    ? [
+                        'order_id' => $order->id,
+                        'status' => $order->status,
+                        'opened_at' => $order->created_at?->toIso8601String(),
+                        'total_price' => $orderTotal,
+                        'paid_total' => $paidTotal,
+                        'display_total' => $displayTotal,
+                        'payment_method' => $latestPayment?->payment_method,
+                        'items' => $items,
+                    ]
+                    : null,
+            ];
+        })->values();
+
+        return response()->json($payload);
+    }
+
     public function show(Reservation $reservation)
     {
         return response()->json($reservation);
