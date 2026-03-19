@@ -37,7 +37,11 @@ export class HeroComponent implements OnInit, OnDestroy {
   ];
 
   activeIndex = 0;
+  displayHeadline = '';
+  displaySubline = '';
   private intervalId: any;
+  private headlineTimerId: any;
+  private sublineTimerId: any;
   currentLanguage: Language = 'hu';
   currentTheme: ThemeMode = 'dark';
 
@@ -50,9 +54,11 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startAutoSlide();
+    this.startTypingAnimation();
     this.languageService.language$.subscribe(lang => {
       this.currentLanguage = lang;
       this.updateSlides();
+      this.startTypingAnimation();
       this.cdr.markForCheck();
     });
     this.themeService.theme$.subscribe(theme => {
@@ -63,11 +69,13 @@ export class HeroComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopAutoSlide();
+    this.stopTypingAnimation();
   }
 
   select(i: number): void {
     this.activeIndex = i;
     this.resetAutoSlide();
+    this.startTypingAnimation();
   }
 
   private updateSlides(): void {
@@ -123,6 +131,7 @@ export class HeroComponent implements OnInit, OnDestroy {
   private startAutoSlide(): void {
     this.intervalId = setInterval(() => {
       this.activeIndex = (this.activeIndex + 1) % this.slides.length;
+      this.startTypingAnimation();
       this.cdr.markForCheck();
     }, 5000); // 5 másodperc
   }
@@ -137,6 +146,35 @@ export class HeroComponent implements OnInit, OnDestroy {
   private resetAutoSlide(): void {
     this.stopAutoSlide();
     this.startAutoSlide();
+  }
+
+  private stopTypingAnimation(): void {
+    if (this.headlineTimerId) { clearInterval(this.headlineTimerId); this.headlineTimerId = null; }
+    if (this.sublineTimerId) { clearInterval(this.sublineTimerId); this.sublineTimerId = null; }
+  }
+
+  private startTypingAnimation(): void {
+    this.stopTypingAnimation();
+    const headline = this.slides[this.activeIndex].headline;
+    const subline = this.slides[this.activeIndex].subline;
+    this.displayHeadline = '';
+    this.displaySubline = '';
+    let hIndex = 0;
+    const hStep = Math.max(1, Math.round(1500 / headline.length));
+    this.headlineTimerId = setInterval(() => {
+      hIndex++;
+      this.displayHeadline = headline.slice(0, hIndex);
+      this.cdr.markForCheck();
+      if (hIndex >= headline.length) { clearInterval(this.headlineTimerId); this.headlineTimerId = null; }
+    }, hStep);
+    let sIndex = 0;
+    const sStep = Math.max(1, Math.round(1500 / subline.length));
+    this.sublineTimerId = setInterval(() => {
+      sIndex++;
+      this.displaySubline = subline.slice(0, sIndex);
+      this.cdr.markForCheck();
+      if (sIndex >= subline.length) { clearInterval(this.sublineTimerId); this.sublineTimerId = null; }
+    }, sStep);
   }
 
   onViewMenu(): void {
