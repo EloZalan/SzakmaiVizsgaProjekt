@@ -16,23 +16,23 @@ export class HeroComponent implements OnInit, OnDestroy {
   slides: HeroSlide[] = [
     {
       imageUrl: 'assets/images/hero-1.jpg',
-      headline: 'AUTHENTIC BBQ FLAVORS',
-      subline: 'Fire-grilled perfection since 2022',
+      headline: 'EREDETI BBQ ÍZEK',
+      subline: 'Tüzön grillezve 2020 óta',
     },
     {
       imageUrl: 'assets/images/hero-2.jpg',
-      headline: 'SMOKE • SEAR • SERVE',
-      subline: 'House-made sauces, prime cuts',
+      headline: 'FÜSTÖLT • ZAMATOS • PRÉMIUM',
+      subline: 'Házilag készült szószok, első osztályú húsok',
     },
     {
       imageUrl: 'assets/images/hero-3.jpg',
-      headline: 'SLOW SMOKED, BIG FLAVOR',
-      subline: 'Pitmaster-crafted, every day',
+      headline: 'HOSSZAN FÜSTÖLT, KIVÁLÓ ÍZEK',
+      subline: 'Mester szakácsok által készítve',
     },
     {
       imageUrl: 'assets/images/hero-4.jpg',
-      headline: 'YOUR TABLE IS WAITING',
-      subline: 'Reserve in seconds',
+      headline: 'ITT A HELYE',
+      subline: 'Foglaljon másodpercek alatt',
     },
   ];
 
@@ -82,24 +82,24 @@ export class HeroComponent implements OnInit, OnDestroy {
     if (this.currentLanguage === 'hu') {
       this.slides = [
         {
-          imageUrl: 'assets/images/hero-1.jpg',
-          headline: 'HITELVES BBQ ÍZELÍTŐK',
-          subline: 'Tűzön grillezett tökélyesség 2022 óta',
+      imageUrl: 'assets/images/hero-1.jpg',
+      headline: 'EREDETI BBQ ÍZEK',
+      subline: 'Tüzön grillezve 2020 óta',
         },
         {
-          imageUrl: 'assets/images/hero-2.jpg',
-          headline: 'FÜST • SÜTÉS • SZOLGÁLTATÁS',
-          subline: 'Házilag készült szószok, első osztályú húsok',
+      imageUrl: 'assets/images/hero-2.jpg',
+      headline: 'FÜSTÖLT • ZAMATOS • PRÉMIUM',
+      subline: 'Házilag készült szószok, első osztályú húsok',
         },
         {
-          imageUrl: 'assets/images/hero-3.jpg',
-          headline: 'LASSAN FÜSTÖLT, NAGY ÍZ',
-          subline: 'Pitmaster által készített, minden nap',
+      imageUrl: 'assets/images/hero-3.jpg',
+      headline: 'HOSSZAN FÜSTÖLT, KIVÁLÓ ÍZEK',
+      subline: 'Mesterszakácsok által készítve',
         },
         {
-          imageUrl: 'assets/images/hero-4.jpg',
-          headline: 'AZ ÖN ASZTALA VÁR',
-          subline: 'Foglaljon másodpercek alatt',
+      imageUrl: 'assets/images/hero-4.jpg',
+      headline: 'ITT A HELYE',
+      subline: 'Foglaljon másodpercek alatt',
         },
       ];
     } else {
