@@ -7,30 +7,37 @@
 	margin-bottom: 4px;
 }
 
-.menu-card__image-wrap,
-.menu-card__image-placeholder {
-	width: 100%;
-	height: 210px;
-	margin-bottom: 14px;
+.menu-card__image-wrap {
+	align-self: center;
+	max-width: 100%;
 	border-radius: 18px;
 	overflow: hidden;
 	background: rgba(255, 255, 255, 0.05);
 	border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.menu-card__image {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	display: block;
+	flex-shrink: 0;
+	line-height: 0;
 }
 
 .menu-card__image-placeholder {
+	width: 100%;
+	height: 200px;
+	border-radius: 18px;
+	overflow: hidden;
+	background: linear-gradient(135deg, rgba(255, 140, 0, 0.14), rgba(255, 255, 255, 0.04));
+	border: 1px solid rgba(255, 255, 255, 0.06);
 	display: grid;
 	place-items: center;
 	font-size: 3rem;
 	color: rgba(255, 255, 255, 0.6);
-	background: linear-gradient(135deg, rgba(255, 140, 0, 0.14), rgba(255, 255, 255, 0.04));
+	flex-shrink: 0;
+}
+
+.menu-card__image {
+	width: 100%;
+	height: auto;
+	max-height: 220px;
+	display: block;
+	object-fit: contain;
 }
 
 .chef-offer__title {
@@ -135,11 +142,6 @@
 	.menu-grid--centered-three .menu-card {
 		flex-basis: 100%;
 		max-width: 100%;
-	}
-
-	.menu-card__image-wrap,
-	.menu-card__image-placeholder {
-		height: 180px;
 	}
 
 	.chef-offer__title {

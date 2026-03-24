@@ -36,14 +36,16 @@
           <div class="menu-card__image-placeholder">🍽️</div>
         </ng-template>
 
-        <div class="menu-card__top">
-          <div>
-            <div class="menu-card__category">{{ card.category.name }}</div>
-            <div class="menu-card__name">{{ card.item.name }}</div>
+        <div class="menu-card__body">
+          <div class="menu-card__top">
+            <div>
+              <div class="menu-card__category">{{ card.category.name }}</div>
+              <div class="menu-card__name">{{ card.item.name }}</div>
+            </div>
+            <div class="menu-card__price">{{ card.item.price }} Ft</div>
           </div>
-          <div class="menu-card__price">{{ card.item.price }} Ft</div>
+          <div class="menu-card__desc">{{ card.item.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
         </div>
-        <div class="menu-card__desc">{{ card.item.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
       </article>
     </div>
 
@@ -86,11 +88,13 @@
             <div class="menu-card__image-placeholder">🍽️</div>
           </ng-template>
 
-          <div class="menu-card__top">
-            <div class="menu-card__name">{{ m.name }}</div>
-            <div class="menu-card__price">{{ m.price }} Ft</div>
+          <div class="menu-card__body">
+            <div class="menu-card__top">
+              <div class="menu-card__name">{{ m.name }}</div>
+              <div class="menu-card__price">{{ m.price }} Ft</div>
+            </div>
+            <div class="menu-card__desc">{{ m.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
           </div>
-          <div class="menu-card__desc">{{ m.desc || (currentLanguage === 'hu' ? 'Nincs leírás' : 'No description') }}</div>
         </article>
       </div>
     </div>

@@ -619,7 +619,13 @@ input {
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 16px;
   padding: 22px;
-  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-card__body {
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .menu-card__top {
