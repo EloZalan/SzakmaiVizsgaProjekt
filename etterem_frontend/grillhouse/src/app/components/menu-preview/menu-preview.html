@@ -29,6 +29,13 @@
 
     <div class="menu-grid menu-grid--centered-three">
       <article class="menu-card" *ngFor="let card of chefRecommendations">
+        <div class="menu-card__image-wrap" *ngIf="card.item.imageUrl; else chefImagePlaceholder">
+          <img class="menu-card__image" [src]="card.item.imageUrl" [alt]="card.item.name">
+        </div>
+        <ng-template #chefImagePlaceholder>
+          <div class="menu-card__image-placeholder">🍽️</div>
+        </ng-template>
+
         <div class="menu-card__top">
           <div>
             <div class="menu-card__category">{{ card.category.name }}</div>
@@ -72,6 +79,13 @@
 
       <div class="menu-grid full-menu-slider__grid">
         <article class="menu-card" *ngFor="let m of slide.items">
+          <div class="menu-card__image-wrap" *ngIf="m.imageUrl; else fullImagePlaceholder">
+            <img class="menu-card__image" [src]="m.imageUrl" [alt]="m.name">
+          </div>
+          <ng-template #fullImagePlaceholder>
+            <div class="menu-card__image-placeholder">🍽️</div>
+          </ng-template>
+
           <div class="menu-card__top">
             <div class="menu-card__name">{{ m.name }}</div>
             <div class="menu-card__price">{{ m.price }} Ft</div>

@@ -68,6 +68,51 @@
                   min="0"
                 />
               </div>
+
+              <div class="form-group">
+                <label>Kép</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-input form-input--file"
+                  (change)="onImageSelected($event)"
+                />
+
+                @if (editingImagePreview) {
+                  <div class="edit-image-preview">
+                    <img [src]="editingImagePreview" [alt]="editing.name || 'Étel kép'" />
+                  </div>
+                } @else {
+                  <div class="edit-image-placeholder">Nincs kiválasztott kép.</div>
+                }
+
+                <div class="edit-image-actions">
+                  <button
+                    type="button"
+                    class="gh-btn gh-btn--ghost gh-btn--sm"
+                    (click)="clearSelectedImage()"
+                    [disabled]="!editing.imageFile"
+                  >
+                    Új fájl törlése
+                  </button>
+                  <button
+                    type="button"
+                    class="gh-btn gh-btn--danger gh-btn--sm"
+                    (click)="removeCurrentImage()"
+                    [disabled]="!editing.currentImageUrl && !editing.imageFile"
+                  >
+                    Kép eltávolítása
+                  </button>
+                  <button
+                    type="button"
+                    class="gh-btn gh-btn--ghost gh-btn--sm"
+                    (click)="restoreCurrentImage()"
+                    [disabled]="!editing.currentImageUrl || !editing.removeImage"
+                  >
+                    Eredeti visszaállítása
+                  </button>
+                </div>
+              </div>
             }
 
             <div class="edit-panel__actions">
@@ -144,6 +189,13 @@
                         (dragstart)="onMenuItemDragStart(item, $event)"
                         (dragend)="onMenuItemDragEnd()"
                       >
+                        <div class="menu-item__thumb" [class.menu-item__thumb--empty]="!item.imageUrl">
+                          @if (item.imageUrl) {
+                            <img [src]="item.imageUrl" [alt]="item.name">
+                          } @else {
+                            <span>🍽️</span>
+                          }
+                        </div>
                         <div class="menu-item__content">
                           <div class="menu-item__info">
                             <strong>{{ item.name }}</strong>
@@ -210,6 +262,13 @@
                   (dragstart)="onMenuItemDragStart(item, $event)"
                   (dragend)="onMenuItemDragEnd()"
                 >
+                  <div class="menu-item__thumb" [class.menu-item__thumb--empty]="!item.imageUrl">
+                    @if (item.imageUrl) {
+                      <img [src]="item.imageUrl" [alt]="item.name">
+                    } @else {
+                      <span>🍽️</span>
+                    }
+                  </div>
                   <div class="menu-item__content">
                     <div class="menu-item__info">
                       <strong>{{ item.name }}</strong>

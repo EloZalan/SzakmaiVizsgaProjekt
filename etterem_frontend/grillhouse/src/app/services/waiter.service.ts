@@ -95,6 +95,7 @@ export interface MenuItemDto {
   description: string | null;
   price: number;
   category_id: number | null;
+  image_url: string | null;
 }
 
 @Injectable({

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MenuService, MenuCategory } from '../../services/menu.service';
@@ -9,6 +9,7 @@ interface MenuItem {
   description?: string;
   price: number;
   categoryId: number | null;
+  imageUrl: string | null;
 }
 
 type DragDropZone = number | 'uncategorized' | null;
@@ -27,6 +28,10 @@ interface EditingState {
   description: string;
   price: number;
   categoryId: number | null;
+  currentImageUrl: string | null;
+  imageFile: File | null;
+  imagePreviewUrl: string | null;
+  removeImage: boolean;
 }
 
 @Component({
@@ -36,7 +41,7 @@ interface EditingState {
   templateUrl: './admin-menu.html',
   styleUrl: './admin-menu.css',
 })
-export class AdminMenuComponent implements OnInit {
+export class AdminMenuComponent implements OnInit, OnDestroy {
   categories: MenuCategory[] = [];
   menuItems: MenuItem[] = [];
   selectedCategory: MenuCategory | null = null;
@@ -52,7 +57,7 @@ export class AdminMenuComponent implements OnInit {
   loading = false;
   error = '';
 
-  editing: EditingState = { type: null, id: null, name: '', description: '', price: 0, categoryId: null };
+  editing: EditingState = this.createEmptyEditingState();
 
   constructor(
     private menuService: MenuService,
@@ -61,6 +66,10 @@ export class AdminMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMenu();
+  }
+
+  ngOnDestroy(): void {
+    this.releaseEditingPreviewUrl();
   }
 
   loadMenu(): void {
@@ -90,6 +99,7 @@ export class AdminMenuComponent implements OnInit {
           description: item.description || '',
           price: item.price,
           categoryId: item.category_id,
+          imageUrl: item.image_url,
         }));
         this.loading = false;
         this.cdr.markForCheck();
@@ -111,15 +121,21 @@ export class AdminMenuComponent implements OnInit {
   }
 
   startEditCategory(cat: MenuCategory): void {
-    this.editing = { type: 'category', id: cat.id, name: cat.name, description: '', price: 0, categoryId: null };
+    this.resetEditingState({
+      type: 'category',
+      id: cat.id,
+      name: cat.name,
+    });
   }
 
   startAddCategory(): void {
-    this.editing = { type: 'category', id: null, name: '', description: '', price: 0, categoryId: null };
+    this.resetEditingState({
+      type: 'category',
+    });
   }
 
   cancelEdit(): void {
-    this.editing = { type: null, id: null, name: '', description: '', price: 0, categoryId: null };
+    this.resetEditingState();
   }
 
   saveCategory(): void {
@@ -184,6 +200,10 @@ export class AdminMenuComponent implements OnInit {
       description: item.description || '',
       price: item.price,
       categoryId: item.categoryId,
+      currentImageUrl: item.imageUrl,
+      imageFile: null,
+      imagePreviewUrl: null,
+      removeImage: false,
     };
   }
 
@@ -192,13 +212,51 @@ export class AdminMenuComponent implements OnInit {
       alert('Válassz ki egy kategóriát!');
       return;
     }
-    this.editing = { type: 'item', id: null, name: '', description: '', price: 0, categoryId: this.selectedCategory.id };
+    this.resetEditingState({
+      type: 'item',
+      categoryId: this.selectedCategory.id,
+    });
   }
 
   startAddUncategorizedMenuItem(): void {
     this.selectedCategory = null;
     this.expandedCategoryId = null;
-    this.editing = { type: 'item', id: null, name: '', description: '', price: 0, categoryId: null };
+    this.resetEditingState({
+      type: 'item',
+      categoryId: null,
+    });
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+
+    this.releaseEditingPreviewUrl();
+
+    if (!file) {
+      this.editing.imageFile = null;
+      this.editing.imagePreviewUrl = null;
+      return;
+    }
+
+    this.editing.imageFile = file;
+    this.editing.imagePreviewUrl = URL.createObjectURL(file);
+    this.editing.removeImage = false;
+  }
+
+  clearSelectedImage(): void {
+    this.releaseEditingPreviewUrl();
+    this.editing.imageFile = null;
+    this.editing.imagePreviewUrl = null;
+  }
+
+  removeCurrentImage(): void {
+    this.clearSelectedImage();
+    this.editing.removeImage = true;
+  }
+
+  restoreCurrentImage(): void {
+    this.editing.removeImage = false;
   }
 
   saveMenuItem(): void {
@@ -219,7 +277,8 @@ export class AdminMenuComponent implements OnInit {
           categoryId,
           this.editing.name.trim(),
           this.editing.description.trim(),
-          Math.round(this.editing.price)
+          Math.round(this.editing.price),
+          this.editing.imageFile,
         )
         .subscribe({
           next: () => {
@@ -238,7 +297,9 @@ export class AdminMenuComponent implements OnInit {
           this.editing.name.trim(),
           this.editing.description.trim(),
           Math.round(this.editing.price),
-          categoryId
+          categoryId,
+          this.editing.imageFile,
+          this.editing.removeImage
         )
         .subscribe({
           next: () => {
@@ -445,7 +506,9 @@ export class AdminMenuComponent implements OnInit {
         item.name,
         item.description || '',
         Math.round(item.price),
-        targetCategoryId
+        targetCategoryId,
+        null,
+        false
       )
       .subscribe({
         next: () => {
@@ -487,7 +550,9 @@ export class AdminMenuComponent implements OnInit {
         targetCategoryId,
         item.name,
         item.description || '',
-        Math.round(item.price)
+        Math.round(item.price),
+        null,
+        item.id
       )
       .subscribe({
         next: () => {
@@ -518,5 +583,44 @@ export class AdminMenuComponent implements OnInit {
 
   get uncategorizedMenuItems(): MenuItem[] {
     return this.menuItems.filter((item) => item.categoryId === null);
+  }
+
+  get editingImagePreview(): string | null {
+    if (this.editing.imagePreviewUrl) {
+      return this.editing.imagePreviewUrl;
+    }
+
+    if (this.editing.removeImage) {
+      return null;
+    }
+
+    return this.editing.currentImageUrl;
+  }
+
+  private createEmptyEditingState(overrides: Partial<EditingState> = {}): EditingState {
+    return {
+      type: null,
+      id: null,
+      name: '',
+      description: '',
+      price: 0,
+      categoryId: null,
+      currentImageUrl: null,
+      imageFile: null,
+      imagePreviewUrl: null,
+      removeImage: false,
+      ...overrides,
+    };
+  }
+
+  private resetEditingState(overrides: Partial<EditingState> = {}): void {
+    this.releaseEditingPreviewUrl();
+    this.editing = this.createEmptyEditingState(overrides);
+  }
+
+  private releaseEditingPreviewUrl(): void {
+    if (this.editing.imagePreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.editing.imagePreviewUrl);
+    }
   }
 }

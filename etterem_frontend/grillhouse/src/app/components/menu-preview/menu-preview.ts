@@ -179,6 +179,7 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
       price: item.price,
       desc: item.description,
       categoryId: item.category_id,
+      imageUrl: item.image_url,
     };
   }
 

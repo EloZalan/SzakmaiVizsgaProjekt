@@ -4,4 +4,5 @@ export interface MenuCard {
   price: number;
   desc: string | null;
   categoryId: number | null;
+  imageUrl: string | null;
 }
