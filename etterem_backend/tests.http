@@ -189,28 +189,63 @@ Accept: application/json
 ### Create item (admin)
 POST {{baseUrl}}/admin/menu-items
 Authorization: Bearer {{token}}
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=MenuItemCreate
 Accept: application/json
 
-{
-    "name": "Tomato Soup",
-    "description": "A warm starter",
-    "price": 500,
-    "category_id": 1
-}
+--MenuItemCreate
+Content-Disposition: form-data; name="name"
+
+Tomato Soup
+--MenuItemCreate
+Content-Disposition: form-data; name="description"
+
+A warm starter
+--MenuItemCreate
+Content-Disposition: form-data; name="price"
+
+500
+--MenuItemCreate
+Content-Disposition: form-data; name="category_id"
+
+1
+--MenuItemCreate
+Content-Disposition: form-data; name="image"; filename="soup.jpg"
+Content-Type: image/jpeg
+
+< ./tests-assets/soup.jpg
+--MenuItemCreate--
 
 ### Update item (admin)
-PUT {{baseUrl}}/admin/menu-items/1
+POST {{baseUrl}}/admin/menu-items/1
 Authorization: Bearer {{token}}
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=MenuItemUpdate
 Accept: application/json
 
-{
-    "name": "Tomato Soup",
-    "description": "Freshly made",
-    "price": 550,
-    "category_id": 1
-}
+--MenuItemUpdate
+Content-Disposition: form-data; name="_method"
+
+PUT
+--MenuItemUpdate
+Content-Disposition: form-data; name="name"
+
+Tomato Soup
+--MenuItemUpdate
+Content-Disposition: form-data; name="description"
+
+Freshly made
+--MenuItemUpdate
+Content-Disposition: form-data; name="price"
+
+550
+--MenuItemUpdate
+Content-Disposition: form-data; name="category_id"
+
+1
+--MenuItemUpdate
+Content-Disposition: form-data; name="remove_image"
+
+0
+--MenuItemUpdate--
 
 ### Delete item (admin)
 DELETE {{baseUrl}}/admin/menu-items/1
