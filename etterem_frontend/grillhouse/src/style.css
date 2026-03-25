@@ -468,12 +468,6 @@ input {
   margin: 0 0 14px;
 }
 
-.hero-shell__subtitle {
-  margin: 0 0 22px;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 18px;
-}
-
 .hero-shell__dots {
   margin-top: 22px;
   display: flex;
@@ -1472,11 +1466,6 @@ body.light-theme .nav-actions .gh-btn--primary:hover,
 .home-page.light-theme .hero-shell__title {
   color: #fff;
   text-shadow: 0 2px 12px rgba(0,0,0,0.55);
-}
-
-.home-page.light-theme .hero-shell__subtitle {
-  color: rgba(255,255,255,0.92);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.45);
 }
 
 .home-page.light-theme .hero-shell__dot {
