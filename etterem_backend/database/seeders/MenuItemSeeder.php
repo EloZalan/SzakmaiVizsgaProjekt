@@ -27,6 +27,7 @@ class MenuItemSeeder extends Seeder
             'description' => 'Az igazi (250ml)',
             'price' => 550,
             'category_id' => 4,
+            'image_path' => $this->seedImage('coca-cola.jpg'),
         ]);
 
         MenuItem::create([
@@ -34,6 +35,7 @@ class MenuItemSeeder extends Seeder
             'description' => '(100g)',
             'price' => 890,
             'category_id' => 2,
+            'image_path' => $this->seedImage('salata.jpg'),
         ]);
 
         MenuItem::create([
@@ -41,6 +43,7 @@ class MenuItemSeeder extends Seeder
             'description' => 'Olasz módra (150g)',
             'price' => 2190,
             'category_id' => 3,
+            'image_path' => $this->seedImage('tiramisu.jpg'),
         ]);
     }
 
