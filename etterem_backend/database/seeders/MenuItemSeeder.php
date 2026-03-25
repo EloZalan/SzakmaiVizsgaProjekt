@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\MenuItem;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class MenuItemSeeder extends Seeder
 {
@@ -18,6 +19,7 @@ class MenuItemSeeder extends Seeder
             'description' => 'Szaftos marha steak (200g)',
             'price' => 8500,
             'category_id' => 1,
+            'image_path' => $this->seedImage('rib-eye.jpg'),
         ]);
 
         MenuItem::create([
@@ -40,5 +42,24 @@ class MenuItemSeeder extends Seeder
             'price' => 2190,
             'category_id' => 3,
         ]);
+    }
+
+    /**
+     * Copies a seed image from database/seeders/images/ to storage/app/public/menu-items/
+     * and returns the stored relative path, or null if the source file doesn't exist.
+     */
+    private function seedImage(string $filename): ?string
+    {
+        $source = database_path('seeders/images/' . $filename);
+
+        if (! file_exists($source)) {
+            return null;
+        }
+
+        $destination = 'menu-items/' . $filename;
+
+        Storage::disk('public')->put($destination, file_get_contents($source));
+
+        return $destination;
     }
 }
