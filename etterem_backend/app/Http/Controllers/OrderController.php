@@ -143,11 +143,50 @@ class OrderController extends Controller
         $addedPrice = $menuItem->price * $fields['quantity'];
         $order->increment('total_price', $addedPrice);
 
+        event(new TableStatusChanged($order->table_id));
+
         return response()->json([
             'item' => $menuItem->name,
             'quantity' => $fields['quantity'],
             'current_total' => $order->total_price
         ], 201);
+    }
+
+    public function deleteItem(int $order, int $orderItem) {
+        $order = Order::find($order);
+
+        if (!$order) {
+            return response()->json(['message' => 'A rendelés nem található.'], 404);
+        }
+
+        if ($order->status !== 'in_progress') {
+            return response()->json([
+                'message' => 'Ehhez a rendeléshez már nem törölhetsz tételt.'
+            ], 400);
+        }
+
+        $orderItem = OrderItem::with('menuItem')
+            ->where('id', $orderItem)
+            ->where('order_id', $order->id)
+            ->first();
+
+        if (!$orderItem) {
+            return response()->json(['message' => 'A rendelés tétel nem található.'], 404);
+        }
+
+        $lineTotal = ($orderItem->menuItem?->price ?? 0) * $orderItem->quantity;
+
+        $orderItem->delete();
+
+        $newTotal = max(0, $order->total_price - $lineTotal);
+        $order->update(['total_price' => $newTotal]);
+
+        event(new TableStatusChanged($order->table_id));
+
+        return response()->json([
+            'message' => 'Rendelés tétel törölve.',
+            'current_total' => $order->total_price
+        ], 200);
     }
 
     public function simulateReadyToPay(int $order) {

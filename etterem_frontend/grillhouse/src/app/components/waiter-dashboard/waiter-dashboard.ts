@@ -54,8 +54,9 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     this.loadWaiterPage();
 
     this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+      const hasSelectedTable = this.selected !== null;
       const tableToKeepSelected = this.selected?.id ?? event.table_id;
-      this.loadWaiterPage(tableToKeepSelected);
+      this.loadWaiterPage(tableToKeepSelected, hasSelectedTable);
     });
   }
 
@@ -82,7 +83,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     return this.tables.reduce((sum, t) => sum + (t.guests || 0), 0);
   }
 
-  loadWaiterPage(selectedTableId?: number | null): void {
+  loadWaiterPage(selectedTableId?: number | null, reloadSelectedOrder = false): void {
     this.loading = true;
     this.errorMessage = '';
 
@@ -103,6 +104,16 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
             this.selected = this.tables.find((t) => t.id === targetId) ?? null;
           } else {
             this.selected = null;
+          }
+
+          if (
+            reloadSelectedOrder &&
+            this.selected &&
+            this.selected.status !== 'Szabad' &&
+            this.selected.status !== 'Foglalt'
+          ) {
+            this.refreshSelectedOrder(this.selected.id);
+            return;
           }
 
           this.cdr.markForCheck();
@@ -135,32 +146,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
 
     this.waiterService.getTableOrder(t.id).subscribe({
       next: (order: TableOrderDetailsDto) => {
-        const items: TableOrderItem[] = (order.items || []).map((it) => ({
-          menuItemId: it.menu_item_id,
-          name: it.name ?? 'Tétel',
-          qty: it.quantity,
-          price: it.price ?? 0,
-        }));
-
-        const hasOrder = typeof order.order_id === 'number' && !!order.status;
-
-        const status: TableInfo['status'] = hasOrder
-          ? this.mapOrderStatus(order.status)
-          : 'Asztalnál';
-
-        this.tables = this.tables.map((tbl) =>
-          tbl.id !== t.id
-            ? tbl
-            : {
-                ...tbl,
-                status,
-                items,
-                orderId: hasOrder ? order.order_id : null,
-                updatedAt: hasOrder ? this.formatOpenedAt(order.opened_at) : '-',
-              }
-        );
-
-        this.selected = this.tables.find((tbl) => tbl.id === t.id) ?? null;
+        this.applyOrderDetailsToTable(t.id, order);
         this.detailsLoading = false;
         this.cdr.markForCheck();
       },
@@ -518,6 +504,48 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     }
 
     return 'Asztalnál';
+  }
+
+  private refreshSelectedOrder(tableId: number): void {
+    this.waiterService.getTableOrder(tableId).subscribe({
+      next: (order: TableOrderDetailsDto) => {
+        this.applyOrderDetailsToTable(tableId, order);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('REALTIME ORDER REFRESH ERROR:', err);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private applyOrderDetailsToTable(tableId: number, order: TableOrderDetailsDto): void {
+    const items: TableOrderItem[] = (order.items || []).map((it) => ({
+      menuItemId: it.menu_item_id,
+      name: it.name ?? 'Tétel',
+      qty: it.quantity,
+      price: it.price ?? 0,
+    }));
+
+    const hasOrder = typeof order.order_id === 'number' && !!order.status;
+
+    const status: TableInfo['status'] = hasOrder
+      ? this.mapOrderStatus(order.status)
+      : 'Asztalnál';
+
+    this.tables = this.tables.map((tbl) =>
+      tbl.id !== tableId
+        ? tbl
+        : {
+            ...tbl,
+            status,
+            items,
+            orderId: hasOrder ? order.order_id : null,
+            updatedAt: hasOrder ? this.formatOpenedAt(order.opened_at) : '-',
+          }
+    );
+
+    this.selected = this.tables.find((tbl) => tbl.id === tableId) ?? null;
   }
 
   private async openOrResolveOrderId(tableId: number): Promise<number> {

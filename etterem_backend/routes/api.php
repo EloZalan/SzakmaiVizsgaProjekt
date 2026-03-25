@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/tables/{table}/orders', [OrderController::class, 'getAllOrder']);
 
         Route::post('/orders/{order}/items', [OrderController::class, 'addItem']);
+        Route::delete('/orders/{order}/items/{orderItem}', [OrderController::class, 'deleteItem']);
         Route::post('/orders/{order}/simulate-ready', [OrderController::class, 'simulateReadyToPay']);
         Route::post('/orders/{order}/pay', [PaymentController::class, 'pay']);
     });

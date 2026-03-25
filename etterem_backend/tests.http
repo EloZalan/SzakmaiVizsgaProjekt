@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 16|MQuWBubdRohCobS6pBqjiGKVg7dPbDUkhItx9ht4e644b465
+@token = 14|5TXv9E98MJDV58VOIJc6KyKK3U3vtrDjqQoVSW1k29764065
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -315,30 +315,39 @@ Accept: application/json
 {}
 
 ### Waiter to table
-POST {{baseUrl}}/tables/3/orders
+POST {{baseUrl}}/tables/2/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### Get all order from a table
-GET {{baseUrl}}/tables/12/orders
+GET {{baseUrl}}/tables/2/orders
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {}
 
 ### Add order item to an order
-POST {{baseUrl}}/orders/3/items
+POST {{baseUrl}}/orders/4/items
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
 {
-    "menu_item_id": 1,
+    "menu_item_id": 2,
     "quantity": 4
 }
 
+
+### Delete item from order
+DELETE {{baseUrl}}/orders/4/items/7
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
 ### Ready to pay simulation
-POST {{baseUrl}}/orders/2/simulate-ready
+POST {{baseUrl}}/orders/4/simulate-ready
 Authorization: Bearer {{token}}
 
 ### Payment
