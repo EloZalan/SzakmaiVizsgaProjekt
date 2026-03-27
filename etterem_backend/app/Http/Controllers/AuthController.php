@@ -118,6 +118,8 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Sikeres kijelentkeztetés.'
-        ], 200);
+        ], 200)
+            ->withCookie(cookie()->forget('laravel_session'))
+            ->withCookie(cookie()->forget('XSRF-TOKEN'));
     }
 }
