@@ -5,7 +5,7 @@ import { AboutComponent } from './components/about/about';
 import { MenuPreviewComponent } from './components/menu-preview/menu-preview';
 import { VisitUsComponent } from './components/visit-us/visit-us';
 import { FooterComponent } from './components/footer/footer';
-import { ReservePageComponent } from './components/reserve-page/reserve-page';
+import { HomeReserveModalComponent } from './components/home-reserve-modal/home-reserve-modal';
 
 @Component({
   selector: 'app-home-page',
@@ -17,10 +17,9 @@ import { ReservePageComponent } from './components/reserve-page/reserve-page';
     MenuPreviewComponent,
     VisitUsComponent,
     FooterComponent,
-    ReservePageComponent,
+    HomeReserveModalComponent,
   ],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.css',
 })
 export class HomePageComponent implements OnDestroy {
   showReserveModal = false;
