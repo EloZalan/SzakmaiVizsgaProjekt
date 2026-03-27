@@ -4,7 +4,7 @@
       <h2>Pincérek kezelése</h2>
       <p>Pincérek felvétele, módosítása, törlése</p>
     </div>
-    <button class="gh-btn gh-btn--primary" (click)="addWaiter()">+ Pincér felvétele</button>
+    <button class="gh-btn gh-btn--primary" (click)="openAddWaiterModal()">+ Pincér felvétele</button>
   </div>
 
   @if (loading) {
@@ -99,4 +99,101 @@
       </div>
     </div>
   </section>
+}
+
+@if (showAddWaiterModal) {
+  <div class="staff-modal-backdrop" (click)="closeAddWaiterModal()">
+    <section class="staff-modal" (click)="$event.stopPropagation()">
+      <div class="staff-modal__accent"></div>
+
+      <header class="staff-modal__header">
+        <div>
+          <h3>Új pincér felvétele</h3>
+          <p>Töltsd ki az adatokat és hozd létre az új felhasználót.</p>
+        </div>
+        <button
+          type="button"
+          class="gh-btn gh-btn--ghost gh-btn--sm"
+          (click)="closeAddWaiterModal()"
+          [disabled]="addingWaiter"
+        >
+          ✕
+        </button>
+      </header>
+
+      <form class="staff-modal__form" (ngSubmit)="addWaiter()">
+        <label class="staff-modal__field">
+          <span>Név</span>
+          <input
+            type="text"
+            name="waiterName"
+            [(ngModel)]="newWaiter.name"
+            placeholder="Pl. Kiss Anna"
+            [disabled]="addingWaiter"
+            required
+          />
+        </label>
+
+        <label class="staff-modal__field">
+          <span>Email</span>
+          <input
+            type="email"
+            name="waiterEmail"
+            [(ngModel)]="newWaiter.email"
+            placeholder="anna@etterem.hu"
+            [disabled]="addingWaiter"
+            required
+          />
+        </label>
+
+        <label class="staff-modal__field">
+          <span>Jelszó</span>
+          <input
+            type="password"
+            name="waiterPassword"
+            [(ngModel)]="newWaiter.password"
+            minlength="6"
+            placeholder="Legalább 6 karakter"
+            [disabled]="addingWaiter"
+            required
+          />
+        </label>
+
+        <label class="staff-modal__field">
+          <span>Jelszó megerősítése</span>
+          <input
+            type="password"
+            name="waiterPasswordConfirmation"
+            [(ngModel)]="newWaiter.passwordConfirmation"
+            minlength="6"
+            placeholder="Írd be újra a jelszót"
+            [disabled]="addingWaiter"
+            required
+          />
+        </label>
+
+        @if (addWaiterError) {
+          <p class="staff-modal__error">{{ addWaiterError }}</p>
+        }
+
+        <div class="staff-modal__actions">
+          <button
+            type="submit"
+            class="gh-btn gh-btn--primary"
+            [disabled]="addingWaiter"
+          >
+            {{ addingWaiter ? 'Mentés...' : 'Létrehozás' }}
+          </button>
+          <button
+            type="button"
+            class="gh-btn gh-btn--ghost"
+            (click)="closeAddWaiterModal()"
+            [disabled]="addingWaiter"
+          >
+            Mégse
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
 }
