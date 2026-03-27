@@ -170,7 +170,7 @@ export class WaiterService {
 
     return {
       id: table.id,
-      name: `Table ${displayIndex}`,
+      name: `Asztal ${displayIndex}`,
       status: this.mapTableStatus(table.status),
       guests,
       server: table.waiter_name ?? '-',
@@ -193,7 +193,7 @@ export class WaiterService {
     }
 
     if (normalized === 'closed' || normalized === 'disabled') {
-      return 'CLOSED';
+      return 'Szabad';
     }
 
     if (

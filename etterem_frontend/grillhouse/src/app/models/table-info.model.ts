@@ -1,4 +1,4 @@
-export type WaiterTableStatus = 'Szabad' | 'Foglalt' | 'Asztalnál' | 'Fizetésre vár' | 'CLOSED';
+export type WaiterTableStatus = 'Szabad' | 'Foglalt' | 'Asztalnál' | 'Fizetésre vár';
 
 export interface TableOrderItem {
   menuItemId: number;

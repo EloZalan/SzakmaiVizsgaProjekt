@@ -62,9 +62,15 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.selectedChefDayKey = new Date().getDay();
+    this.currentLanguage = this.languageService.currentLanguageValue;
     this.loadMenu();
     this.languageSubscription = this.languageService.language$.subscribe(lang => {
+      const languageChanged = this.currentLanguage !== lang;
       this.currentLanguage = lang;
+
+      if (languageChanged) {
+        this.loadMenu();
+      }
     });
 
     this.stopMenuChangesListening = this.realtimeService.listenToMenuChanges(() => {

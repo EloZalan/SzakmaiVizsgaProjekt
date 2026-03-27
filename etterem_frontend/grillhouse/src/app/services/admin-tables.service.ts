@@ -57,7 +57,7 @@ export class AdminTablesService {
 
           return rows
             .sort((a, b) => a.id - b.id)
-            .map((table) => this.mapDtoToViewModel(table));
+            .map((table, index) => this.mapDtoToViewModel(table, index + 1));
         })
       );
   }
@@ -71,7 +71,7 @@ export class AdminTablesService {
 
           return rows
             .sort((a, b) => a.id - b.id)
-            .map((table) => this.mapDtoToLiveTable(table));
+            .map((table, index) => this.mapDtoToLiveTable(table, index + 1));
         })
       );
   }
@@ -99,23 +99,29 @@ export class AdminTablesService {
       .pipe(map(() => void 0));
   }
 
+  resetTableToFree(tableId: number): Observable<void> {
+    return this.http
+      .post(`${this.config.apiUrl}/admin/tables/${tableId}/reset-to-free`, {})
+      .pipe(map(() => void 0));
+  }
+
   private extractRows(response: TableDto[] | TableListResponse): TableDto[] {
     return Array.isArray(response) ? response : response?.data ?? [];
   }
 
-  private mapDtoToViewModel(table: TableDto): RestaurantTable {
+  private mapDtoToViewModel(table: TableDto, displayIndex: number): RestaurantTable {
     return {
       id: table.id,
-      name: `Asztal ${table.id}`,
+      name: `Asztal ${displayIndex}`,
       seats: table.capacity,
       status: this.mapStatus(table.status),
     };
   }
 
-  private mapDtoToLiveTable(table: TableDto): AdminLiveTable {
+  private mapDtoToLiveTable(table: TableDto, displayIndex: number): AdminLiveTable {
     return {
       id: table.id,
-      name: `Asztal ${table.id}`,
+      name: `Asztal ${displayIndex}`,
       seats: table.capacity,
       status: this.mapLiveStatus(table.status),
       guests: table.reservation?.guest_count ?? 0,
@@ -150,7 +156,7 @@ export class AdminTablesService {
     }
 
     if (normalized === 'closed' || normalized === 'disabled') {
-      return 'CLOSED';
+      return 'Szabad';
     }
 
     return 'Asztalnál';
