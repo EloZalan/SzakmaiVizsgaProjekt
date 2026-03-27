@@ -14,16 +14,24 @@ class MenuCategorySeeder extends Seeder
     public function run(): void
     {
         MenuCategory::create([
-            'name' => 'main dish'
+            'name' => 'Főétel',
+            'name_hu' => 'Főétel',
+            'name_en' => 'Main dish',
         ]);
         MenuCategory::create([
-            'name' => 'side dish'
+            'name' => 'Köret',
+            'name_hu' => 'Köret',
+            'name_en' => 'Side dish',
         ]);
         MenuCategory::create([
-            'name' => 'dessert'
+            'name' => 'Desszert',
+            'name_hu' => 'Desszert',
+            'name_en' => 'Dessert',
         ]);
         MenuCategory::create([
-            'name' => 'drink'
+            'name' => 'Ital',
+            'name_hu' => 'Ital',
+            'name_en' => 'Drink',
         ]);
     }
 }

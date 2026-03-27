@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/tables', [TableController::class, 'index']);
         Route::post('/admin/tables', [TableController::class, 'store']);
         Route::put('/admin/tables/{table}', [TableController::class, 'update']);
+        Route::post('/admin/tables/{table}/reset-to-free', [TableController::class, 'resetToFree']);
         Route::delete('/admin/tables/{table}', [TableController::class, 'destroy']);
 
         Route::post('/admin/menu-categories', [\App\Http\Controllers\MenuCategoryController::class, 'store']);

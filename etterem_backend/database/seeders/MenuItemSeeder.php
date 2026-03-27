@@ -16,6 +16,8 @@ class MenuItemSeeder extends Seeder
     {
         MenuItem::create([
             'name' => 'Rib-eye',
+            'name_hu' => 'Rib-eye steak',
+            'name_en' => 'Rib-eye steak',
             'description' => 'Szaftos marha steak (200g)',
             'price' => 8500,
             'category_id' => 1,
@@ -24,6 +26,8 @@ class MenuItemSeeder extends Seeder
 
         MenuItem::create([
             'name' => 'Coca Cola',
+            'name_hu' => 'Coca Cola',
+            'name_en' => 'Coca Cola',
             'description' => 'Az igazi (250ml)',
             'price' => 550,
             'category_id' => 4,
@@ -32,6 +36,8 @@ class MenuItemSeeder extends Seeder
 
         MenuItem::create([
             'name' => 'Saláta',
+            'name_hu' => 'Saláta',
+            'name_en' => 'Salad',
             'description' => '(100g)',
             'price' => 890,
             'category_id' => 2,
@@ -40,6 +46,8 @@ class MenuItemSeeder extends Seeder
 
         MenuItem::create([
             'name' => 'Tiramisu',
+            'name_hu' => 'Tiramisu',
+            'name_en' => 'Tiramisu',
             'description' => 'Olasz módra (150g)',
             'price' => 2190,
             'category_id' => 3,

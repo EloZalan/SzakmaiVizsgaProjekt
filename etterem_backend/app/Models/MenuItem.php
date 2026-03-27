@@ -8,6 +8,8 @@ class MenuItem extends Model
 {
     protected $fillable = [
         'name',
+        'name_hu',
+        'name_en',
         'description',
         'price',
         'category_id',
