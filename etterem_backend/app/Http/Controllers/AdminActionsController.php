@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\WaiterStatusChanged;
 use App\Models\Payment;
+use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -62,6 +63,32 @@ class AdminActionsController extends Controller
     public function getDailyRevenue() {
         $total = Payment::whereDate('paid_at', today())->sum('amount');
         return response()->json(['daily_revenue' => (int) $total]);
+    }
+
+    public function getTodayGuests()
+    {
+        $total = Reservation::whereDate('start_time', today())
+            ->whereHas('order', fn($q) => $q->where('status', 'done'))
+            ->sum('guest_count');
+        return response()->json(['today_guests' => (int) $total]);
+    }
+
+    public function getGuestCountHistory()
+    {
+        $history = collect(range(9, 0))->map(function (int $daysAgo) {
+            $day = now()->subDays($daysAgo)->toDateString();
+
+            $count = Reservation::whereDate('start_time', $day)
+                ->whereHas('order', fn($q) => $q->where('status', 'done'))
+                ->sum('guest_count');
+
+            return [
+                'date'        => $day,
+                'guest_count' => (int) $count,
+            ];
+        });
+
+        return response()->json($history);
     }
 
 }

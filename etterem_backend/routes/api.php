@@ -10,17 +10,18 @@ use App\Http\Controllers\MenuItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reservations', [ReservationController::class, 'store']);
-Route::get('/tables/max-capacity', [TableController::class, 'maxCapacity']);
+Route::middleware(['security.headers', 'throttle:api'])->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::get('/tables/max-capacity', [TableController::class, 'maxCapacity']);
 
-Route::get('/menu-categories', [\App\Http\Controllers\MenuCategoryController::class, 'index']);
-Route::get('/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'show']);
+    Route::get('/menu-categories', [\App\Http\Controllers\MenuCategoryController::class, 'index']);
+    Route::get('/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'show']);
 
-Route::get('/menu-items', [MenuItemController::class, 'index']);
-Route::get('/menu-items/{menu_item}', [MenuItemController::class, 'show']);
+    Route::get('/menu-items', [MenuItemController::class, 'index']);
+    Route::get('/menu-items/{menu_item}', [MenuItemController::class, 'show']);
 
-Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/take-shift', [AuthController::class, 'takeShift']);
     Route::post('/end-shift', [AuthController::class, 'endShift']);
@@ -53,6 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/waiters', [AdminActionsController::class, 'addWaiter']);
         Route::delete('/admin/waiters/{id}', [AdminActionsController::class, 'deleteWaiter']);
         Route::get('/admin/daily-revenue', [AdminActionsController::class, 'getDailyRevenue']);
+        Route::get('/admin/today-guests', [AdminActionsController::class, 'getTodayGuests']);
+        Route::get('/admin/guest-count-history', [AdminActionsController::class, 'getGuestCountHistory']);
 
         Route::get('/admin/tables', [TableController::class, 'index']);
         Route::post('/admin/tables', [TableController::class, 'store']);
@@ -68,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/menu-items', [MenuItemController::class, 'store']);
         Route::put('/admin/menu-items/{menu_item}', [MenuItemController::class, 'update']);
         Route::delete('/admin/menu-items/{menu_item}', [MenuItemController::class, 'destroy']);
+    });
     });
 });
 
