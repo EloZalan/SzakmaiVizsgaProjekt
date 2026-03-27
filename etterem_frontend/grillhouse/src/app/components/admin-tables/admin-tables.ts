@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminLiveTable, AdminTablesService } from '../../services/admin-tables.service';
 import { RealtimeService } from '../../services/realtime.service';
 
-type EditorMode = 'create' | 'edit' | null;
+type EditorMode = 'create' | 'edit' | 'delete' | 'reset' | null;
 
 @Component({
   selector: 'app-admin-tables',
@@ -104,6 +104,34 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  startDelete(table: AdminLiveTable): void {
+    if (!this.isEditable(table)) {
+      this.formError = 'Csak a szabad asztalok torolhetok.';
+      this.selectedTable = table;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.selectedTable = table;
+    this.editorMode = 'delete';
+    this.formError = '';
+    this.cdr.markForCheck();
+  }
+
+  startResetToFree(table: AdminLiveTable): void {
+    if (!this.canResetToFree(table)) {
+      this.formError = 'Csak foglalt asztal allithato vissza szabadra.';
+      this.selectedTable = table;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.selectedTable = table;
+    this.editorMode = 'reset';
+    this.formError = '';
+    this.cdr.markForCheck();
+  }
+
   cancelEditor(): void {
     this.editorMode = null;
     this.formError = '';
@@ -179,11 +207,6 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const confirmed = confirm(`Biztosan torlod ezt az asztalt: ${this.selectedTable.name}?`);
-    if (!confirmed) {
-      return;
-    }
-
     const deletingId = this.selectedTable.id;
     this.saving = true;
     this.formError = '';
@@ -204,8 +227,42 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
     });
   }
 
+  resetSelectedTableToFree(): void {
+    if (!this.selectedTable) {
+      return;
+    }
+
+    if (!this.canResetToFree(this.selectedTable)) {
+      this.formError = 'Csak foglalt asztal allithato vissza szabadra.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const selectedId = this.selectedTable.id;
+    this.saving = true;
+    this.formError = '';
+
+    this.adminTablesService.resetTableToFree(selectedId).subscribe({
+      next: () => {
+        this.saving = false;
+        this.editorMode = null;
+        this.loadTables(selectedId);
+      },
+      error: (err) => {
+        this.saving = false;
+        this.formError = this.extractError(err, 'Nem sikerült visszaállítani az asztalt szabadra.');
+        console.error('ADMIN TABLE RESET TO FREE ERROR:', err);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   isEditable(table: AdminLiveTable): boolean {
     return table.status === 'Szabad';
+  }
+
+  canResetToFree(table: AdminLiveTable): boolean {
+    return table.status === 'Foglalt';
   }
 
   get freeCount(): number {
@@ -222,10 +279,6 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
 
   get paymentCount(): number {
     return this.tables.filter((table) => table.status === 'Fizetésre vár').length;
-  }
-
-  get closedCount(): number {
-    return this.tables.filter((table) => table.status === 'CLOSED').length;
   }
 
   private extractError(err: unknown, fallback: string): string {

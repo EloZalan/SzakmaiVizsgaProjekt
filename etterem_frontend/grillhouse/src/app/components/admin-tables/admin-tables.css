@@ -45,6 +45,46 @@
   margin-top: 12px;
 }
 
+.admin-tables-delete-box {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 106, 0, 0.24);
+  background: rgba(255, 106, 0, 0.08);
+  color: #ffcfad;
+  display: grid;
+  gap: 6px;
+}
+
+.admin-tables-reset-box {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(70, 170, 110, 0.32);
+  background: rgba(70, 170, 110, 0.12);
+  color: #bdeecb;
+  display: grid;
+  gap: 6px;
+}
+
+.admin-tables-reset-box p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-tables-reset-box small {
+  color: #a5ddb7;
+}
+
+.admin-tables-delete-box p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-tables-delete-box small {
+  color: #ffbf8f;
+}
+
 .admin-tables-hint,
 .inline-error {
   margin-top: 12px;

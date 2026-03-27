@@ -38,11 +38,6 @@
         <strong>{{ paymentCount }}</strong>
         <small>Lezárás előtt</small>
       </div>
-      <div class="summary-box">
-        <span>Zárt</span>
-        <strong>{{ closedCount }}</strong>
-        <small>Nem módosítható</small>
-      </div>
     </div>
 
     <div class="legend-row admin-tables-legend">
@@ -50,7 +45,6 @@
       <span class="gh-tag">Foglalt</span>
       <span class="gh-tag">Asztalnál</span>
       <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
-      <span class="gh-tag gh-tag--muted">CLOSED</span>
     </div>
 
     <div class="admin-tables-shell">
@@ -70,7 +64,6 @@
                 [class.waiter-table-tile--selected]="selectedTable?.id === table.id"
                 [class.waiter-table-tile--free]="table.status === 'Szabad'"
                 [class.waiter-table-tile--pay]="table.status === 'Fizetésre vár'"
-                [class.waiter-table-tile--closed]="table.status === 'CLOSED'"
               >
                 <div class="waiter-table-tile__top">
                   <strong>{{ table.name }}</strong>
@@ -80,8 +73,6 @@
                     <span class="gh-tag">Foglalt</span>
                   } @else if (table.status === 'Fizetésre vár') {
                     <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
-                  } @else if (table.status === 'CLOSED') {
-                    <span class="gh-tag gh-tag--muted">CLOSED</span>
                   } @else {
                     <span class="gh-tag">Asztalnál</span>
                   }
@@ -130,7 +121,7 @@
           <div class="panel-head panel-head--row">
             <div>
               <h2>{{ table.name }}</h2>
-              <p>Csak a szabad asztalok módosíthatók vagy törölhetők.</p>
+              <p>Szabad asztal szerkeszthető vagy törölhető, foglalt asztal visszaállítható szabadra.</p>
             </div>
 
             @if (table.status === 'Szabad') {
@@ -139,8 +130,6 @@
               <span class="gh-tag">Foglalt</span>
             } @else if (table.status === 'Fizetésre vár') {
               <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
-            } @else if (table.status === 'CLOSED') {
-              <span class="gh-tag gh-tag--muted">CLOSED</span>
             } @else {
               <span class="gh-tag">Asztalnál</span>
             }
@@ -162,6 +151,46 @@
               <button type="button" class="gh-btn gh-btn--ghost" (click)="cancelEditor()">Mégse</button>
               <button type="button" class="gh-btn gh-btn--primary" (click)="saveTable()" [disabled]="saving">
                 Mentés
+              </button>
+            </div>
+          } @else if (editorMode === 'delete') {
+            @if (formError) {
+              <div class="inline-error">{{ formError }}</div>
+            }
+
+            <div class="admin-tables-delete-box">
+              <strong>Asztal törlése</strong>
+              <p>
+                Biztosan törölni szeretnéd ezt az asztalt: <b>{{ table.name }}</b>?
+              </p>
+              <small>A művelet nem visszavonható.</small>
+            </div>
+
+            <div class="action-row action-row--end admin-tables-actions">
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="cancelEditor()">Mégse</button>
+              <button type="button" class="gh-btn gh-btn--danger" (click)="deleteSelectedTable()" [disabled]="saving">
+                Törlés megerősítése
+              </button>
+            </div>
+          } @else if (editorMode === 'reset') {
+            @if (formError) {
+              <div class="inline-error">{{ formError }}</div>
+            }
+
+            <div class="admin-tables-reset-box">
+              <strong>Asztal visszaállítása szabadra</strong>
+              <p>
+                Biztosan visszaállítod szabadra ezt az asztalt: <b>{{ table.name }}</b>?
+              </p>
+              <small>
+                Ha admin állítja vissza, a kapcsolódó foglalás nem jelenik meg a statisztikában.
+              </small>
+            </div>
+
+            <div class="action-row action-row--end admin-tables-actions">
+              <button type="button" class="gh-btn gh-btn--ghost" (click)="cancelEditor()">Mégse</button>
+              <button type="button" class="gh-btn gh-btn--primary" (click)="resetSelectedTableToFree()" [disabled]="saving">
+                Visszaállítás
               </button>
             </div>
           } @else {
@@ -192,24 +221,27 @@
               </div>
             </div>
 
-            @if (table.note) {
-              <div class="summary-box admin-tables-note">
-                <span>Kapcsolódó foglalás</span>
-                <strong>{{ table.note }}</strong>
-              </div>
-            }
-
             @if (!isEditable(table)) {
               <div class="admin-tables-hint">
-                Ez az asztal most nem szabad, ezért a férőhely módosítása és a törlés le van tiltva.
+                Nem szabad asztalnál a férőhely módosítása és a törlés le van tiltva. Foglalt állapotból visszaállítható szabadra.
               </div>
             }
 
             <div class="action-row action-row--end admin-tables-actions">
+              @if (table.status !== 'Szabad') {
+                <button
+                  type="button"
+                  class="gh-btn gh-btn--primary"
+                  (click)="startResetToFree(table)"
+                  [disabled]="!canResetToFree(table) || saving"
+                >
+                  Visszaállítás szabadra
+                </button>
+              }
               <button type="button" class="gh-btn gh-btn--ghost" (click)="startEdit(table)" [disabled]="!isEditable(table)">
                 Férőhely módosítása
               </button>
-              <button type="button" class="gh-btn gh-btn--danger" (click)="deleteSelectedTable()" [disabled]="!isEditable(table) || saving">
+              <button type="button" class="gh-btn gh-btn--danger" (click)="startDelete(table)" [disabled]="!isEditable(table) || saving">
                 Törlés
               </button>
             </div>
