@@ -15,11 +15,13 @@ class Reservation extends Model
         'end_time',
         'guest_count',
         'note',
+        'admin_released_at',
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'admin_released_at' => 'datetime',
         'guest_count' => 'integer',
         'phone_number' => E164PhoneNumberCast::class . ':HU',
     ];

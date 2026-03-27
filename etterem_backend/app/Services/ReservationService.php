@@ -21,6 +21,7 @@ class ReservationService
             // és amelyhez nincs done rendelés (tehát a vendég még nem "ment el").
             ->whereDoesntHave('reservations', function ($query) use ($reservationStart, $reservationEnd) {
                 $query
+                    ->whereNull('admin_released_at')
                     // időintervallum átfedés ellenőrzése
                     ->where('start_time', '<', $reservationEnd)
                     ->where('end_time', '>', $reservationStart)

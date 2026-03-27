@@ -45,6 +45,7 @@ class Table extends Model
         $bufferEnd = $now->copy()->addHours(2);
 
         $hasReservedWindow = $this->reservations()
+            ->whereNull('admin_released_at')
             ->whereDoesntHave('order', function ($q) {
                 $q->where('status', 'done');
             })
