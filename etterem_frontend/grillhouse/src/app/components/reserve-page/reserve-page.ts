@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../services/config.service';
@@ -56,6 +56,8 @@ export class ReservePageComponent implements OnInit {
   resultMessage = '';
   isResultSuccess = false;
   maxTableCapacity: number | null = null;
+  @Input() embeddedMode = false;
+  @Output() closeRequested = new EventEmitter<void>();
 
   readonly allTimes: string[] = this.generateAllTimes();
   availableTimes: string[] = [];
@@ -141,6 +143,11 @@ export class ReservePageComponent implements OnInit {
 
   backToHome(): void {
     this.showResultModal = false;
+    if (this.embeddedMode) {
+      this.closeRequested.emit();
+      return;
+    }
+
     this.router.navigateByUrl('/');
   }
 

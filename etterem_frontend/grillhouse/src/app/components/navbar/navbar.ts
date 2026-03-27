@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
@@ -14,6 +14,7 @@ import { ThemeService } from '../../services/theme.service';
 })
 export class NavbarComponent {
   scrolled = false;
+  @Output() reserveRequested = new EventEmitter<void>();
 
   constructor(
     private actions: GrillhouseActionsService,
@@ -49,6 +50,7 @@ export class NavbarComponent {
 
   onReserveTable(): void {
     this.actions.reserveTable();
+    this.reserveRequested.emit();
   }
 
   scrollToSection(fragment: string): void {
