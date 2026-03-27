@@ -1,4 +1,4 @@
-<app-navbar></app-navbar>
+<app-navbar (reserveRequested)="openReserveModal()"></app-navbar>
 
 <main class="home-page">
   <section id="top">
@@ -19,3 +19,22 @@
 
   <app-footer></app-footer>
 </main>
+
+@if (showReserveModal) {
+  <div class="home-reserve-backdrop" (click)="closeReserveModal()">
+    <section class="home-reserve-modal" (click)="$event.stopPropagation()">
+      <div class="home-reserve-modal__accent"></div>
+      <header class="home-reserve-modal__header">
+        <div>
+          <h3>Asztalfoglalás</h3>
+          <p>Foglalj asztalt néhány kattintással</p>
+        </div>
+        <button type="button" class="gh-btn gh-btn--ghost gh-btn--sm" (click)="closeReserveModal()">✕</button>
+      </header>
+
+      <div class="home-reserve-modal__body">
+        <app-reserve-page [embeddedMode]="true" (closeRequested)="closeReserveModal()"></app-reserve-page>
+      </div>
+    </section>
+  </div>
+}

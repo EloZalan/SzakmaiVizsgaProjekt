@@ -23,7 +23,7 @@
         <span>{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</span>
       </button>
       <a class="gh-btn gh-btn--ghost btn-login" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
-      <a class="gh-btn gh-btn--primary" [routerLink]="['/reserve']">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</a>
+      <button type="button" class="gh-btn gh-btn--primary" (click)="onReserveTable()">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</button>
     </div>
   </div>
 </header>
