@@ -37,7 +37,7 @@
           >
             <div class="waiter-reservation-card__title">
               <strong>
-                Table {{ reservation.table_id }} · {{ reservation.guest_name }}
+                Asztal {{ reservation.table_id }} · {{ displayGuestName(reservation.guest_name) }}
               </strong>
               <small>
                 Kezdés: {{ formatDateTime(reservation.start_time) }} · {{ reservation.guest_count }} fő

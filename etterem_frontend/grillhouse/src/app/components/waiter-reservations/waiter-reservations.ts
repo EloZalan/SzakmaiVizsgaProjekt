@@ -97,6 +97,16 @@ export class WaiterReservationsComponent implements OnInit {
     });
   }
 
+  displayGuestName(name: string): string {
+    const normalized = (name ?? '').trim().toLowerCase();
+
+    if (normalized === 'walk-in guest') {
+      return 'Helyszíni vendég';
+    }
+
+    return name;
+  }
+
   getOrderStatusLabel(status?: WaiterDailyReservationOrderDto['status']): string {
     if (status === 'ready_to_pay') {
       return 'Fizetésre vár';
@@ -150,9 +160,9 @@ export class WaiterReservationsComponent implements OnInit {
       doc.setFontSize(11);
       doc.text(`Foglalas: #${reservation.reservation_id}`, left, y);
       y += 6;
-      doc.text(`Asztal: Table ${reservation.table_id}`, left, y);
+      doc.text(`Asztal: Asztal ${reservation.table_id}`, left, y);
       y += 6;
-      doc.text(`Vendeg: ${reservation.guest_name}`, left, y);
+      doc.text(`Vendeg: ${this.displayGuestName(reservation.guest_name)}`, left, y);
       y += 6;
       doc.text(`Letszam: ${reservation.guest_count} fo`, left, y);
       y += 6;
