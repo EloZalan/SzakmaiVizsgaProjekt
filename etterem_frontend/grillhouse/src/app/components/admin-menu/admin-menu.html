@@ -38,11 +38,21 @@
 
           <div class="edit-panel__body">
             <div class="form-group">
-              <label>Név *</label>
+              <label>Magyar név *</label>
               <input
                 type="text"
                 [(ngModel)]="editing.name"
-                placeholder="Add meg a nevet"
+                placeholder="Add meg a magyar nevet"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Angol név</label>
+              <input
+                type="text"
+                [(ngModel)]="editing.nameEn"
+                placeholder="Add meg az angol nevet"
                 class="form-input"
               />
             </div>

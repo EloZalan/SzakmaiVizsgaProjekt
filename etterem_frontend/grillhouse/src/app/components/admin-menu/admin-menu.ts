@@ -6,6 +6,8 @@ import { MenuService, MenuCategory } from '../../services/menu.service';
 interface MenuItem {
   id: number;
   name: string;
+  nameHu: string;
+  nameEn: string;
   description?: string;
   price: number;
   categoryId: number | null;
@@ -25,6 +27,7 @@ interface EditingState {
   type: 'category' | 'item' | null;
   id: number | null;
   name: string;
+  nameEn: string;
   description: string;
   price: number;
   categoryId: number | null;
@@ -76,9 +79,12 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
 
-    this.menuService.getCategories().subscribe({
+    this.menuService.getAdminCategories().subscribe({
       next: (categories) => {
-        this.categories = categories;
+        this.categories = categories.map((category) => ({
+          ...category,
+          name: category.name_hu || category.name,
+        }));
         this.loadMenuItems();
       },
       error: (err) => {
@@ -95,7 +101,9 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       next: (items) => {
         this.menuItems = items.map(item => ({
           id: item.id,
-          name: item.name,
+          name: item.name_hu || item.name,
+          nameHu: item.name_hu || item.name,
+          nameEn: item.name_en || item.name_hu || item.name,
           description: item.description || '',
           price: item.price,
           categoryId: item.category_id,
@@ -124,7 +132,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.resetEditingState({
       type: 'category',
       id: cat.id,
-      name: cat.name,
+      name: cat.name_hu || cat.name,
+      nameEn: cat.name_en || cat.name_hu || cat.name,
     });
   }
 
@@ -146,7 +155,10 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
     if (this.editing.id === null) {
       // Create new
-      this.menuService.createCategory(this.editing.name.trim()).subscribe({
+      this.menuService.createCategory(
+        this.editing.name.trim(),
+        this.editing.nameEn.trim() || this.editing.name.trim()
+      ).subscribe({
         next: () => {
           this.cancelEdit();
           this.loadMenu();
@@ -158,7 +170,12 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       });
     } else {
       // Update existing
-      this.menuService.updateCategory(this.editing.id, this.editing.name.trim()).subscribe({
+      const existingCategory = this.categories.find(c => c.id === this.editing.id);
+      this.menuService.updateCategory(
+        this.editing.id,
+        this.editing.name.trim(),
+        this.editing.nameEn.trim() || existingCategory?.name_en || this.editing.name.trim()
+      ).subscribe({
         next: () => {
           this.cancelEdit();
           this.loadMenu();
@@ -196,7 +213,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.editing = {
       type: 'item',
       id: item.id,
-      name: item.name,
+      name: item.nameHu,
+      nameEn: item.nameEn,
       description: item.description || '',
       price: item.price,
       categoryId: item.categoryId,
@@ -279,6 +297,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
           this.editing.description.trim(),
           Math.round(this.editing.price),
           this.editing.imageFile,
+          null,
+          this.editing.nameEn.trim() || this.editing.name.trim(),
         )
         .subscribe({
           next: () => {
@@ -299,7 +319,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
           Math.round(this.editing.price),
           categoryId,
           this.editing.imageFile,
-          this.editing.removeImage
+          this.editing.removeImage,
+          this.editing.nameEn.trim() || this.editing.name.trim(),
         )
         .subscribe({
           next: () => {
@@ -503,12 +524,13 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.menuService
       .updateMenuItem(
         item.id,
-        item.name,
+        item.nameHu,
         item.description || '',
         Math.round(item.price),
         targetCategoryId,
         null,
-        false
+        false,
+        item.nameEn,
       )
       .subscribe({
         next: () => {
@@ -548,11 +570,12 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.menuService
       .createMenuItem(
         targetCategoryId,
-        item.name,
+        item.nameHu,
         item.description || '',
         Math.round(item.price),
         null,
-        item.id
+        item.id,
+        item.nameEn,
       )
       .subscribe({
         next: () => {
@@ -602,6 +625,7 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       type: null,
       id: null,
       name: '',
+      nameEn: '',
       description: '',
       price: 0,
       categoryId: null,
