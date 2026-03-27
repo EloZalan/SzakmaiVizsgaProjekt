@@ -39,5 +39,31 @@
         <small>Összes konfigurált</small>
       </div>
     </div>
+
+    <div class="line-chart">
+      <div class="line-chart__header">
+        <h3>Vendégforgalom – elmúlt 10 nap</h3>
+      </div>
+      @if (guestHistory.length > 0) {
+        <svg viewBox="0 0 600 200" class="line-chart__svg" aria-label="Vendégforgalom az elmúlt 10 napban">
+          @for (gridLine of chartGridLines; track gridLine.y) {
+            <line x1="45" [attr.y1]="gridLine.y" x2="585" [attr.y2]="gridLine.y" class="lchart-grid" />
+            <text x="40" [attr.y]="gridLine.y + 4" class="lchart-ylabel" text-anchor="end">{{ gridLine.label }}</text>
+          }
+          <polygon [attr.points]="chartAreaPoints" class="lchart-area" />
+          <polyline [attr.points]="chartLinePoints" class="lchart-line" />
+          @for (pt of chartDataPoints; track pt.date) {
+            <g>
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4.5" class="lchart-dot">
+                <title>{{ pt.tooltip }}</title>
+              </circle>
+              <text [attr.x]="pt.x" y="192" class="lchart-xlabel" text-anchor="middle">{{ pt.dayLabel }}</text>
+            </g>
+          }
+        </svg>
+      } @else {
+        <div class="gh-empty" style="padding: 1rem 0;">Nincs adat az elmúlt 10 napra.</div>
+      }
+    </div>
   }
 </section>

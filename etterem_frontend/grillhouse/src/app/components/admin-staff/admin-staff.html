@@ -39,12 +39,12 @@
               <td>{{ staff.name }}</td>
               <td>
                 <span class="gh-tag" [class.gh-tag--accent]="staff.role === 'ADMIN'">
-                  {{ staff.role }}
+                  {{ getRoleLabel(staff.role) }}
                 </span>
               </td>
               <td>
                 <span class="gh-tag" [class.gh-tag--muted]="staff.status === 'INACTIVE'">
-                  {{ staff.status }}
+                  {{ getStatusLabel(staff.status) }}
                 </span>
               </td>
               <td>{{ staff.shift }}</td>
@@ -110,12 +110,12 @@
 
       <div class="detail-line">
         <span>Szerepkör</span>
-        <strong>{{ selectedStaff.role }}</strong>
+        <strong>{{ getRoleLabel(selectedStaff.role) }}</strong>
       </div>
 
       <div class="detail-line">
         <span>Státusz</span>
-        <strong>{{ selectedStaff.status }}</strong>
+        <strong>{{ getStatusLabel(selectedStaff.status) }}</strong>
       </div>
 
       <div class="detail-line">

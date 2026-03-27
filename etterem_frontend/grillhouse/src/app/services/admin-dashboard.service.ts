@@ -21,6 +21,11 @@ export interface ReservationDto {
   guest_count: number;
 }
 
+export interface GuestHistoryPoint {
+  date: string;
+  guest_count: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -57,21 +62,13 @@ export class AdminDashboardService {
       .pipe(map((res) => res.daily_revenue));
   }
 
-  getTodayGuestCount(now: Date = new Date()): Observable<number> {
-    return this.getReservations().pipe(
-      map((reservations) =>
-        reservations
-          .filter((r) => this.isSameLocalDate(new Date(r.start_time), now))
-          .reduce((sum, r) => sum + (r.guest_count || 0), 0)
-      )
-    );
+  getGuestCountHistory(): Observable<GuestHistoryPoint[]> {
+    return this.http.get<GuestHistoryPoint[]>(`${this.config.apiUrl}/admin/guest-count-history`);
   }
 
-  private isSameLocalDate(a: Date, b: Date): boolean {
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate()
-    );
+  getTodayGuestCount(): Observable<number> {
+    return this.http
+      .get<{ today_guests: number }>(`${this.config.apiUrl}/admin/today-guests`)
+      .pipe(map((res) => res.today_guests));
   }
 }
