@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AdminDashboardService, AdminWaiterDto } from '../../services/admin-dashboard.service';
 import { StaffMember } from '../../models/staff-member.model';
 import { RealtimeService } from '../../services/realtime.service';
@@ -7,7 +8,7 @@ import { RealtimeService } from '../../services/realtime.service';
 @Component({
   selector: 'app-admin-staff',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-staff.html',
   styleUrl: './admin-staff.css',
 })
@@ -17,6 +18,15 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
 
   loading = false;
   error = '';
+  showAddWaiterModal = false;
+  addingWaiter = false;
+  addWaiterError = '';
+  newWaiter = {
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+  };
   private stopWaiterStatusListening: (() => void) | null = null;
 
   constructor(
@@ -67,42 +77,76 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  openAddWaiterModal(): void {
+    this.showAddWaiterModal = true;
+    this.addWaiterError = '';
+    this.newWaiter = {
+      name: '',
+      email: '',
+      password: '',
+      passwordConfirmation: '',
+    };
+    this.cdr.markForCheck();
+  }
+
+  closeAddWaiterModal(): void {
+    if (this.addingWaiter) return;
+
+    this.showAddWaiterModal = false;
+    this.addWaiterError = '';
+    this.cdr.markForCheck();
+  }
+
   addWaiter(): void {
-    const name = prompt('Új pincér neve:');
-    if (!name || !name.trim()) return;
+    const name = this.newWaiter.name.trim();
+    const email = this.newWaiter.email.trim();
+    const password = this.newWaiter.password;
+    const passwordConfirmation = this.newWaiter.passwordConfirmation;
 
-    const email = prompt('Email cím:');
-    if (!email || !email.trim()) {
-      alert('Email megadása kötelező.');
+    if (!name) {
+      this.addWaiterError = 'A név megadása kötelező.';
+      this.cdr.markForCheck();
       return;
     }
 
-    const password = prompt('Jelszó:');
+    if (!email) {
+      this.addWaiterError = 'Email megadása kötelező.';
+      this.cdr.markForCheck();
+      return;
+    }
+
     if (!password || password.length < 6) {
-      alert('A jelszó legalább 6 karakter legyen.');
+      this.addWaiterError = 'A jelszó legalább 6 karakter legyen.';
+      this.cdr.markForCheck();
       return;
     }
 
-    const passwordConfirmation = prompt('Jelszó megerősítése:');
     if (passwordConfirmation !== password) {
-      alert('A két jelszó nem egyezik.');
+      this.addWaiterError = 'A két jelszó nem egyezik.';
+      this.cdr.markForCheck();
       return;
     }
+
+    this.addingWaiter = true;
+    this.addWaiterError = '';
 
     this.adminDashboardService
       .createWaiter({
-        name: name.trim(),
-        email: email.trim(),
+        name,
+        email,
         password,
         password_confirmation: passwordConfirmation,
       })
       .subscribe({
-        next: (created) => {
+        next: () => {
+          this.addingWaiter = false;
+          this.showAddWaiterModal = false;
           this.loadStaff();
         },
         error: (err) => {
+          this.addingWaiter = false;
           console.error('CREATE WAITER ERROR:', err);
-          alert('Nem sikerült létrehozni a pincért.');
+          this.addWaiterError = 'Nem sikerült létrehozni a pincért.';
           this.cdr.markForCheck();
         },
       });
