@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Events\MenuChanged;
 use App\Models\MenuCategory;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class MenuCategoryController extends Controller
 {
@@ -14,10 +13,13 @@ class MenuCategoryController extends Controller
      */
     public function index()
     {
+        $request = request();
+
         return response()->json(
             MenuCategory::where('name', '!=', MenuCategory::UNAVAILABLE_CATEGORY_NAME)
                 ->orderBy('name')
                 ->get()
+                ->map(fn (MenuCategory $category) => $this->serializeCategory($category, $request))
         );
     }
 
@@ -27,16 +29,31 @@ class MenuCategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|unique:menu_categories,name|not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
+            'name' => 'sometimes|required|string|not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
+            'name_hu' => 'sometimes|required|string|not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
+            'name_en' => 'sometimes|required|string|not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
         ]);
 
+        [$nameHu, $nameEn] = $this->resolveNames($request);
+
+        if ($nameHu === '' || $nameEn === '') {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Kérlek adj meg legalább egy kategória nevet (HU vagy EN).',
+                    'en' => 'Please provide at least one category name (HU or EN).',
+                ], $request),
+            ], 422);
+        }
+
         $category = MenuCategory::create([
-            'name' => $request->name,
+            'name' => $nameHu,
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
         ]);
 
         event(new MenuChanged('category', 'created', $category->id));
 
-        return response()->json($category, 201);
+        return response()->json($this->serializeCategory($category, $request), 201);
     }
 
     /**
@@ -44,7 +61,8 @@ class MenuCategoryController extends Controller
      */
     public function show(MenuCategory $menu_category)
     {
-        return response()->json($menu_category);
+        $request = request();
+        return response()->json($this->serializeCategory($menu_category, $request));
     }
 
     /**
@@ -53,21 +71,49 @@ class MenuCategoryController extends Controller
     public function update(Request $request, MenuCategory $menu_category)
     {
         $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME,
-                Rule::unique('menu_categories', 'name')->ignore($menu_category->id),
-            ],
+            'name' => ['sometimes', 'required', 'string', 'not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME],
+            'name_hu' => ['sometimes', 'required', 'string', 'not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME],
+            'name_en' => ['sometimes', 'required', 'string', 'not_in:' . MenuCategory::UNAVAILABLE_CATEGORY_NAME],
         ]);
 
+        [$nameHu, $nameEn] = $this->resolveNames($request, $menu_category->name_hu ?? $menu_category->name, $menu_category->name_en ?? $menu_category->name);
+
+        if ($nameHu === '' || $nameEn === '') {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'A kategória magyar és angol neve nem lehet üres.',
+                    'en' => 'Category Hungarian and English names cannot be empty.',
+                ], $request),
+            ], 422);
+        }
+
+        $conflict = MenuCategory::query()
+            ->where('id', '!=', $menu_category->id)
+            ->where(function ($query) use ($nameHu, $nameEn) {
+                $query
+                    ->where('name_hu', $nameHu)
+                    ->orWhere('name_en', $nameEn);
+            })
+            ->exists();
+
+        if ($conflict) {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Már létezik ilyen nevű kategória.',
+                    'en' => 'A category with this name already exists.',
+                ], $request),
+            ], 422);
+        }
+
         $menu_category->update([
-            'name' => $request->name,
+            'name' => $nameHu,
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
         ]);
 
         event(new MenuChanged('category', 'updated', $menu_category->id));
 
-        return response()->json($menu_category, 200);
+        return response()->json($this->serializeCategory($menu_category, $request), 200);
     }
 
     /**
@@ -81,5 +127,37 @@ class MenuCategoryController extends Controller
         event(new MenuChanged('category', 'deleted', $categoryId));
 
         return response()->json("", 204);
+    }
+
+    private function resolveNames(Request $request, string $fallbackHu = '', string $fallbackEn = ''): array
+    {
+        $name = trim((string) $request->input('name', ''));
+        $nameHu = trim((string) $request->input('name_hu', $name !== '' ? $name : $fallbackHu));
+        $nameEn = trim((string) $request->input('name_en', $name !== '' ? $name : $fallbackEn));
+
+        if ($nameHu === '' && $nameEn !== '') {
+            $nameHu = $nameEn;
+        }
+
+        if ($nameEn === '' && $nameHu !== '') {
+            $nameEn = $nameHu;
+        }
+
+        return [$nameHu, $nameEn];
+    }
+
+    private function serializeCategory(MenuCategory $category, Request $request): array
+    {
+        $nameHu = $category->name_hu ?? $category->name;
+        $nameEn = $category->name_en ?? $category->name;
+
+        return [
+            'id' => $category->id,
+            'name' => $this->localizedName($nameHu, $nameEn, $request),
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
+            'created_at' => $category->created_at,
+            'updated_at' => $category->updated_at,
+        ];
     }
 }

@@ -19,6 +19,7 @@ class OrderController extends Controller
         $now = Carbon::now();
 
         $activeReservation = $table->reservations()
+            ->whereNull('admin_released_at')
             ->where('start_time', '<=', $now)
             ->where('end_time', '>', $now)
             ->latest('start_time')
@@ -58,6 +59,7 @@ class OrderController extends Controller
         $now = Carbon::now();
 
         $activeReservation = $table->reservations()
+            ->whereNull('admin_released_at')
             ->where('start_time', '<=', $now)
             ->where('end_time', '>', $now)
             ->latest('start_time')

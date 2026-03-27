@@ -1,5 +1,5 @@
 @baseUrl = http://127.0.0.1:8000/api
-@token = 14|5TXv9E98MJDV58VOIJc6KyKK3U3vtrDjqQoVSW1k29764065
+@token = 2|YRvG63ZJp3mhTLpyJV6n1VwGMPijenJWW7Uq8Cy85765b4e2
 ### Login admin
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -327,7 +327,7 @@ Content-Type: application/json
 {}
 
 ### Add order item to an order
-POST {{baseUrl}}/orders/4/items
+POST {{baseUrl}}/orders/2/items
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
@@ -347,7 +347,7 @@ Accept: application/json
 {}
 
 ### Ready to pay simulation
-POST {{baseUrl}}/orders/4/simulate-ready
+POST {{baseUrl}}/orders/2/simulate-ready
 Authorization: Bearer {{token}}
 
 ### Payment

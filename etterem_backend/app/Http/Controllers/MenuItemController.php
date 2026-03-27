@@ -13,11 +13,13 @@ class MenuItemController extends Controller
 {
     public function adminIndex()
     {
+        $request = request();
+
         return response()->json(
             MenuItem::with('menuCategory')
                 ->orderBy('name')
                 ->get()
-                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item))
+                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item, $request))
         );
     }
 
@@ -26,6 +28,8 @@ class MenuItemController extends Controller
      */
     public function index()
     {
+        $request = request();
+
         return response()->json(
             MenuItem::with('menuCategory')
                 ->whereHas('menuCategory', function ($query) {
@@ -34,7 +38,7 @@ class MenuItemController extends Controller
                 ->orderBy('category_id')
                 ->orderBy('name')
                 ->get()
-                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item))
+                ->map(fn (MenuItem $item) => $this->serializeMenuItem($item, $request))
         );
     }
 
@@ -44,7 +48,9 @@ class MenuItemController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string',
+            'name'        => 'sometimes|required|string',
+            'name_hu'     => 'sometimes|required|string',
+            'name_en'     => 'sometimes|required|string',
             'description' => 'nullable|string',
             'price'       => 'required|integer|min:0',
             'category_id' => 'nullable|exists:menu_categories,id',
@@ -53,8 +59,21 @@ class MenuItemController extends Controller
             'source_item_id' => 'nullable|exists:menu_items,id',
         ]);
 
+        [$nameHu, $nameEn] = $this->resolveNames($request);
+
+        if ($nameHu === '' || $nameEn === '') {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Kérlek adj meg legalább egy tétel nevet (HU vagy EN).',
+                    'en' => 'Please provide at least one item name (HU or EN).',
+                ], $request),
+            ], 422);
+        }
+
         $item = MenuItem::create([
-            'name' => $request->input('name'),
+            'name' => $nameHu,
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
             'description' => $request->input('description'),
             'price' => $request->input('price'),
             'category_id' => $this->resolveCategoryId($request->input('category_id')),
@@ -65,7 +84,7 @@ class MenuItemController extends Controller
 
         event(new MenuChanged('item', 'created', $item->id));
 
-        return response()->json($this->serializeMenuItem($item), 201);
+        return response()->json($this->serializeMenuItem($item, $request), 201);
     }
 
     /**
@@ -74,7 +93,8 @@ class MenuItemController extends Controller
     public function show(MenuItem $menu_item)
     {
         $item = MenuItem::with('menuCategory')->findOrFail($menu_item->id);
-        return response()->json($this->serializeMenuItem($item), 200);
+        $request = request();
+        return response()->json($this->serializeMenuItem($item, $request), 200);
     }
 
     /**
@@ -83,13 +103,26 @@ class MenuItemController extends Controller
     public function update(Request $request, MenuItem $menu_item)
     {
         $request->validate([
-            'name'        => 'required|string',
+            'name'        => 'sometimes|required|string',
+            'name_hu'     => 'sometimes|required|string',
+            'name_en'     => 'sometimes|required|string',
             'description' => 'nullable|string',
             'price'       => 'required|integer|min:0',
             'category_id' => 'nullable|exists:menu_categories,id',
             'image' => 'nullable|image|max:5120',
             'remove_image' => 'nullable|boolean',
         ]);
+
+        [$nameHu, $nameEn] = $this->resolveNames($request, $menu_item->name_hu ?? $menu_item->name, $menu_item->name_en ?? $menu_item->name);
+
+        if ($nameHu === '' || $nameEn === '') {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'A tétel magyar és angol neve nem lehet üres.',
+                    'en' => 'Item Hungarian and English names cannot be empty.',
+                ], $request),
+            ], 422);
+        }
 
         $imagePath = $menu_item->image_path;
 
@@ -103,7 +136,9 @@ class MenuItemController extends Controller
         }
 
         $menu_item->update([
-            'name' => $request->input('name'),
+            'name' => $nameHu,
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
             'description' => $request->input('description'),
             'price' => $request->input('price'),
             'category_id' => $this->resolveCategoryId($request->input('category_id')),
@@ -114,7 +149,7 @@ class MenuItemController extends Controller
 
         event(new MenuChanged('item', 'updated', $menu_item->id));
 
-        return response()->json($this->serializeMenuItem($menu_item), 200);
+        return response()->json($this->serializeMenuItem($menu_item, $request), 200);
     }
 
     /**
@@ -144,18 +179,39 @@ class MenuItemController extends Controller
         return (int) $categoryId;
     }
 
-    private function serializeMenuItem(MenuItem $item): array
+    private function serializeMenuItem(MenuItem $item, Request $request): array
     {
         $isUnavailable = $item->menuCategory?->name === MenuCategory::UNAVAILABLE_CATEGORY_NAME;
+        $nameHu = $item->name_hu ?? $item->name;
+        $nameEn = $item->name_en ?? $item->name;
 
         return [
             'id' => $item->id,
-            'name' => $item->name,
+            'name' => $this->localizedName($nameHu, $nameEn, $request),
+            'name_hu' => $nameHu,
+            'name_en' => $nameEn,
             'description' => $item->description,
             'price' => $item->price,
             'category_id' => $isUnavailable ? null : $item->category_id,
             'image_url' => $this->resolveImageUrl($item->image_path),
         ];
+    }
+
+    private function resolveNames(Request $request, string $fallbackHu = '', string $fallbackEn = ''): array
+    {
+        $name = trim((string) $request->input('name', ''));
+        $nameHu = trim((string) $request->input('name_hu', $name !== '' ? $name : $fallbackHu));
+        $nameEn = trim((string) $request->input('name_en', $name !== '' ? $name : $fallbackEn));
+
+        if ($nameHu === '' && $nameEn !== '') {
+            $nameHu = $nameEn;
+        }
+
+        if ($nameEn === '' && $nameHu !== '') {
+            $nameEn = $nameHu;
+        }
+
+        return [$nameHu, $nameEn];
     }
 
     private function storeUploadedImage(Request $request): ?string

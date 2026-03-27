@@ -22,7 +22,11 @@ class ReservationController extends Controller
 
     public function index()
     {
-        return response()->json(Reservation::all());
+        return response()->json(
+            Reservation::query()
+                ->whereNull('admin_released_at')
+                ->get()
+        );
     }
 
     public function todayWithOrders()
@@ -36,6 +40,7 @@ class ReservationController extends Controller
                 'order.orderItems.menuItem:id,name,price',
                 'order.payments:id,order_id,amount,payment_method,created_at',
             ])
+            ->whereNull('admin_released_at')
             ->where('start_time', '>=', $todayStart)
             ->where('start_time', '<', $tomorrowStart)
             ->orderBy('start_time')
@@ -109,7 +114,10 @@ class ReservationController extends Controller
         $maxCapacity = Table::max('capacity');
         if ($maxCapacity === null || (int) $request->guest_count > (int) $maxCapacity) {
             return response()->json([
-                'message' => 'Sikertelen foglalas: nincs ekkora asztal az etteremben.',
+                'message' => $this->t([
+                    'hu' => 'Sikertelen foglalás: nincs ekkora asztal az étteremben.',
+                    'en' => 'Reservation failed: there is no table this large in the restaurant.',
+                ], $request),
             ], 422);
         }
 
@@ -123,7 +131,10 @@ class ReservationController extends Controller
 
         if (!$table) {
             return response()->json([
-                'message' => 'Sikertelen foglalas: nincs szabad asztal ebben az idopontban.',
+                'message' => $this->t([
+                    'hu' => 'Sikertelen foglalás: nincs szabad asztal ebben az időpontban.',
+                    'en' => 'Reservation failed: no table is available at this time.',
+                ], $request),
             ], 422);
         }
 
@@ -157,12 +168,17 @@ class ReservationController extends Controller
         );
 
         if (!$table) {
-            return response()->json(['message' => 'Sajnos nincs szabad asztal jelenleg.'], 422);
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Sajnos nincs szabad asztal jelenleg.',
+                    'en' => 'Unfortunately there are no free tables at the moment.',
+                ], $request),
+            ], 422);
         }
 
         $reservation = Reservation::create([
             'table_id' => $table->id,
-            'guest_name' => 'Walk-in guest',
+            'guest_name' => 'Helyszíni vendég',
             'phone_number' => null,
             'start_time' => $startTime,
             'end_time' => $endTime,
@@ -245,6 +261,7 @@ class ReservationController extends Controller
             ->whereDoesntHave('reservations', function ($query) use ($reservationStart, $reservationEnd, $currentReservation) {
                 $query
                     ->where('id', '!=', $currentReservation->id)
+                    ->whereNull('admin_released_at')
                     ->where('start_time', '<', $reservationEnd)
                     ->where('end_time', '>', $reservationStart)
                     ->whereDoesntHave('order', function ($q) {

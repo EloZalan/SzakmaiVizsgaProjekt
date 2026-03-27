@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TableStatusChanged;
 use App\Models\Table;
 use Illuminate\Http\Request;
 
@@ -54,7 +55,6 @@ class TableController extends Controller
 
         if ($openOrder) {
             $data['waiter_name'] = $openOrder->waiter?->name;
-
             if ($openOrder->reservation_id) {
                 $data['reservation'] = $table->reservations()
                     ->whereKey($openOrder->reservation_id)
@@ -64,6 +64,7 @@ class TableController extends Controller
 
         if (!isset($data['reservation']) && $table->status === 'reserved') {
             $data['reservation'] = $table->reservations()
+                ->whereNull('admin_released_at')
                 ->whereDoesntHave('order', fn($q) => $q->where('status', 'done'))
                 ->where('start_time', '<=', $bufferEnd)
                 ->where('end_time', '>=', $bufferStart)
@@ -99,11 +100,65 @@ class TableController extends Controller
         return response()->json('', 204);
     }
 
+    public function resetToFree(Table $table)
+    {
+        $openOrder = $table->orders()
+            ->whereIn('status', ['in_progress', 'ready_to_pay', 'pay'])
+            ->exists();
+
+        if ($openOrder) {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Aktív rendelés mellett nem állítható vissza szabadra.',
+                    'en' => 'This table cannot be reset to free while it has an active order.',
+                ]),
+            ], 409);
+        }
+
+        $now = now();
+        $bufferStart = $now->copy()->subHours(2);
+        $bufferEnd = $now->copy()->addHours(2);
+
+        $reservation = $table->reservations()
+            ->whereNull('admin_released_at')
+            ->whereDoesntHave('order', fn($q) => $q->where('status', 'done'))
+            ->where('start_time', '<=', $bufferEnd)
+            ->where('end_time', '>=', $bufferStart)
+            ->latest('start_time')
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'message' => $this->t([
+                    'hu' => 'Ehhez az asztalhoz nincs visszaállítható foglalás.',
+                    'en' => 'There is no reservation to release for this table.',
+                ]),
+            ], 404);
+        }
+
+        $reservation->admin_released_at = $now;
+        $reservation->save();
+
+        event(new TableStatusChanged($table->id));
+
+        return response()->json([
+            'message' => $this->t([
+                'hu' => 'Az asztal státusza sikeresen visszaállítva szabadra.',
+                'en' => 'The table status has been reset to free successfully.',
+            ]),
+            'table_id' => $table->id,
+            'reservation_id' => $reservation->id,
+        ]);
+    }
+
     private function ensureTableIsAvailable(Table $table)
     {
         if (!in_array($table->status, ['available', 'free'], true)) {
             return response()->json([
-                'message' => 'Csak szabad asztal modosithato vagy torolheto.',
+                'message' => $this->t([
+                    'hu' => 'Csak szabad asztal módosítható vagy törölhető.',
+                    'en' => 'Only free tables can be updated or deleted.',
+                ]),
             ], 409);
         }
 
