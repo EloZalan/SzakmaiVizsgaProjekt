@@ -15,6 +15,9 @@ import { RealtimeService } from '../../services/realtime.service';
 export class AdminStaffComponent implements OnInit, OnDestroy {
   staffMembers: StaffMember[] = [];
   selectedStaff: StaffMember | null = null;
+  pendingRemovalStaffId: number | null = null;
+  removingStaffId: number | null = null;
+  removeError = '';
 
   loading = false;
   error = '';
@@ -74,6 +77,20 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
 
   selectStaff(staff: StaffMember): void {
     this.selectedStaff = staff;
+    this.removeError = '';
+    this.cdr.markForCheck();
+  }
+
+  startRemoveStaff(staffId: number): void {
+    this.pendingRemovalStaffId = staffId;
+    this.removeError = '';
+    this.cdr.markForCheck();
+  }
+
+  cancelRemoveStaff(): void {
+    this.pendingRemovalStaffId = null;
+    this.removingStaffId = null;
+    this.removeError = '';
     this.cdr.markForCheck();
   }
 
@@ -156,19 +173,22 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     const staff = this.staffMembers.find((s) => s.id === staffId);
     if (!staff) return;
 
-    const confirmed = confirm(`Biztosan eltávolítod őt: ${staff.name}?`);
-    if (!confirmed) return;
+    this.removingStaffId = staffId;
+    this.removeError = '';
 
     this.adminDashboardService.deleteWaiter(staffId).subscribe({
       next: () => {
+        this.removingStaffId = null;
+        this.pendingRemovalStaffId = null;
         if (this.selectedStaff?.id === staffId) {
           this.selectedStaff = null;
         }
         this.loadStaff();
       },
       error: (err) => {
+        this.removingStaffId = null;
         console.error('DELETE WAITER ERROR:', err);
-        alert('Nem sikerült törölni a pincért.');
+        this.removeError = `Nem sikerült törölni a pincért: ${staff.name}.`;
         this.cdr.markForCheck();
       },
     });
