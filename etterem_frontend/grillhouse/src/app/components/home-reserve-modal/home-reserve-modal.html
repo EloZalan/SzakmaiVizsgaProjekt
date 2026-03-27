@@ -1,0 +1,18 @@
+@if (visible) {
+  <div class="home-reserve-backdrop" (click)="requestClose()">
+    <section class="home-reserve-modal" (click)="$event.stopPropagation()">
+      <div class="home-reserve-modal__accent"></div>
+      <header class="home-reserve-modal__header">
+        <div>
+          <h3>Asztalfoglalás</h3>
+          <p>Foglalj asztalt néhány kattintással</p>
+        </div>
+        <button type="button" class="gh-btn gh-btn--ghost gh-btn--sm" (click)="requestClose()">✕</button>
+      </header>
+
+      <div class="home-reserve-modal__body">
+        <app-reserve-page [embeddedMode]="true" (closeRequested)="requestClose()"></app-reserve-page>
+      </div>
+    </section>
+  </div>
+}
