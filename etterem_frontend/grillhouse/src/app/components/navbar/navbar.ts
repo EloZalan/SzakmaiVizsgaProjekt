@@ -2,7 +2,6 @@ import { Component, EventEmitter, HostListener, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
-import { AuthService } from '../../services/auth';
 import { LanguageService } from '../../services/language.service';
 import { ThemeService } from '../../services/theme.service';
 
@@ -18,7 +17,6 @@ export class NavbarComponent {
 
   constructor(
     private actions: GrillhouseActionsService,
-    public auth: AuthService,
     public languageService: LanguageService,
     public themeService: ThemeService
   ) {}
@@ -32,15 +30,11 @@ export class NavbarComponent {
   }
 
   get homeActionLabel(): string {
-    if (this.auth.isLoggedIn()) {
-      return this.currentLanguage === 'hu' ? 'Vezérlőpult' : 'Dashboard';
-    } else {
-      return this.currentLanguage === 'hu' ? 'Bejelentkezés' : 'Login';
-    }
+    return this.currentLanguage === 'hu' ? 'Bejelentkezés' : 'Login';
   }
 
   get homeActionRoute(): string {
-    return this.auth.isLoggedIn() ? this.auth.getHomeRouteByRole() : '/login';
+    return '/login';
   }
 
   @HostListener('window:scroll')
