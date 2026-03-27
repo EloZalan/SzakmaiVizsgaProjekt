@@ -1,0 +1,12 @@
+.reserve-card--embedded {
+	width: 100%;
+	max-width: none;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	padding: 1rem 1.2rem 1.2rem;
+}
+
+.reserve-card--embedded .reserve-field {
+	margin: 10px 0;
+}
