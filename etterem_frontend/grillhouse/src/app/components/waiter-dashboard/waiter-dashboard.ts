@@ -193,6 +193,10 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     return `${this.ftFormatter.format(value)} Ft`;
   }
 
+  getStatusLabel(status: TableInfo['status']): string {
+    return status;
+  }
+
   tipAmount(t: TableInfo): number {
     return this.calcTotal(t) * (this.tipPreset / 100);
   }
@@ -305,28 +309,6 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
         ? t
         : {
             ...t,
-            status: 'CLOSED',
-            guests: 0,
-            items: [],
-            note: undefined,
-            orderId: null,
-            updatedAt: '-',
-          }
-    );
-
-    this.selected = this.tables.find((t) => t.id === tableId) ?? null;
-    this.mode = 'details';
-    this.pendingPaymentOrderId = null;
-    this.pendingPaymentTableId = null;
-    this.cdr.markForCheck();
-  }
-
-  setClosedTableToFree(tableId: number): void {
-    this.tables = this.tables.map((table) =>
-      table.id !== tableId
-        ? table
-        : {
-            ...table,
             status: 'Szabad',
             guests: 0,
             items: [],
@@ -338,6 +320,8 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
 
     this.selected = null;
     this.mode = 'details';
+    this.pendingPaymentOrderId = null;
+    this.pendingPaymentTableId = null;
     this.cdr.markForCheck();
   }
 
@@ -500,7 +484,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     }
 
     if (status === 'done') {
-      return 'CLOSED';
+      return 'Szabad';
     }
 
     return 'Asztalnál';
@@ -571,7 +555,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
             ...table,
             orderId: null,
             items: [],
-            status: table.status === 'CLOSED' ? 'CLOSED' : 'Asztalnál',
+            status: 'Asztalnál',
             updatedAt: '-',
           }
     );

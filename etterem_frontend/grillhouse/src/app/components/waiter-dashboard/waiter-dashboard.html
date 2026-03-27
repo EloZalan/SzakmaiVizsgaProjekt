@@ -44,7 +44,6 @@
         <span class="gh-tag">Foglalt</span>
         <span class="gh-tag">Asztalnál</span>
         <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
-        <span class="gh-tag gh-tag--muted">CLOSED</span>
       </div>
     </div>
 
@@ -72,7 +71,6 @@
             [class.waiter-table-tile--selected]="selected?.id === t.id"
             [class.waiter-table-tile--free]="t.status === 'Szabad'"
             [class.waiter-table-tile--pay]="t.status === 'Fizetésre vár'"
-            [class.waiter-table-tile--closed]="t.status === 'CLOSED'"
           >
             <div class="waiter-table-tile__top">
               <strong>{{ t.name }}</strong>
@@ -81,9 +79,6 @@
               }
               @if (t.status === 'Fizetésre vár') {
                 <span class="gh-tag gh-tag--accent">Fizetésre vár</span>
-              }
-              @if (t.status === 'CLOSED') {
-                <span class="gh-tag gh-tag--muted">CLOSED</span>
               }
             </div>
 
@@ -94,7 +89,7 @@
 
             <div class="waiter-table-tile__bottom">
               <strong>{{ formatFt(calcTotal(t)) }}</strong>
-              <small>{{ t.status }}</small>
+              <small>{{ getStatusLabel(t.status) }}</small>
             </div>
           </button>
         }
@@ -143,10 +138,10 @@
 
           <div class="payment-method-row">
             <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CARD'" (click)="setPaymentMethod('CARD')">
-              💳 Card
+              💳 Kártya
             </button>
             <button type="button" class="method-chip" [class.method-chip--active]="paymentMethod === 'CASH'" (click)="setPaymentMethod('CASH')">
-              💵 Cash
+              💵 Készpénz
             </button>
           </div>
 
@@ -173,7 +168,7 @@
         <div class="panel-head panel-head--row">
           <div>
             <h2>{{ s.name }} részletek</h2>
-            <p>Státusz: {{ s.status }}</p>
+            <p>Státusz: {{ getStatusLabel(s.status) }}</p>
           </div>
           <button type="button" class="gh-btn gh-btn--ghost" (click)="clearSelection()">Bezár</button>
         </div>
@@ -220,11 +215,6 @@
           <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'Fizetésre vár' || !s.orderId">
             Fizetés
           </button>
-          @if (s.status === 'CLOSED') {
-            <button type="button" class="gh-btn gh-btn--ghost" (click)="setClosedTableToFree(s.id)">
-              Asztal felszabadítása
-            </button>
-          }
           <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
         </div>
       }
@@ -242,16 +232,19 @@
 
 @if (showCardModal) {
   <div class="gh-modal-overlay">
-    <div class="gh-modal">
-      <div class="panel-head">
+    <div class="gh-modal payment-modal payment-modal--card">
+      <div class="payment-modal__accent"></div>
+      <div class="panel-head payment-modal__head">
+        <span class="gh-tag">Kártya</span>
         <h3>Banki terminál</h3>
+        <p>Fizetés feldolgozása folyamatban</p>
       </div>
-      <div class="gh-panel__body">
+      <div class="gh-panel__body payment-modal__body">
         <div class="modal-body-row">
           <div class="spinner"></div>
           <div>
-            <p><strong>Átirányítás a terminálra</strong></p>
-            <p class="muted">Kérem várjon, a tranzakció elindul...</p>
+            <p class="payment-modal__title"><strong>Átirányítás a terminálra</strong></p>
+            <p class="muted">Kérlek várj, a tranzakció indítása zajlik.</p>
           </div>
         </div>
       </div>
@@ -261,16 +254,19 @@
 
 @if (showCashModal) {
   <div class="gh-modal-overlay">
-    <div class="gh-modal">
-      <div class="panel-head">
-        <h3>Köszönjük a vásárlást</h3>
+    <div class="gh-modal payment-modal payment-modal--cash">
+      <div class="payment-modal__accent"></div>
+      <div class="panel-head payment-modal__head">
+        <span class="gh-tag">Készpénz</span>
+        <h3>Készpénzes fizetés</h3>
+        <p>Fizetés rögzítése folyamatban</p>
       </div>
-      <div class="gh-panel__body">
+      <div class="gh-panel__body payment-modal__body">
         <div class="modal-body-row">
           <div class="spinner"></div>
           <div>
-            <p><strong>Sikeres kommunikáció a pénztárgéppel</strong></p>
-            <p class="muted">A fizetés feldolgozása folyamatban...</p>
+            <p class="payment-modal__title"><strong>Sikeres kommunikáció a pénztárgéppel</strong></p>
+            <p class="muted">A fizetés könyvelése folyamatban...</p>
           </div>
         </div>
       </div>
