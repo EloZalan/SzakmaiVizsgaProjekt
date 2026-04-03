@@ -160,20 +160,48 @@
                 <strong>{{ cat.name }}</strong>
               </div>
               <div class="category-header__actions">
-                <button
-                  class="gh-btn gh-btn--ghost gh-btn--sm"
-                  (click)="startEditCategory(cat); $event.stopPropagation();"
-                >
-                  Szerkesztés
-                </button>
-                <button
-                  class="gh-btn gh-btn--danger gh-btn--sm"
-                  (click)="deleteCategory(cat.id); $event.stopPropagation();"
-                >
-                  Törlés
-                </button>
+                @if (pendingRemovalCategoryId === cat.id) {
+                  <div class="category-confirm">
+                    <span>Biztosan törlöd ezt a kategóriát és az összes tételét?</span>
+                    <div class="action-row">
+                      <button
+                        class="gh-btn gh-btn--ghost gh-btn--sm"
+                        (click)="cancelRemoveCategory(); $event.stopPropagation();"
+                        [disabled]="removingCategoryId === cat.id"
+                      >
+                        Mégse
+                      </button>
+                      <button
+                        class="gh-btn gh-btn--danger gh-btn--sm"
+                        (click)="removeCategory(cat.id); $event.stopPropagation();"
+                        [disabled]="removingCategoryId === cat.id"
+                      >
+                        {{ removingCategoryId === cat.id ? 'Törlés...' : 'Megerősítés' }}
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <button
+                    class="gh-btn gh-btn--ghost gh-btn--sm"
+                    (click)="startEditCategory(cat); $event.stopPropagation();"
+                  >
+                    Szerkesztés
+                  </button>
+                  <button
+                    class="gh-btn gh-btn--danger gh-btn--sm"
+                    (click)="startRemoveCategory(cat.id); $event.stopPropagation();"
+                  >
+                    Törlés
+                  </button>
+                }
               </div>
             </div>
+
+            @if (categoryRemovalError && pendingRemovalCategoryId === cat.id) {
+              <div class="category-item" style="margin-top: -1rem;">
+                <p class="item-removal-error">{{ categoryRemovalError }}</p>
+              </div>
+            }
 
             @if (expandedCategoryId === cat.id) {
               <div class="category-content">
@@ -215,7 +243,7 @@
                           </div>
                           <div class="menu-item__price">{{ item.price }} Ft</div>
                         </div>
-                        <div class="menu-item__actions">
+                      <div class="menu-item__actions">
                           <button
                             class="gh-btn gh-btn--ghost gh-btn--sm"
                             (click)="startEditMenuItem(item)"
@@ -223,15 +251,40 @@
                           >
                             Szerkesztés
                           </button>
-                          <button
-                            class="gh-btn gh-btn--danger gh-btn--sm"
-                            (click)="deleteMenuItem(item.id)"
-                            [disabled]="movingItemId === item.id"
-                          >
-                            Törlés
-                          </button>
+                          @if (pendingRemovalItemId === item.id) {
+                            <div class="item-confirm">
+                              <span>Biztosan törlöd ezt a tételt?</span>
+                              <div class="action-row">
+                                <button
+                                  class="gh-btn gh-btn--ghost gh-btn--sm"
+                                  (click)="cancelRemoveItem()"
+                                  [disabled]="removingItemId === item.id"
+                                >
+                                  Mégse
+                                </button>
+                                <button
+                                  class="gh-btn gh-btn--danger gh-btn--sm"
+                                  (click)="removeItem(item.id)"
+                                  [disabled]="removingItemId === item.id"
+                                >
+                                  {{ removingItemId === item.id ? 'Törlés...' : 'Megerősítés' }}
+                                </button>
+                              </div>
+                            </div>
+                          } @else {
+                            <button
+                              class="gh-btn gh-btn--danger gh-btn--sm"
+                              (click)="startRemoveItem(item.id)"
+                              [disabled]="movingItemId === item.id"
+                            >
+                              Törlés
+                            </button>
+                          }
                         </div>
                       </div>
+                      @if (itemRemovalError && pendingRemovalItemId === item.id) {
+                        <p class="item-removal-error">{{ itemRemovalError }}</p>
+                      }
                     }
                   </div>
                 }
@@ -296,15 +349,40 @@
                     >
                       Szerkesztés
                     </button>
-                    <button
-                      class="gh-btn gh-btn--danger gh-btn--sm"
-                      (click)="deleteMenuItem(item.id)"
-                      [disabled]="movingItemId === item.id"
-                    >
-                      Törlés
-                    </button>
+                    @if (pendingRemovalItemId === item.id) {
+                      <div class="item-confirm">
+                        <span>Biztosan törlöd ezt a tételt?</span>
+                        <div class="action-row">
+                          <button
+                            class="gh-btn gh-btn--ghost gh-btn--sm"
+                            (click)="cancelRemoveItem()"
+                            [disabled]="removingItemId === item.id"
+                          >
+                            Mégse
+                          </button>
+                          <button
+                            class="gh-btn gh-btn--danger gh-btn--sm"
+                            (click)="removeItem(item.id)"
+                            [disabled]="removingItemId === item.id"
+                          >
+                            {{ removingItemId === item.id ? 'Törlés...' : 'Megerősítés' }}
+                          </button>
+                        </div>
+                      </div>
+                    } @else {
+                      <button
+                        class="gh-btn gh-btn--danger gh-btn--sm"
+                        (click)="startRemoveItem(item.id)"
+                        [disabled]="movingItemId === item.id"
+                      >
+                        Törlés
+                      </button>
+                    }
                   </div>
                 </div>
+                @if (itemRemovalError && pendingRemovalItemId === item.id) {
+                  <p class="item-removal-error">{{ itemRemovalError }}</p>
+                }
               }
             </div>
           }

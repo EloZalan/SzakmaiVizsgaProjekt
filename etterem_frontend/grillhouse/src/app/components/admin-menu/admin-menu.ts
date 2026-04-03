@@ -57,6 +57,14 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
   showDropDecisionModal = false;
   decisionLoading = false;
 
+  pendingRemovalCategoryId: number | null = null;
+  removingCategoryId: number | null = null;
+  categoryRemovalError = '';
+
+  pendingRemovalItemId: number | null = null;
+  removingItemId: number | null = null;
+  itemRemovalError = '';
+
   loading = false;
   error = '';
 
@@ -189,11 +197,30 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
   }
 
   deleteCategory(catId: number): void {
-    const confirmed = confirm('Biztosan törlöd ezt a kategóriát és az összes tételét?');
-    if (!confirmed) return;
+    this.startRemoveCategory(catId);
+  }
+
+  startRemoveCategory(catId: number): void {
+    this.pendingRemovalCategoryId = catId;
+    this.categoryRemovalError = '';
+    this.cdr.markForCheck();
+  }
+
+  cancelRemoveCategory(): void {
+    this.pendingRemovalCategoryId = null;
+    this.removingCategoryId = null;
+    this.categoryRemovalError = '';
+    this.cdr.markForCheck();
+  }
+
+  removeCategory(catId: number): void {
+    this.removingCategoryId = catId;
+    this.categoryRemovalError = '';
 
     this.menuService.deleteCategory(catId).subscribe({
       next: () => {
+        this.removingCategoryId = null;
+        this.pendingRemovalCategoryId = null;
         if (this.selectedCategory?.id === catId) {
           this.selectedCategory = null;
         }
@@ -203,8 +230,10 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
         this.loadMenu();
       },
       error: (err: any) => {
+        this.removingCategoryId = null;
         console.error('DELETE CATEGORY ERROR:', err);
-        alert('Nem sikerült törölni a kategóriát.');
+        this.categoryRemovalError = 'Nem sikerült törölni a kategóriát.';
+        this.cdr.markForCheck();
       },
     });
   }
@@ -336,19 +365,40 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
   }
 
   deleteMenuItem(itemId: number): void {
-    const confirmed = confirm('Biztosan törlöd ezt a menü tételt?');
-    if (!confirmed) return;
+    this.startRemoveItem(itemId);
+  }
+
+  startRemoveItem(itemId: number): void {
+    this.pendingRemovalItemId = itemId;
+    this.itemRemovalError = '';
+    this.cdr.markForCheck();
+  }
+
+  cancelRemoveItem(): void {
+    this.pendingRemovalItemId = null;
+    this.removingItemId = null;
+    this.itemRemovalError = '';
+    this.cdr.markForCheck();
+  }
+
+  removeItem(itemId: number): void {
+    this.removingItemId = itemId;
+    this.itemRemovalError = '';
 
     this.menuService.deleteMenuItem(itemId).subscribe({
       next: () => {
+        this.removingItemId = null;
+        this.pendingRemovalItemId = null;
         if (this.selectedMenuItem?.id === itemId) {
           this.selectedMenuItem = null;
         }
         this.loadMenu();
       },
       error: (err: any) => {
+        this.removingItemId = null;
         console.error('DELETE MENU ITEM ERROR:', err);
-        alert('Nem sikerült törölni a menü tételt.');
+        this.itemRemovalError = 'Nem sikerült törölni a menü tételt.';
+        this.cdr.markForCheck();
       },
     });
   }
