@@ -9,7 +9,7 @@
             <div class="visit-row__icon">📍</div>
             <div>
               <div class="visit-row__title">{{ currentLanguage === 'hu' ? 'Helyszín' : 'Location' }}</div>
-        
+
               <div class="visit-row__value">Al Haram</div>
               <div class="visit-row__value">Giza Governorate 3512201, Egyiptom</div>
             </div>
@@ -19,9 +19,20 @@
             <div class="visit-row__icon">🕒</div>
             <div>
               <div class="visit-row__title">{{ currentLanguage === 'hu' ? 'Nyitvatartás' : 'Opening Hours' }}</div>
-              <div class="visit-row__value">{{ currentLanguage === 'hu' ? 'H-Cs: 11:00 - 20:00' : 'Mon-Thu: 11:00 - 20:00' }}</div>
-              <div class="visit-row__value">{{ currentLanguage === 'hu' ? 'P-Szo: 11:00 - 23:00' : 'Fri-Sat: 11:00 - 23:00' }}</div>
-              <div class="visit-row__value">{{ currentLanguage === 'hu' ? 'Vasárnap: 12:00 - 21:00' : 'Sun: 12:00 - 21:00' }}</div>
+              @for (hours of businessHours; track hours.dayOfWeek) {
+                <div class="visit-row__value">
+                  {{ currentLanguage === 'hu'
+                    ? (hours.dayOfWeek === 0 ? 'Vasárnap' :
+                       hours.dayOfWeek === 1 ? 'Hétfő' :
+                       hours.dayOfWeek === 2 ? 'Kedd' :
+                       hours.dayOfWeek === 3 ? 'Szerda' :
+                       hours.dayOfWeek === 4 ? 'Csütörtök' :
+                       hours.dayOfWeek === 5 ? 'Péntek' :
+                       'Szombat')
+                    : hours.dayName
+                  }}: {{ hours.opens }} - {{ hours.closes }}
+                </div>
+              }
             </div>
           </div>
 

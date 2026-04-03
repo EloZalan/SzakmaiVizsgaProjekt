@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { GrillhouseActionsService, TravelMode } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
+import { BusinessHoursService, BusinessHours } from '../../services/business-hours.service';
 
 @Component({
   selector: 'app-visit-us',
@@ -12,16 +13,19 @@ import { LanguageService, Language } from '../../services/language.service';
 export class VisitUsComponent implements OnInit {
   showDirectionsModal = false;
   currentLanguage: Language = 'hu';
+  businessHours: BusinessHours[] = [];
 
   constructor(
     private actions: GrillhouseActionsService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private businessHoursService: BusinessHoursService
   ) {}
 
   ngOnInit(): void {
     this.languageService.language$.subscribe(lang => {
       this.currentLanguage = lang;
     });
+    this.businessHours = this.businessHoursService.getAllHours();
   }
 
   onGetDirections(): void {
