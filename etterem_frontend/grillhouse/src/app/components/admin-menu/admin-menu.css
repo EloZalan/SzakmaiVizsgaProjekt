@@ -364,7 +364,7 @@
 }
 
 .drag-decision-modal {
-  width: min(560px, 100%);
+  width: min(560px, calc(100% - 32px));
   background: linear-gradient(165deg, #252525 0%, #1a1a1a 100%);
   border: 1px solid rgba(255, 140, 0, 0.5);
   border-radius: 14px;
@@ -454,6 +454,14 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .drag-decision-modal__backdrop {
+    padding: 0.6rem;
+  }
+
+  .drag-decision-modal {
+    width: min(560px, calc(100% - 16px));
+  }
+
   .menu-item {
     flex-direction: column;
     align-items: flex-start;
