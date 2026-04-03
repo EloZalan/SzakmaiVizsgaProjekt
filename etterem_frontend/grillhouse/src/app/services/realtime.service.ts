@@ -91,7 +91,7 @@ export class RealtimeService {
       wsPort: this.config.reverbPort,
       wssPort: this.config.reverbPort,
       forceTLS: this.config.reverbScheme === 'https',
-      enabledTransports: ['ws', 'wss'],
+      enabledTransports: this.config.reverbScheme === 'https' ? ['wss'] : ['ws'],
     });
 
     return this.echo;

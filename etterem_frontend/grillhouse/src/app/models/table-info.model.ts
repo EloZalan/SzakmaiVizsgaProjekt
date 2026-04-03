@@ -13,6 +13,7 @@ export interface TableInfo {
   status: WaiterTableStatus;
   guests: number;
   server: string;
+  reservationName?: string;
   updatedAt: string;
   items: TableOrderItem[];
   note?: string;

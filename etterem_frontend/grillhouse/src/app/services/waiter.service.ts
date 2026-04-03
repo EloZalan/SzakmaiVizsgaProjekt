@@ -68,6 +68,7 @@ export interface WaiterDailyReservationOrderDto {
   total_price: number;
   paid_total: number | null;
   display_total: number;
+  tip_amount: number;
   payment_method: 'cash' | 'card' | null;
   items: WaiterDailyReservationOrderItemDto[];
 }
@@ -80,6 +81,7 @@ export interface WaiterDailyReservationDto {
   guest_count: number;
   start_time: string;
   end_time: string;
+  closed_at: string | null;
   note: string | null;
   order: WaiterDailyReservationOrderDto | null;
 }
@@ -174,6 +176,7 @@ export class WaiterService {
       status: this.mapTableStatus(table.status),
       guests,
       server: table.waiter_name ?? '-',
+      reservationName: table.reservation?.guest_name ?? undefined,
       updatedAt: '-',
       items: [],
       note: this.mapReservationNote(table.reservation),
