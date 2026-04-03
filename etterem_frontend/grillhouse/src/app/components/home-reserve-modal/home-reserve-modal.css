@@ -51,6 +51,50 @@
   overflow: auto;
 }
 
+:host-context(.light-theme) .home-reserve-backdrop {
+  background: rgba(45, 33, 17, 0.24);
+}
+
+:host-context(.light-theme) .home-reserve-modal {
+  background: linear-gradient(165deg, #fffdfa 0%, #f7f2ea 100%);
+  border-color: #e4ddd3;
+  box-shadow: 0 20px 44px rgba(20, 13, 6, 0.18);
+}
+
+:host-context(.light-theme) .home-reserve-modal__header {
+  border-bottom-color: #e8e0d4;
+}
+
+:host-context(.light-theme) .home-reserve-modal__header h3 {
+  color: #1a1208;
+}
+
+:host-context(.light-theme) .home-reserve-modal__header p {
+  color: #5b4b35;
+}
+
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field {
+  color: #3d2e0f;
+}
+
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field input,
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field select,
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field textarea {
+  background: #fff;
+  border-color: #d6cabb;
+  color: #1a1208;
+}
+
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field input::placeholder,
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-field textarea::placeholder {
+  color: #8a7a66;
+}
+
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .reserve-subtitle,
+:host-context(.light-theme) ::ng-deep .home-reserve-modal .login-hint {
+  color: #6e5d45;
+}
+
 @media (max-width: 640px) {
   .home-reserve-backdrop {
     padding: 0.6rem;
