@@ -10,3 +10,9 @@
 .reserve-card--embedded .reserve-field {
 	margin: 10px 0;
 }
+
+@media (max-width: 640px) {
+	.reserve-card--embedded {
+		padding: 0.9rem 0.8rem 1rem;
+	}
+}
