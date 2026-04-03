@@ -11,7 +11,7 @@
 }
 
 .home-reserve-modal {
-  width: min(620px, 100%);
+  width: min(620px, calc(100% - 32px));
   max-height: min(92vh, 860px);
   overflow: hidden;
   background: linear-gradient(165deg, #252525 0%, #1a1a1a 100%);
@@ -52,7 +52,12 @@
 }
 
 @media (max-width: 640px) {
+  .home-reserve-backdrop {
+    padding: 0.6rem;
+  }
+
   .home-reserve-modal {
+    width: min(620px, calc(100% - 16px));
     max-height: 95vh;
   }
 
