@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } fro
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../services/config.service';
+import { BusinessHoursService } from '../../services/business-hours.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -38,6 +39,7 @@ export class ReservePageComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private config: ConfigService,
+    private businessHours: BusinessHoursService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -59,17 +61,23 @@ export class ReservePageComponent implements OnInit {
   @Input() embeddedMode = false;
   @Output() closeRequested = new EventEmitter<void>();
 
-  readonly allTimes: string[] = this.generateAllTimes();
+  allTimes: string[] = [];
   availableTimes: string[] = [];
 
   ngOnInit(): void {
     this.minDate = this.toDateInputValue(new Date());
     this.date = this.minDate;
+    // Initialize allTimes for today so it respects business hours
+    this.generateAllTimesForDate(this.parseLocalDate(this.date) || new Date());
     this.refreshTimeOptions();
     this.loadMaxTableCapacity();
   }
 
   onDateChange(): void {
+    const selectedDate = this.parseLocalDate(this.date);
+    if (selectedDate) {
+      this.generateAllTimesForDate(selectedDate);
+    }
     this.refreshTimeOptions();
   }
 
@@ -240,14 +248,17 @@ export class ReservePageComponent implements OnInit {
     }
   }
 
-  private generateAllTimes(): string[] {
+  private generateAllTimesForDate(date: Date): void {
+    const openingHour = this.businessHours.getOpeningHour(date);
+    const closingHour = this.businessHours.getClosingHour(date);
+
     const times: string[] = [];
-    for (let hour = 0; hour < 24; hour++) {
+    for (let hour = openingHour; hour < closingHour; hour++) {
       for (const minute of [0, 30]) {
         times.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
       }
     }
-    return times;
+    this.allTimes = times;
   }
 
   private toDateInputValue(date: Date): string {
