@@ -77,3 +77,18 @@
 }
 
 @keyframes spin{to{transform:rotate(360deg)}}
+
+.gh-panel .gh-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+	border-color: rgba(255, 255, 255, 0.08);
+	color: rgba(255, 255, 255, 0.52);
+	background: rgba(255, 255, 255, 0.02);
+	box-shadow: none;
+	transform: none;
+}
+
+.gh-panel .gh-btn:disabled:hover {
+	background: rgba(255, 255, 255, 0.02);
+	color: rgba(255, 255, 255, 0.52);
+}

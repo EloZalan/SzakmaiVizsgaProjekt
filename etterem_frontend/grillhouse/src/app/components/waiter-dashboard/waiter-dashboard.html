@@ -9,7 +9,7 @@
       <div class="stat-box stat-box--accent">
         <span>Foglalt asztalok</span>
         <strong>{{ occupiedCount }}</strong>
-        <small>Aktív rendelések</small>
+        <small>Foglalás alatt</small>
       </div>
 
       <div class="stat-box">
@@ -183,6 +183,10 @@
             <strong>{{ s.server }}</strong>
           </div>
           <div class="summary-box">
+            <span>Foglaló neve</span>
+            <strong>{{ s.reservationName || '-' }}</strong>
+          </div>
+          <div class="summary-box">
             <span>Nyitás ideje</span>
             <strong>{{ s.updatedAt }}</strong>
           </div>
@@ -212,10 +216,24 @@
         </div>
 
         <div class="action-row action-row--end">
-          <button type="button" class="gh-btn gh-btn--ghost" (click)="openPayment(s.id)" [disabled]="s.status !== 'Fizetésre vár' || !s.orderId">
+          <button
+            type="button"
+            class="gh-btn gh-btn--ghost"
+            (click)="openPayment(s.id)"
+            [disabled]="!canOpenPayment(s)"
+            [title]="!canOpenPayment(s) ? 'A fizetés csak Fizetésre vár státuszban indítható' : ''"
+          >
             Fizetés
           </button>
-          <button type="button" class="gh-btn gh-btn--ghost" (click)="printReceipt(s.id)">Nyugta</button>
+          <button
+            type="button"
+            class="gh-btn gh-btn--ghost"
+            (click)="printReceipt(s.id)"
+            [disabled]="!canPrintReceipt(s)"
+            [title]="!canPrintReceipt(s) ? 'Nyugtát csak akkor lehet nyomtatni, ha az asztal már szabad' : ''"
+          >
+            Nyugta
+          </button>
         </div>
       }
     </section>

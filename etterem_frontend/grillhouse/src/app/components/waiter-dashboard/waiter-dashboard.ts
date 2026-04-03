@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, firstValueFrom } from 'rxjs';
-import type { jsPDF as JsPdfType } from 'jspdf';
 
 import { TableInfo, TableOrderItem } from '../../models/table-info.model';
 import { PaymentMethod } from '../../models/payment-method.model';
@@ -66,9 +65,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
   }
 
   get occupiedCount(): number {
-    return this.tables.filter(
-      (t) => t.status === 'Asztalnál' || t.status === 'Fizetésre vár'
-    ).length;
+    return this.tables.filter((t) => t.status === 'Foglalt').length;
   }
 
   get freeCount(): number {
@@ -164,6 +161,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
                   guests: 0,
                   items: [],
                   note: undefined,
+                  reservationName: undefined,
                   orderId: null,
                   updatedAt: '-',
                 }
@@ -210,9 +208,17 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     return this.grandTotal(t) / g;
   }
 
+  canOpenPayment(table: TableInfo): boolean {
+    return table.status === 'Fizetésre vár' && !!table.orderId;
+  }
+
+  canPrintReceipt(table: TableInfo): boolean {
+    return table.status === 'Szabad' && !!table.items?.length;
+  }
+
   openPayment(tableId: number): void {
     const table = this.tables.find((x) => x.id === tableId);
-    if (!table || table.status !== 'Fizetésre vár' || !table.orderId) return;
+    if (!table || !this.canOpenPayment(table)) return;
 
     this.selected = table;
     this.mode = 'payment';
@@ -313,6 +319,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
             guests: 0,
             items: [],
             note: undefined,
+            reservationName: undefined,
             orderId: null,
             updatedAt: '-',
           }
@@ -339,6 +346,10 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     const table = this.tables.find((t) => t.id === tableId);
     if (!table) return;
 
+    if (!this.canPrintReceipt(table)) {
+      return;
+    }
+
     if (!table.items?.length) {
       alert('Ehhez az asztalhoz nincs nyomtathato tetel.');
       return;
@@ -350,94 +361,68 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
       const doc = new JsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
+        format: [80, 220],
       });
 
-      const left = 14;
-      const right = 196;
-      let y = 18;
+      const left = 6;
+      const right = 74;
+      const center = 40;
+      let y = 10;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.text('GRILLHOUSE - NYUGTA', left, y);
-      y += 9;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      doc.text(`Asztal: ${table.name}`, left, y);
-      y += 6;
-      doc.text(`Statusz: ${table.status}`, left, y);
-      y += 6;
-      doc.text(`Pincer: ${table.server || '-'}`, left, y);
-      y += 6;
-      doc.text(`Nyomtatas ideje: ${new Date().toLocaleString('hu-HU')}`, left, y);
-      y += 8;
-
-      doc.setDrawColor(120);
-      doc.line(left, y, right, y);
-      y += 6;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('Tetel', left, y);
-      doc.text('Db', 128, y, { align: 'right' });
-      doc.text('Egysegar', 158, y, { align: 'right' });
-      doc.text('Osszesen', right, y, { align: 'right' });
+      doc.setFont('courier', 'bold');
+      doc.setFontSize(12);
+      doc.text('GRILLHOUSE', center, y, { align: 'center' });
       y += 5;
-
-      doc.setDrawColor(80);
-      doc.line(left, y, right, y);
-      y += 5;
-
-      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
+      doc.text('ETTERMI NYUGTA', center, y, { align: 'center' });
+      y += 5;
+
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Asztal: ${table.name}`, left, y);
+      y += 4;
+      doc.text(`Statusz: ${table.status}`, left, y);
+      y += 4;
+      doc.text(`Pincer: ${table.server || '-'}`, left, y);
+      y += 4;
+      doc.text(`Datum: ${new Date().toLocaleString('hu-HU')}`, left, y);
+      y += 3;
+
+      doc.line(left, y, right, y);
+      y += 4;
 
       table.items.forEach((item) => {
         const lineTotal = item.qty * item.price;
-        const nameLines = doc.splitTextToSize(item.name, 92) as string[];
-        const rowHeight = Math.max(nameLines.length * 5, 5);
+        const nameLines = doc.splitTextToSize(item.name, 44) as string[];
 
-        if (y + rowHeight + 16 > 286) {
-          this.addReceiptPageHeader(doc);
-          y = 28;
-        }
-
+        doc.setFont('courier', 'bold');
         doc.text(nameLines, left, y);
-        doc.text(String(item.qty), 128, y, { align: 'right' });
-        doc.text(this.formatFt(item.price), 158, y, { align: 'right' });
-        doc.text(this.formatFt(lineTotal), right, y, { align: 'right' });
+        y += nameLines.length * 3.7;
 
-        y += rowHeight + 2;
+        doc.setFont('courier', 'normal');
+        doc.text(`${item.qty} x ${this.formatFt(item.price)}`, left, y);
+        doc.text(this.formatFt(lineTotal), right, y, { align: 'right' });
+        y += 4.5;
       });
 
+      y += 1;
       doc.line(left, y, right, y);
-      y += 9;
+      y += 4;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.text(`Vegosszeg: ${this.formatFt(this.calcTotal(table))}`, right, y, { align: 'right' });
-      y += 8;
+      doc.setFont('courier', 'bold');
+      doc.text('Fizetendo vegosszeg:', left, y);
+      doc.text(this.formatFt(this.calcTotal(table)), right, y, { align: 'right' });
+      y += 6;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text('Koszonjuk, hogy a Grillhouse-t valasztotta!', left, y);
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(7);
+      doc.text('Koszonjuk, hogy a Grillhouse-t valasztotta!', center, y, { align: 'center' });
 
       doc.save(`nyugta-${table.id}-${this.getReceiptTimestamp(new Date())}.pdf`);
     } catch (err) {
       console.error('RECEIPT PDF ERROR:', err);
       alert('Nem sikerült letölteni a nyugtát PDF-ként.');
     }
-  }
-
-  private addReceiptPageHeader(doc: JsPdfType): void {
-    doc.addPage();
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('GRILLHOUSE - NYUGTA (folytatas)', 14, 18);
-    doc.setDrawColor(120);
-    doc.line(14, 22, 196, 22);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
   }
 
   private getReceiptTimestamp(date: Date): string {
