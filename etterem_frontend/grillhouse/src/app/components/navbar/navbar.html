@@ -1,29 +1,64 @@
-<header class="nav-shell" [class.nav-shell--scrolled]="scrolled">
-  <div class="gh-container nav-inner">
-    <a class="nav-brand" (click)="scrollToSection('top')">
+<header
+  class="nav-shell"
+  [class.nav-shell--scrolled]="scrolled"
+  [class.nav-shell--links-collapsed]="linksCollapsed"
+  [class.nav-shell--minimal-actions]="minimalActions"
+  [class.nav-shell--compact]="compactNav"
+>
+  <div class="gh-container nav-inner" #navInner>
+    <a class="nav-brand" #navBrand (click)="scrollToSection('top')">
       <span class="nav-brand__icon">
              <img src="../../../assets/images/logo1024A.png" alt="Grillhouse logo">
       </span>
       <span class="nav-brand__text">GRILLHOUSE</span>
     </a>
 
-    <nav class="nav-links">
+    <nav class="nav-links" #navLinks>
       <a (click)="scrollToSection('menu')">{{ currentLanguage === 'hu' ? 'Menü' : 'Menu' }}</a>
       <a (click)="scrollToSection('about')">{{ currentLanguage === 'hu' ? 'Rólunk' : 'About' }}</a>
       <a (click)="scrollToSection('location')">{{ currentLanguage === 'hu' ? 'Helyszín' : 'Location' }}</a>
     </nav>
 
-    <div class="nav-actions">
-      <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()" title="Toggle language">
+    <button
+      type="button"
+      class="nav-hamburger"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen"
+      aria-label="Mobile menu"
+    >
+      <mat-icon>{{ mobileMenuOpen ? 'close' : 'menu' }}</mat-icon>
+    </button>
+
+    <div class="nav-actions" #navActions>
+      <button class="gh-btn gh-btn--ghost" #languageButton (click)="toggleLanguage()" title="Toggle language">
         <mat-icon>{{ languageService.currentLanguageValue === 'hu' ? 'language' : 'language' }}</mat-icon>
         <span>{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</span>
       </button>
-      <button class="gh-btn gh-btn--ghost" (click)="toggleTheme()" title="Toggle theme">
+      <button class="gh-btn gh-btn--ghost nav-action-secondary" (click)="toggleTheme()" title="Toggle theme">
         <mat-icon>{{ currentTheme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
         <span>{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</span>
       </button>
-      <a class="gh-btn gh-btn--ghost btn-login" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
-      <button type="button" class="gh-btn gh-btn--primary" (click)="onReserveTable()">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</button>
+      <a class="gh-btn gh-btn--ghost btn-login nav-action-secondary" [routerLink]="[homeActionRoute]">{{ homeActionLabel }}</a>
+      <button type="button" class="gh-btn gh-btn--primary nav-action-secondary" (click)="onReserveTable()">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</button>
     </div>
   </div>
+
+  @if (mobileMenuOpen) {
+    <div class="nav-mobile">
+      <div class="gh-container nav-mobile__inner">
+        <div class="nav-mobile__actions">
+          <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()" title="Toggle language">
+            <mat-icon>{{ languageService.currentLanguageValue === 'hu' ? 'language' : 'language' }}</mat-icon>
+            <span>{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</span>
+          </button>
+          <button class="gh-btn gh-btn--ghost" (click)="toggleTheme()" title="Toggle theme">
+            <mat-icon>{{ currentTheme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            <span>{{ currentTheme === 'dark' ? (currentLanguage === 'hu' ? 'Világos mód' : 'Light Mode') : (currentLanguage === 'hu' ? 'Sötét mód' : 'Dark Mode') }}</span>
+          </button>
+          <a class="gh-btn gh-btn--ghost btn-login nav-mobile__btn-login" [routerLink]="[homeActionRoute]" (click)="closeMobileMenu()">{{ homeActionLabel }}</a>
+          <button type="button" class="gh-btn gh-btn--primary nav-mobile__btn-reserve" (click)="onReserveTable()">{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Reserve Table' }}</button>
+        </div>
+      </div>
+    </div>
+  }
 </header>
