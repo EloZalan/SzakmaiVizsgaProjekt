@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   title: Etterem API
-  version: 1.0.0
+  version: 1.1.0
   description: |
-    REST API az étterem foglalás, rendelés és admin funkcióinak kezeléséhez.
-    Az összes végpont a `routes/api.php` és a `Controllers` mappában definiált vezérlők alapján.
+    Aktuális OpenAPI leírás a routes/api.php alapján.
+    A védett endpointok Bearer tokennel (Sanctum) hívhatók.
 
 servers:
   - url: http://localhost:8000/api
@@ -12,28 +12,71 @@ servers:
 
 tags:
   - name: Auth
-    description: Bejelentkezés és felhasználói adatok
   - name: Reservations
-    description: Asztalfoglalások kezelése
   - name: Tables
-    description: Asztalok kezelése
   - name: Menu Categories
-    description: Menü kategóriák kezelése
   - name: Menu Items
-    description: Menü tételek kezelése
   - name: Orders
-    description: Rendelések és fizetés
   - name: Admin
-    description: Adminisztrációs végpontok (pincérek, asztalok, menü)
 
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
+      bearerFormat: Sanctum
+
+  parameters:
+    ReservationId:
+      name: reservation
+      in: path
+      required: true
+      schema:
+        type: integer
+    TableId:
+      name: table
+      in: path
+      required: true
+      schema:
+        type: integer
+    OrderId:
+      name: order
+      in: path
+      required: true
+      schema:
+        type: integer
+    OrderItemId:
+      name: orderItem
+      in: path
+      required: true
+      schema:
+        type: integer
+    MenuCategoryId:
+      name: menu_category
+      in: path
+      required: true
+      schema:
+        type: integer
+    MenuItemId:
+      name: menu_item
+      in: path
+      required: true
+      schema:
+        type: integer
+    WaiterId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
 
   schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+
     User:
       type: object
       properties:
@@ -70,6 +113,9 @@ components:
           format: date-time
         guest_count:
           type: integer
+        note:
+          type: string
+          nullable: true
 
     Table:
       type: object
@@ -93,6 +139,16 @@ components:
           type: integer
         name:
           type: string
+        name_hu:
+          type: string
+        name_en:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
     MenuItem:
       type: object
@@ -101,6 +157,10 @@ components:
           type: integer
         name:
           type: string
+        name_hu:
+          type: string
+        name_en:
+          type: string
         description:
           type: string
           nullable: true
@@ -108,31 +168,62 @@ components:
           type: integer
         category_id:
           type: integer
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
 
-    Order:
+    TableOrderItem:
       type: object
       properties:
         id:
+          type: integer
+        menu_item_id:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        price:
+          type: integer
+          nullable: true
+        quantity:
+          type: integer
+        line_total:
+          type: integer
+          nullable: true
+
+    TableOrderDetails:
+      type: object
+      properties:
+        order_id:
           type: integer
         table_id:
           type: integer
         reservation_id:
           type: integer
-        waiter_id:
-          type: integer
-        total_price:
-          type: integer
+          nullable: true
         status:
           type: string
           enum: [in_progress, ready_to_pay, done]
+        total_price:
+          type: integer
+        opened_at:
+          type: string
+          format: date-time
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableOrderItem'
 
-    Payment:
+    PaymentResponse:
       type: object
       properties:
         payment_id:
           type: integer
         order_status:
           type: string
+          example: done
         table:
           type: object
           properties:
@@ -140,6 +231,84 @@ components:
               type: integer
             status:
               type: string
+
+    DailyReservationOrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        menu_item_id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: integer
+        quantity:
+          type: integer
+        line_total:
+          type: integer
+
+    DailyReservationOrder:
+      type: object
+      properties:
+        order_id:
+          type: integer
+        status:
+          type: string
+          enum: [in_progress, ready_to_pay, done]
+        opened_at:
+          type: string
+          format: date-time
+          nullable: true
+        total_price:
+          type: integer
+        paid_total:
+          type: integer
+          nullable: true
+        display_total:
+          type: integer
+        tip_amount:
+          type: integer
+        payment_method:
+          type: string
+          nullable: true
+          enum: [cash, card, null]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyReservationOrderItem'
+
+    DailyReservation:
+      type: object
+      properties:
+        reservation_id:
+          type: integer
+        table_id:
+          type: integer
+        table_capacity:
+          type: integer
+          nullable: true
+        guest_name:
+          type: string
+        guest_count:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        order:
+          allOf:
+            - $ref: '#/components/schemas/DailyReservationOrder'
+          nullable: true
 
 paths:
   /login:
@@ -177,19 +346,19 @@ paths:
   /user:
     get:
       tags: [Auth]
-      summary: Jelenlegi felhasználó lekérése
+      summary: Aktuális felhasználó
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Felhasználói adatok
+          description: Felhasználó
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
     put:
       tags: [Auth]
-      summary: Felhasználó adatainak frissítése
+      summary: Felhasználó frissítése
       security:
         - BearerAuth: []
       requestBody:
@@ -209,48 +378,26 @@ paths:
       responses:
         '200':
           description: Frissített felhasználó
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
 
   /take-shift:
     post:
       tags: [Auth]
-      summary: Pincér műszak felvétele
-      description: >
-        A bejelentkezett pincér műszakját állítja aktívra (`on_shift = true`).
-        Csak `waiter` szerepkörű felhasználó érheti el.
+      summary: Műszak felvétele (pincér)
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Műszak sikeresen felvéve
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '403':
-          description: Nem pincér próbál műszakot felvenni
+          description: Műszak aktív
 
   /end-shift:
     post:
       tags: [Auth]
-      summary: Pincér műszak leadása
-      description: >
-        A bejelentkezett pincér műszakját inaktívra állítja (`on_shift = false`).
-        Csak `waiter` szerepkörű felhasználó érheti el.
+      summary: Műszak leadása (pincér)
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Műszak sikeresen leadva
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '403':
-          description: Nem pincér próbál műszakot leadni
+          description: Műszak inaktív
 
   /logout:
     post:
@@ -260,24 +407,21 @@ paths:
         - BearerAuth: []
       responses:
         '200':
-          description: Sikeres kijelentkezés
+          description: Sikeres kijelentkeztetés
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/Message'
 
   /reservations:
     get:
       tags: [Reservations]
-      summary: Foglalások listázása
+      summary: Foglalások listázása (műszakban lévő pincér)
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Foglalások listája
+          description: Foglalások
           content:
             application/json:
               schema:
@@ -286,7 +430,7 @@ paths:
                   $ref: '#/components/schemas/Reservation'
     post:
       tags: [Reservations]
-      summary: Új foglalás létrehozása
+      summary: Új előzetes foglalás létrehozása (publikus)
       requestBody:
         required: true
         content:
@@ -305,6 +449,9 @@ paths:
                 start_time:
                   type: string
                   format: date-time
+                note:
+                  type: string
+                  nullable: true
       responses:
         '201':
           description: Foglalás létrehozva
@@ -313,15 +460,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Reservation'
         '422':
-          description: Nincs szabad asztal vagy érvénytelen adatok
+          description: Validáció vagy asztal elérhetőség hiba
 
   /reservations/walk-in:
     post:
       tags: [Reservations]
-      summary: Helyben érkező (walk-in) vendég foglalásának létrehozása
-      description: >
-        Pincér által indított foglalás olyan vendégnek, aki nem foglalt előre.
-        Csak a vendég létszámát (`guest_count`) kell megadni. Csak műszakban lévő pincér érheti el.
+      summary: Walk-in foglalás létrehozása (műszakban lévő pincér)
       security:
         - BearerAuth: []
       requestBody:
@@ -337,13 +481,27 @@ paths:
                   minimum: 1
       responses:
         '201':
-          description: Foglalás létrehozva egy szabad asztalhoz
+          description: Foglalás létrehozva
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reservation'
-        '422':
-          description: Sajnos nincs szabad asztal jelenleg
+
+  /reservations/today-with-orders:
+    get:
+      tags: [Reservations]
+      summary: Mai foglalások rendeléssel együtt (műszakban lévő pincér)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Napi foglalások
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyReservation'
 
   /reservations/{reservation}:
     get:
@@ -352,29 +510,21 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: reservation
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/ReservationId'
       responses:
         '200':
-          description: Foglalás adatai
+          description: Foglalás
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reservation'
     put:
       tags: [Reservations]
-      summary: Foglalás frissítése
+      summary: Foglalás módosítása
       security:
         - BearerAuth: []
       parameters:
-        - name: reservation
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/ReservationId'
       requestBody:
         required: true
         content:
@@ -388,42 +538,55 @@ paths:
                   type: string
                 guest_count:
                   type: integer
+                  minimum: 1
                 start_time:
                   type: string
                   format: date-time
+                note:
+                  type: string
+                  nullable: true
       responses:
         '200':
-          description: Frissített foglalás
+          description: Foglalás módosítva
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reservation'
-        '422':
-          description: Nincs szabad asztal az új beállításokkal
     delete:
       tags: [Reservations]
       summary: Foglalás törlése
       security:
         - BearerAuth: []
       parameters:
-        - name: reservation
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/ReservationId'
       responses:
         '204':
           description: Sikeres törlés
 
+  /tables/max-capacity:
+    get:
+      tags: [Tables]
+      summary: Legnagyobb asztalkapacitás (publikus)
+      responses:
+        '200':
+          description: Max kapacitás
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  max_capacity:
+                    type: integer
+
   /tables:
     get:
       tags: [Tables]
-      summary: Asztalok listázása
+      summary: Asztalok listázása (műszakban lévő pincér)
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Asztalok listája
+          description: Asztalok
           content:
             application/json:
               schema:
@@ -434,18 +597,14 @@ paths:
   /tables/{table}:
     get:
       tags: [Tables]
-      summary: Asztal lekérése
+      summary: Asztal részletei
       security:
         - BearerAuth: []
       parameters:
-        - name: table
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/TableId'
       responses:
         '200':
-          description: Asztal adatai
+          description: Asztal
           content:
             application/json:
               schema:
@@ -454,165 +613,30 @@ paths:
   /tables/{table}/orders:
     post:
       tags: [Orders]
-      summary: Új rendelés nyitása egy asztalhoz
+      summary: Rendelés nyitása az asztalhoz
       security:
         - BearerAuth: []
       parameters:
-        - name: table
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/TableId'
       responses:
         '201':
           description: Rendelés létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
         '400':
-          description: Nincs érvényes foglalás vagy már létezik rendelés
-        '403':
-          description: Csak műszakban lévő pincér nyithat rendelést
+          description: Nincs érvényes foglalás vagy már van rendelés
     get:
       tags: [Orders]
-      summary: Rendelés és tételek lekérése az adott asztal aktuális foglalásához
-      description: >
-        Visszaadja az aktuális foglaláshoz tartozó rendelést, a rendelt tételeket és a jelenlegi végösszeget.
-        Csak műszakban lévő pincér érheti el.
+      summary: Aktuális rendelés lekérése az asztalhoz
       security:
         - BearerAuth: []
       parameters:
-        - name: table
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/TableId'
       responses:
         '200':
-          description: Rendelés adatai, vagy üres rendelés válasz
+          description: Rendelés adatok
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      order_id:
-                        type: integer
-                      table_id:
-                        type: integer
-                      reservation_id:
-                        type: integer
-                        nullable: true
-                      status:
-                        type: string
-                        enum: [in_progress, ready_to_pay, done]
-                      total_price:
-                        type: integer
-                      opened_at:
-                        type: string
-                        format: date-time
-                        nullable: true
-                      items:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: integer
-                            menu_item_id:
-                              type: integer
-                            name:
-                              type: string
-                              nullable: true
-                            price:
-                              type: integer
-                              nullable: true
-                            quantity:
-                              type: integer
-                            line_total:
-                              type: integer
-                              nullable: true
-                  - type: object
-                    properties:
-                      message:
-                        type: string
-                      items:
-                        type: array
-                        items:
-                          type: object
-                      total_price:
-                        type: integer
-                      opened_at:
-                        type: string
-                        format: date-time
-                        nullable: true
-        '400':
-          description: Nincs érvényes foglalás ehhez az asztalhoz
-
-  /menu-categories:
-    get:
-      tags: [Menu Categories]
-      summary: Menü kategóriák listázása
-      responses:
-        '200':
-          description: Menü kategóriák
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MenuCategory'
-
-  /menu-categories/{menu_category}:
-    get:
-      tags: [Menu Categories]
-      summary: Menü kategória lekérése
-      parameters:
-        - name: menu_category
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Menü kategória
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuCategory'
-
-  /menu-items:
-    get:
-      tags: [Menu Items]
-      summary: Menü tételek listázása
-      responses:
-        '200':
-          description: Menü tételek
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MenuItem'
-
-  /menu-items/{menu_item}:
-    get:
-      tags: [Menu Items]
-      summary: Menü tétel lekérése
-      parameters:
-        - name: menu_item
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Menü tétel
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuItem'
+                $ref: '#/components/schemas/TableOrderDetails'
 
   /orders/{order}/items:
     post:
@@ -621,11 +645,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: order
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/OrderId'
       requestBody:
         required: true
         content:
@@ -642,66 +662,40 @@ paths:
       responses:
         '201':
           description: Tétel hozzáadva
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  item:
-                    type: string
-                  quantity:
-                    type: integer
-                  current_total:
-                    type: integer
-        '400':
-          description: A rendelés már nem módosítható
-        '404':
-          description: A rendelés nem található
+
+  /orders/{order}/items/{orderItem}:
+    delete:
+      tags: [Orders]
+      summary: Tétel törlése rendelésből
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/OrderItemId'
+      responses:
+        '200':
+          description: Tétel törölve
 
   /orders/{order}/simulate-ready:
     post:
       tags: [Orders]
-      summary: Rendelés fizetésre készre állítása (szimuláció)
+      summary: Rendelés fizetésre készre állítása
       security:
         - BearerAuth: []
       parameters:
-        - name: order
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/OrderId'
       responses:
         '200':
-          description: Státusz frissítve
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  order_id:
-                    type: integer
-                  new_status:
-                    type: string
-                    enum: [ready_to_pay]
-                  total_amount:
-                    type: integer
-        '422':
-          description: Nincs fizetendő rendelés
-        '404':
-          description: A rendelés nem található
+          description: 'Új státusz: ready_to_pay'
 
   /orders/{order}/pay:
     post:
       tags: [Orders]
-      summary: Rendelés kifizetése
+      summary: Fizetés rögzítése
       security:
         - BearerAuth: []
       parameters:
-        - name: order
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/OrderId'
       requestBody:
         required: true
         content:
@@ -713,15 +707,73 @@ paths:
                 payment_method:
                   type: string
                   enum: [cash, card]
+                tip:
+                  type: integer
+                  minimum: 0
+                  nullable: true
       responses:
         '200':
-          description: Sikeres fizetés
+          description: Fizetés rögzítve
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment'
-        '400':
-          description: A rendelés státusza nem megfelelő
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /menu-categories:
+    get:
+      tags: [Menu Categories]
+      summary: Menü kategóriák listázása (publikus)
+      responses:
+        '200':
+          description: Kategóriák
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuCategory'
+
+  /menu-categories/{menu_category}:
+    get:
+      tags: [Menu Categories]
+      summary: Menü kategória lekérése (publikus)
+      parameters:
+        - $ref: '#/components/parameters/MenuCategoryId'
+      responses:
+        '200':
+          description: Kategória
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuCategory'
+
+  /menu-items:
+    get:
+      tags: [Menu Items]
+      summary: Menü tételek listázása (publikus)
+      responses:
+        '200':
+          description: Menü tételek
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItem'
+
+  /menu-items/{menu_item}:
+    get:
+      tags: [Menu Items]
+      summary: Menü tétel lekérése (publikus)
+      parameters:
+        - $ref: '#/components/parameters/MenuItemId'
+      responses:
+        '200':
+          description: Menü tétel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
 
   /admin/waiters:
     get:
@@ -731,7 +783,7 @@ paths:
         - BearerAuth: []
       responses:
         '200':
-          description: Pincérek listája
+          description: Waiter lista
           content:
             application/json:
               schema:
@@ -740,7 +792,7 @@ paths:
                   $ref: '#/components/schemas/User'
     post:
       tags: [Admin]
-      summary: Új pincér létrehozása
+      summary: Pincér létrehozása
       security:
         - BearerAuth: []
       requestBody:
@@ -771,26 +823,76 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/WaiterId'
       responses:
         '204':
-          description: Sikeres törlés
-        '404':
-          description: Nem található ilyen azonosítójú pincér
+          description: Törölve
 
-  /admin/tables:
+  /admin/daily-revenue:
     get:
       tags: [Admin]
-      summary: Asztalok listázása admin nézetben
+      summary: Mai bevétel (borravaló nélkül)
       security:
         - BearerAuth: []
       responses:
         '200':
-          description: Asztalok listája
+          description: Napi bevétel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  daily_revenue:
+                    type: integer
+
+  /admin/today-guests:
+    get:
+      tags: [Admin]
+      summary: Mai vendégszám
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Mai vendégek száma
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  today_guests:
+                    type: integer
+
+  /admin/guest-count-history:
+    get:
+      tags: [Admin]
+      summary: Vendégforgalom előzmények
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Napi vendégszám adatok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    guest_count:
+                      type: integer
+
+  /admin/tables:
+    get:
+      tags: [Admin]
+      summary: Asztalok listázása adminnak
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Asztalok
           content:
             application/json:
               schema:
@@ -799,7 +901,7 @@ paths:
                   $ref: '#/components/schemas/Table'
     post:
       tags: [Admin]
-      summary: Új asztal létrehozása
+      summary: Asztal létrehozása
       security:
         - BearerAuth: []
       requestBody:
@@ -816,23 +918,15 @@ paths:
       responses:
         '201':
           description: Asztal létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Table'
 
   /admin/tables/{table}:
     put:
       tags: [Admin]
-      summary: Asztal frissítése
+      summary: Asztal módosítása
       security:
         - BearerAuth: []
       parameters:
-        - name: table
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/TableId'
       requestBody:
         required: true
         content:
@@ -846,29 +940,29 @@ paths:
                   minimum: 1
       responses:
         '200':
-          description: Frissített asztal
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Table'
-        '409':
-          description: Csak szabad asztal módosítható
+          description: Asztal módosítva
     delete:
       tags: [Admin]
       summary: Asztal törlése
       security:
         - BearerAuth: []
       parameters:
-        - name: table
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/TableId'
       responses:
         '204':
-          description: Sikeres törlés
-        '409':
-          description: Csak szabad asztal törölhető
+          description: Asztal törölve
+
+  /admin/tables/{table}/reset-to-free:
+    post:
+      tags: [Admin]
+      summary: Asztal visszaállítása szabadra
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TableId'
+      responses:
+        '200':
+          description: Sikeres visszaállítás
 
   /admin/menu-categories:
     post:
@@ -882,17 +976,16 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name]
               properties:
                 name:
                   type: string
+                name_hu:
+                  type: string
+                name_en:
+                  type: string
       responses:
         '201':
-          description: Menü kategória létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuCategory'
+          description: Kategória létrehozva
 
   /admin/menu-categories/{menu_category}:
     put:
@@ -901,44 +994,49 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: menu_category
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/MenuCategoryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [name]
               properties:
                 name:
                   type: string
+                name_hu:
+                  type: string
+                name_en:
+                  type: string
       responses:
         '200':
-          description: Frissített menü kategória
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuCategory'
+          description: Kategória frissítve
     delete:
       tags: [Admin]
       summary: Menü kategória törlése
       security:
         - BearerAuth: []
       parameters:
-        - name: menu_category
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/MenuCategoryId'
       responses:
         '204':
-          description: Sikeres törlés
+          description: Kategória törölve
 
   /admin/menu-items:
+    get:
+      tags: [Admin]
+      summary: Menü tételek listázása adminnak
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Menü tételek
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItem'
     post:
       tags: [Admin]
       summary: Menü tétel létrehozása
@@ -947,28 +1045,34 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [name, price, category_id]
+              required: [price]
               properties:
                 name:
                   type: string
+                name_hu:
+                  type: string
+                name_en:
+                  type: string
                 description:
                   type: string
-                  nullable: true
                 price:
                   type: integer
-                  minimum: 0
                 category_id:
+                  type: integer
+                  nullable: true
+                image:
+                  type: string
+                  format: binary
+                remove_image:
+                  type: boolean
+                source_item_id:
                   type: integer
       responses:
         '201':
           description: Menü tétel létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuItem'
 
   /admin/menu-items/{menu_item}:
     put:
@@ -977,48 +1081,43 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: menu_item
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/MenuItemId'
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
-              required: [name, price, category_id]
+              required: [price]
               properties:
                 name:
                   type: string
+                name_hu:
+                  type: string
+                name_en:
+                  type: string
                 description:
                   type: string
-                  nullable: true
                 price:
                   type: integer
-                  minimum: 0
                 category_id:
                   type: integer
+                  nullable: true
+                image:
+                  type: string
+                  format: binary
+                remove_image:
+                  type: boolean
       responses:
         '200':
-          description: Frissített menü tétel
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MenuItem'
+          description: Menü tétel frissítve
     delete:
       tags: [Admin]
       summary: Menü tétel törlése
       security:
         - BearerAuth: []
       parameters:
-        - name: menu_item
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: '#/components/parameters/MenuItemId'
       responses:
         '204':
-          description: Sikeres törlés
-
+          description: Menü tétel törölve
