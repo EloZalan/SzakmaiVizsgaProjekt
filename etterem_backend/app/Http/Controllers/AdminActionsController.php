@@ -61,7 +61,13 @@ class AdminActionsController extends Controller
     }
 
     public function getDailyRevenue() {
-        $total = Payment::whereDate('paid_at', today())->sum('amount');
+        $total = Payment::whereDate('paid_at', today())
+            ->with('order:id,total_price')
+            ->get()
+            ->sum(function (Payment $payment) {
+                return (int)($payment->order?->total_price ?? 0);
+            });
+
         return response()->json(['daily_revenue' => (int) $total]);
     }
 

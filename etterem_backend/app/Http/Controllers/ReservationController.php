@@ -49,6 +49,11 @@ class ReservationController extends Controller
         $payload = $reservations->map(function (Reservation $reservation) {
             $order = $reservation->order;
             $latestPayment = $order?->payments?->sortByDesc('created_at')->first();
+            $closedAt = null;
+
+            if ($order?->status === 'done') {
+                $closedAt = $latestPayment?->created_at ?? $order?->updated_at;
+            }
 
             $items = $order
                 ? $order->orderItems->map(function ($orderItem) {
@@ -68,7 +73,8 @@ class ReservationController extends Controller
 
             $orderTotal = (int)($order?->total_price ?? 0);
             $paidTotal = $latestPayment ? (int)$latestPayment->amount : null;
-            $displayTotal = $paidTotal ?? $orderTotal;
+            $tipAmount = $paidTotal !== null ? max($paidTotal - $orderTotal, 0) : 0;
+            $displayTotal = $orderTotal;
 
             return [
                 'reservation_id' => $reservation->id,
@@ -78,6 +84,7 @@ class ReservationController extends Controller
                 'guest_count' => (int)$reservation->guest_count,
                 'start_time' => $reservation->start_time?->toIso8601String(),
                 'end_time' => $reservation->end_time?->toIso8601String(),
+                'closed_at' => $closedAt?->toIso8601String(),
                 'note' => $reservation->note,
                 'order' => $order
                     ? [
@@ -87,6 +94,7 @@ class ReservationController extends Controller
                         'total_price' => $orderTotal,
                         'paid_total' => $paidTotal,
                         'display_total' => $displayTotal,
+                        'tip_amount' => $tipAmount,
                         'payment_method' => $latestPayment?->payment_method,
                         'items' => $items,
                     ]
