@@ -18,6 +18,7 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden;
 }
 
 html {
@@ -39,6 +40,13 @@ a {
 button,
 input {
   font: inherit;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
 }
 
 .gh-container {
@@ -150,6 +158,16 @@ input {
 .gh-tag--muted {
   border-color: rgba(255, 255, 255, 0.10);
   color: rgba(255, 255, 255, 0.55);
+}
+
+.waiter-status-tag b {
+  font-size: 12px;
+}
+
+.waiter-status-tag {
+  min-width: 160px;
+  white-space: nowrap;
+  justify-content: center;
 }
 
 .gh-panel {
@@ -389,6 +407,20 @@ input {
   gap: 28px;
 }
 
+.nav-hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .nav-links a {
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
@@ -421,6 +453,100 @@ input {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.nav-mobile {
+  display: none;
+}
+
+.nav-mobile__inner {
+  padding: 0 0 14px;
+}
+
+.nav-mobile__links {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-mobile__links a {
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.nav-mobile__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.nav-mobile__actions .gh-btn {
+  width: min(240px, 100%);
+  justify-content: flex-start;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-mobile__actions .gh-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 2px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: #ff6a00;
+  transition: width 0.2s ease;
+}
+
+.nav-mobile__actions .gh-btn:hover {
+  background: transparent;
+  color: #fff;
+}
+
+.nav-mobile__actions .gh-btn:hover::after {
+  width: 100%;
+}
+
+.nav-mobile__actions .gh-btn:active {
+  transform: none;
+}
+.nav-mobile__btn-login,
+.nav-mobile__btn-reserve {
+  width: min(240px, 100%) !important;
+}
+
+.nav-shell--compact .nav-links,
+.nav-shell--compact .nav-actions {
+  display: none;
+}
+
+.nav-shell--links-collapsed .nav-links {
+  display: none;
+}
+
+.nav-shell--minimal-actions .nav-action-secondary {
+  display: none;
+}
+
+.nav-shell--compact .nav-hamburger {
+  display: inline-flex;
+}
+
+.nav-shell--compact .nav-mobile {
+  display: block;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Hero */
@@ -1003,7 +1129,7 @@ input {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 0;
 }
 
 .admin-table th,
@@ -1111,6 +1237,10 @@ input {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .waiter-tables-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .about-grid,
   .visit-grid {
     grid-template-columns: 1fr;
@@ -1133,12 +1263,12 @@ input {
 }
 
 @media (max-width: 900px) {
-  .nav-links {
-    display: none;
+  .nav-inner {
+    min-height: 68px;
   }
 
   .hero-shell {
-    min-height: 560px;
+    min-height: 430px;
   }
 
   .hero-shell__title {
@@ -1152,41 +1282,14 @@ input {
 
   .about-logo-box {
     display: none;
-}
+  }
 
-.about-logo-circle {
-  display: none;
-
-}
+  .about-logo-circle {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
-  .admin-shell{
-    font-size: 1.5rem;
-  }
-
-    .admin-shell p{
-    font-size: 1.3rem;
-  }
-
-    .admin-shell button{
-    font-size: 1.2rem;
-  }
-
-      .admin-shell span{
-    font-size: 1.2rem;
-  }
-
-      .admin-shell div{
-    font-size: 1.2rem;
-  }
-
-      .admin-shell small{
-    font-size: 1rem;
-  }
-
-
-
   .gh-container {
     width: min(var(--gh-container), calc(100% - 28px));
   }
@@ -1213,10 +1316,80 @@ input {
     font-size: 12px;
   }
 
+  .hero-shell {
+    min-height: 350px;
+  }
+
+  .hero-shell__title {
+    font-size: 32px;
+    letter-spacing: 2px;
+  }
+
   .directionsDiv{
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .waiter-status-tag {
+    font-size: 10px;
+    padding: 8px 10px;
+    min-width: 170px;
+  }
+
+  .waiter-status-tag b {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 620px) {
+  .panel-top {
+    height: auto;
+    min-height: 72px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .panel-top__right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .panel-top__right .gh-btn {
+    flex: 1 1 100%;
+  }
+
+  .panel-brand__text {
+    font-size: 14px;
+    letter-spacing: 0.6px;
+  }
+
+  .nav-mobile__actions {
+    align-items: flex-start;
+  }
+
+  .gh-btn {
+    padding: 10px 12px;
+  }
+
+  .menu-full-box {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 540px) {
+  .waiter-tables-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scroll-top-btn {
+    width: 48px;
+    height: 48px;
+    right: 16px;
+    bottom: 16px;
+    font-size: 22px;
   }
 }
 
@@ -1380,6 +1553,38 @@ body.light-theme .nav-actions .gh-btn--primary:hover,
   background: #e05c00;
   border-color: #e05c00;
   box-shadow: 0 4px 14px rgba(255, 106, 0, 0.40);
+}
+
+body.light-theme .nav-hamburger,
+.home-page.light-theme .nav-hamburger {
+  color: #3d2e0f;
+  border-color: #d6cabb;
+  background: #f7f2ea;
+}
+
+body.light-theme .nav-mobile,
+.home-page.light-theme .nav-mobile {
+  border-top-color: #e4ddd3;
+}
+
+body.light-theme .nav-mobile__links a,
+.home-page.light-theme .nav-mobile__links a {
+  color: #1a1208;
+  border-color: #e4ddd3;
+  background: #fff;
+}
+
+body.light-theme .nav-mobile__actions .gh-btn,
+.home-page.light-theme .nav-mobile__actions .gh-btn {
+  background: transparent;
+  border: 0;
+  color: #3d2e0f;
+}
+
+body.light-theme .nav-mobile__actions .gh-btn:hover,
+.home-page.light-theme .nav-mobile__actions .gh-btn:hover {
+  background: transparent;
+  color: #1a1208;
 }
 
 /* --- Buttons --- */
