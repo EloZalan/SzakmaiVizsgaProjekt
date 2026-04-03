@@ -359,7 +359,6 @@ svg {
   flex-wrap: wrap;
 }
 
-/* Navbar */
 .nav-shell {
   position: sticky;
   top: 0;
@@ -463,21 +462,6 @@ svg {
   padding: 0 0 14px;
 }
 
-.nav-mobile__links {
-  display: grid;
-  gap: 6px;
-}
-
-.nav-mobile__links a {
-  padding: 12px 10px;
-  border-radius: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  cursor: pointer;
-}
-
 .nav-mobile__actions {
   display: flex;
   flex-direction: column;
@@ -549,7 +533,6 @@ svg {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Hero */
 .hero-shell {
   position: relative;
   min-height: 640px;
@@ -616,7 +599,6 @@ svg {
   background: var(--gh-accent);
 }
 
-/* About */
 .about-card {
   background: var(--gh-surface);
   border: 1px solid var(--gh-border);
@@ -699,7 +681,6 @@ svg {
   background-position: center;
 }
 
-/* Menu */
 .menu-head {
   text-align: center;
   margin-bottom: 34px;
@@ -802,7 +783,6 @@ svg {
   color: var(--gh-accent);
 }
 
-/* Visit us */
 .visit-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -861,7 +841,6 @@ svg {
   background-position: center;
 }
 
-/* Footer */
 .footer-shell {
   padding: 44px 0 60px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -903,7 +882,6 @@ svg {
   font-size: 12px;
 }
 
-/* Login */
 .login-shell,
 .reserve-shell {
   min-height: 100vh;
@@ -969,7 +947,6 @@ svg {
   line-height: 1.6;
 }
 
-/* Waiter */
 .waiter-shell,
 .admin-shell {
   min-height: 100vh;
@@ -1113,7 +1090,6 @@ svg {
   color: #ffb27a;
 }
 
-/* Admin */
 .admin-layout {
   display: grid;
   grid-template-columns: 1.2fr 1.3fr;
@@ -1193,7 +1169,6 @@ svg {
   font-weight: 900;
 }
 
-/* Scroll button */
 .scroll-top-btn {
   position: fixed;
   bottom: 30px;
@@ -1216,7 +1191,6 @@ svg {
   transform: translateY(-3px);
 }
 
-/* Responsive */
 @media (max-width: 1200px) {
   .waiter-layout,
   .admin-layout {
@@ -1449,7 +1423,6 @@ svg {
   color: #1a1208;
 }
 
-/* --- Global text overrides --- */
 .home-page.light-theme *,
 .home-page.light-theme h1,
 .home-page.light-theme h2,
@@ -1461,7 +1434,6 @@ svg {
   color: inherit;
 }
 
-/* --- Navbar --- */
 body.light-theme .nav-shell,
 .home-page.light-theme .nav-shell {
   background: rgba(255, 250, 244, 0.95);
@@ -1567,13 +1539,6 @@ body.light-theme .nav-mobile,
   border-top-color: #e4ddd3;
 }
 
-body.light-theme .nav-mobile__links a,
-.home-page.light-theme .nav-mobile__links a {
-  color: #1a1208;
-  border-color: #e4ddd3;
-  background: #fff;
-}
-
 body.light-theme .nav-mobile__actions .gh-btn,
 .home-page.light-theme .nav-mobile__actions .gh-btn {
   background: transparent;
@@ -1587,7 +1552,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #1a1208;
 }
 
-/* --- Buttons --- */
 .home-page.light-theme .gh-btn {
   background: #fff;
   color: #1a1208;
@@ -1631,7 +1595,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #c03030;
 }
 
-/* --- Pills & Tags --- */
 .home-page.light-theme .gh-pill {
   background: #fff;
   border-color: #d6cabb;
@@ -1654,14 +1617,12 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #78695a;
 }
 
-/* --- Panel / card surfaces --- */
 .home-page.light-theme .gh-panel {
   background: #fff;
   border-color: #e4ddd3;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
 }
 
-/* --- Hero --- */
 .home-page.light-theme .hero-shell__overlay {
   background:
     radial-gradient(60% 50% at 50% 50%, rgba(0,0,0,0.30), rgba(0,0,0,0.55)),
@@ -1677,7 +1638,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   background: rgba(0,0,0,0.28);
 }
 
-/* --- About section --- */
 .home-page.light-theme .about-card {
   background: #fff;
   border-color: #e4ddd3;
@@ -1702,7 +1662,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #1a1208;
 }
 
-/* --- Menu section --- */
 .home-page.light-theme .menu-head__subtitle {
   color: #4a3c26;
 }
@@ -1764,7 +1723,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   border-color: #ff6a00;
 }
 
-/* --- Visit / Contact section --- */
 .home-page.light-theme .visit-card {
   background: #fff;
   border-color: #e4ddd3;
@@ -1784,12 +1742,10 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 }
 
-/* --- Detail lines --- */
 .home-page.light-theme .detail-line {
   border-bottom-color: #e8e0d4;
 }
 
-/* --- Stat / Summary boxes --- */
 .home-page.light-theme .stat-box,
 .home-page.light-theme .summary-box {
   background: #fff;
@@ -1811,7 +1767,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #78695a;
 }
 
-/* --- Footer --- */
 .home-page.light-theme .footer-shell {
   background: #fff;
   border-top: 1px solid #e8e0d4;
@@ -1829,7 +1784,6 @@ body.light-theme .nav-mobile__actions .gh-btn:hover,
   color: #78695a;
 }
 
-/* --- Material Icons --- */
 mat-icon {
   display: inline-flex;
   align-items: center;
