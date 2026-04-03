@@ -198,10 +198,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     return role === 'ADMIN' ? 'Adminisztrátor' : 'Pincér';
   }
 
-  getStatusLabel(status: StaffMember['status']): string {
-    return status === 'ACTIVE' ? 'Aktív' : 'Inaktív';
-  }
-
   private mapWaiterToStaffMember(waiter: AdminWaiterDto): StaffMember {
     return {
       id: waiter.id,

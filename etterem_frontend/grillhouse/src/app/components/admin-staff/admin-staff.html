@@ -27,7 +27,6 @@
           <tr>
             <th>Név</th>
             <th>Szerepkör</th>
-            <th>Státusz</th>
             <th>Műszak</th>
             <th>Művelet</th>
           </tr>
@@ -44,10 +43,9 @@
               </td>
               <td>
                 <span class="gh-tag" [class.gh-tag--muted]="staff.status === 'INACTIVE'">
-                  {{ getStatusLabel(staff.status) }}
+                  {{ staff.shift }}
                 </span>
               </td>
-              <td>{{ staff.shift }}</td>
               <td>
                 @if (pendingRemovalStaffId === staff.id) {
                   <div class="staff-row-confirm">
@@ -83,7 +81,7 @@
             </tr>
             @if (removeError && pendingRemovalStaffId === staff.id) {
               <tr>
-                <td colspan="5">
+                <td colspan="4">
                   <p class="staff-row-error">{{ removeError }}</p>
                 </td>
               </tr>
@@ -114,13 +112,12 @@
       </div>
 
       <div class="detail-line">
-        <span>Státusz</span>
-        <strong>{{ getStatusLabel(selectedStaff.status) }}</strong>
-      </div>
-
-      <div class="detail-line">
         <span>Műszak</span>
-        <strong>{{ selectedStaff.shift }}</strong>
+        <strong>
+          <span class="gh-tag" [class.gh-tag--muted]="selectedStaff.status === 'INACTIVE'">
+            {{ selectedStaff.shift }}
+          </span>
+        </strong>
       </div>
 
       <div class="action-row action-row--end" style="margin-top: 1rem;">
