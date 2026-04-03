@@ -85,6 +85,21 @@
   margin: 8px 0 0;
 }
 
+.waiter-reservation-card__body .gh-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+  transform: none;
+}
+
+.waiter-reservation-card__body .gh-btn:disabled:hover {
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.52);
+}
+
 @media (max-width: 768px) {
   .waiter-reservation-card__head {
     flex-direction: column;

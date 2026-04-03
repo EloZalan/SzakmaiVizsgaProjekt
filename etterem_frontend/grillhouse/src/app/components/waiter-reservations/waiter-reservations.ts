@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import type { jsPDF as JsPdfType } from 'jspdf';
 
 import {
   WaiterDailyReservationDto,
@@ -107,6 +106,21 @@ export class WaiterReservationsComponent implements OnInit {
     return name;
   }
 
+  canPrintReceipt(reservation: WaiterDailyReservationDto): boolean {
+    return (
+      !!reservation.order?.items?.length &&
+      reservation.order?.status === 'done'
+    );
+  }
+
+  getClosingTime(reservation: WaiterDailyReservationDto): string | null {
+    if (reservation.order?.status === 'done') {
+      return reservation.closed_at ?? reservation.end_time;
+    }
+
+    return reservation.end_time;
+  }
+
   getOrderStatusLabel(status?: WaiterDailyReservationOrderDto['status']): string {
     if (status === 'ready_to_pay') {
       return 'Fizetésre vár';
@@ -124,7 +138,7 @@ export class WaiterReservationsComponent implements OnInit {
       return 0;
     }
 
-    return reservation.order.display_total ?? reservation.order.paid_total ?? reservation.order.total_price;
+    return reservation.order.total_price;
   }
 
   getPerGuestTotal(reservation: WaiterDailyReservationDto): number {
@@ -144,97 +158,75 @@ export class WaiterReservationsComponent implements OnInit {
       const doc = new JsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
+        format: [80, 220],
       });
 
-      const left = 14;
-      const right = 196;
-      let y = 18;
+      const left = 6;
+      const right = 74;
+      const center = 40;
+      let y = 10;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.text('GRILLHOUSE - NYUGTA', left, y);
-      y += 9;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      doc.text(`Foglalas: #${reservation.reservation_id}`, left, y);
-      y += 6;
-      doc.text(`Asztal: Asztal ${reservation.table_id}`, left, y);
-      y += 6;
-      doc.text(`Vendeg: ${this.displayGuestName(reservation.guest_name)}`, left, y);
-      y += 6;
-      doc.text(`Letszam: ${reservation.guest_count} fo`, left, y);
-      y += 6;
-      doc.text(`Nyomtatas ideje: ${new Date().toLocaleString('hu-HU')}`, left, y);
-      y += 8;
-
-      doc.setDrawColor(120);
-      doc.line(left, y, right, y);
-      y += 6;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.text('Tetel', left, y);
-      doc.text('Db', 128, y, { align: 'right' });
-      doc.text('Egysegar', 158, y, { align: 'right' });
-      doc.text('Osszesen', right, y, { align: 'right' });
+      doc.setFont('courier', 'bold');
+      doc.setFontSize(12);
+      doc.text('GRILLHOUSE', center, y, { align: 'center' });
       y += 5;
-
-      doc.setDrawColor(80);
-      doc.line(left, y, right, y);
-      y += 5;
-
-      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
+      doc.text('ETTERMI NYUGTA', center, y, { align: 'center' });
+      y += 5;
+
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Foglalas: #${reservation.reservation_id}`, left, y);
+      y += 4;
+      doc.text(`Asztal: ${reservation.table_id}`, left, y);
+      y += 4;
+      doc.text(`Vendeg: ${this.displayGuestName(reservation.guest_name)}`, left, y);
+      y += 4;
+      doc.text(`Letszam: ${reservation.guest_count} fo`, left, y);
+      y += 4;
+      doc.text(`Datum: ${new Date().toLocaleString('hu-HU')}`, left, y);
+      y += 3;
+
+      doc.line(left, y, right, y);
+      y += 4;
 
       reservation.order.items.forEach((item) => {
-        const nameLines = doc.splitTextToSize(item.name, 92) as string[];
-        const rowHeight = Math.max(nameLines.length * 5, 5);
-
-        if (y + rowHeight + 16 > 286) {
-          this.addReceiptPageHeader(doc);
-          y = 28;
-        }
-
+        const nameLines = doc.splitTextToSize(item.name, 44) as string[];
+        doc.setFont('courier', 'bold');
         doc.text(nameLines, left, y);
-        doc.text(String(item.quantity), 128, y, { align: 'right' });
-        doc.text(this.formatFt(item.price), 158, y, { align: 'right' });
+        y += nameLines.length * 3.7;
+
+        doc.setFont('courier', 'normal');
+        doc.text(`${item.quantity} x ${this.formatFt(item.price)}`, left, y);
         doc.text(this.formatFt(item.line_total), right, y, { align: 'right' });
-
-        y += rowHeight + 2;
+        y += 4.5;
       });
 
+      y += 1;
       doc.line(left, y, right, y);
-      y += 9;
+      y += 4;
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.text(`Vegosszeg: ${this.formatFt(this.getReservationTotal(reservation))}`, right, y, {
-        align: 'right',
-      });
-      y += 8;
+      const foodAndDrinkTotal = reservation.order.total_price;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text('Koszonjuk, hogy a Grillhouse-t valasztotta!', left, y);
+      doc.setFont('courier', 'normal');
+      doc.text('Etel + ital osszesen:', left, y);
+      doc.text(this.formatFt(foodAndDrinkTotal), right, y, { align: 'right' });
+      y += 4;
+
+      doc.setFont('courier', 'bold');
+      doc.text('Fizetendo vegosszeg:', left, y);
+      doc.text(this.formatFt(foodAndDrinkTotal), right, y, { align: 'right' });
+      y += 6;
+
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(7);
+      doc.text('Koszonjuk, hogy a Grillhouse-t valasztotta!', center, y, { align: 'center' });
 
       doc.save(`nyugta-foglalas-${reservation.reservation_id}-${this.getReceiptTimestamp(new Date())}.pdf`);
     } catch (err) {
       console.error('DAILY RESERVATION RECEIPT PDF ERROR:', err);
       alert('Nem sikerült letölteni a nyugtát PDF-ként.');
     }
-  }
-
-  private addReceiptPageHeader(doc: JsPdfType): void {
-    doc.addPage();
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('GRILLHOUSE - NYUGTA (folytatas)', 14, 18);
-    doc.setDrawColor(120);
-    doc.line(14, 22, 196, 22);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
   }
 
   private getReceiptTimestamp(date: Date): string {

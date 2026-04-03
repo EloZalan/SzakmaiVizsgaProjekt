@@ -83,8 +83,8 @@
                 </div>
 
                 <div class="summary-box">
-                  <span>Foglalás vége</span>
-                  <strong>{{ formatDateTime(reservation.end_time) }}</strong>
+                  <span>{{ reservation.order?.status === 'done' ? 'Lezárás ideje' : 'Foglalás vége' }}</span>
+                  <strong>{{ formatDateTime(getClosingTime(reservation)) }}</strong>
                 </div>
               </div>
 
@@ -115,8 +115,9 @@
                 <button
                   type="button"
                   class="gh-btn gh-btn--ghost"
-                  [disabled]="!reservation.order?.items?.length"
+                  [disabled]="!canPrintReceipt(reservation)"
                   (click)="printReceipt(reservation)"
+                  [title]="!canPrintReceipt(reservation) ? 'A nyugta csak lezárt rendelésnél tölthető le' : ''"
                 >
                   Nyugta (PDF)
                 </button>
