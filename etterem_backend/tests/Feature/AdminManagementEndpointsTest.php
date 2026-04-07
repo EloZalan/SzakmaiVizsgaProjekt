@@ -5,6 +5,7 @@ use App\Models\MenuItem;
 use App\Models\Reservation;
 use App\Models\Table;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 test('admin listázhatja a pincéreket', function () {
     /** @var \Tests\TestCase $this */
@@ -29,15 +30,72 @@ test('admin hozzáadhat új pincért', function () {
     /** @var \Tests\TestCase $this */
     $admin = User::where('email', 'admin@test.com')->firstOrFail();
 
+    Mail::fake();
+
     $this->actingAs($admin)
         ->postJson('/api/admin/waiters', [
             'name' => 'Új Pincér',
             'email' => 'ujpincer@test.com',
-            'password' => 'Jelszo123!',
-            'password_confirmation' => 'Jelszo123!',
         ])
         ->assertStatus(201)
-        ->assertJsonFragment(['email' => 'ujpincer@test.com']);
+        ->assertJsonFragment([
+            'email' => 'ujpincer@test.com',
+            'invite_pending' => true,
+        ]);
+
+    $this->assertDatabaseHas('users', [
+        'email' => 'ujpincer@test.com',
+        'role' => 'waiter',
+    ]);
+
+    expect(User::where('email', 'ujpincer@test.com')->firstOrFail()->invite_token)->not->toBeNull();
+});
+
+test('nyilvanos invite végpont visszaadja az aktiválható meghívót', function () {
+    /** @var \Tests\TestCase $this */
+    $user = User::create([
+        'name' => 'Invite Teszt',
+        'email' => 'invite@test.com',
+        'password' => 'temporary-password',
+        'role' => 'waiter',
+        'invite_token' => hash('sha256', 'plain-test-token'),
+        'invite_expires_at' => now()->addDay(),
+        'invited_at' => now(),
+    ]);
+
+    $this->getJson('/api/waiter-invites/plain-test-token')
+        ->assertStatus(200)
+        ->assertJsonFragment([
+            'name' => $user->name,
+            'email' => $user->email,
+        ]);
+});
+
+test('meghivo elfogadasa beallitja a jelszot es igazolja az emailt', function () {
+    /** @var \Tests\TestCase $this */
+    $user = User::create([
+        'name' => 'Elfogado Pincer',
+        'email' => 'elfogado@test.com',
+        'password' => 'temporary-password',
+        'role' => 'waiter',
+        'invite_token' => hash('sha256', 'accept-token'),
+        'invite_expires_at' => now()->addDay(),
+        'invited_at' => now(),
+    ]);
+
+    $this->postJson('/api/waiter-invites/accept-token/accept', [
+        'password' => 'UjJelszo123!',
+        'password_confirmation' => 'UjJelszo123!',
+    ])
+        ->assertStatus(200)
+        ->assertJsonFragment([
+            'message' => 'A meghívó aktiválva lett. Most már bejelentkezhetsz.',
+        ]);
+
+    $user->refresh();
+
+    expect($user->email_verified_at)->not->toBeNull();
+    expect($user->invite_token)->toBeNull();
 });
 
 test('admin törölhet pincért', function () {

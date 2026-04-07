@@ -78,3 +78,26 @@ test('bejelentkezett felhasználó frissítheti az emailjét', function () {
         ->assertStatus(200)
         ->assertJsonFragment(['email' => 'uj-email@test.com']);
 });
+
+test('aktiválatlan pincér nem tud bejelentkezni', function () {
+    /** @var \Tests\TestCase $this */
+    User::create([
+        'name' => 'Meghivott Pincer',
+        'email' => 'meghivott@test.com',
+        'password' => 'temporary-password',
+        'role' => 'waiter',
+        'invite_token' => hash('sha256', 'blocked-token'),
+        'invite_expires_at' => now()->addDay(),
+        'invited_at' => now(),
+        'email_verified_at' => null,
+    ]);
+
+    $this->postJson('/api/login', [
+        'email' => 'meghivott@test.com',
+        'password' => 'temporary-password',
+    ])
+        ->assertStatus(403)
+        ->assertJsonFragment([
+            'message' => 'A meghívó még nincs aktiválva. Ellenőrizd az emailedet.',
+        ]);
+});

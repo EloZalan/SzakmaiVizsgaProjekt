@@ -14,6 +14,8 @@ Route::middleware(['security.headers', 'throttle:api'])->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::get('/tables/max-capacity', [TableController::class, 'maxCapacity']);
+    Route::get('/waiter-invites/{token}', [AdminActionsController::class, 'showWaiterInvite']);
+    Route::post('/waiter-invites/{token}/accept', [AdminActionsController::class, 'acceptWaiterInvite']);
 
     Route::get('/menu-categories', [\App\Http\Controllers\MenuCategoryController::class, 'index']);
     Route::get('/menu-categories/{menu_category}', [\App\Http\Controllers\MenuCategoryController::class, 'show']);
