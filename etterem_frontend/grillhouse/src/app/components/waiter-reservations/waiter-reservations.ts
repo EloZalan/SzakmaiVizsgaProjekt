@@ -1,10 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 
 import {
   WaiterDailyReservationDto,
   WaiterDailyReservationOrderDto,
   WaiterService,
 } from '../../services/waiter.service';
+import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-waiter-reservations',
@@ -13,9 +14,10 @@ import {
   templateUrl: './waiter-reservations.html',
   styleUrl: './waiter-reservations.css',
 })
-export class WaiterReservationsComponent implements OnInit {
+export class WaiterReservationsComponent implements OnInit, OnDestroy {
   constructor(
     private waiterService: WaiterService,
+    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -27,9 +29,20 @@ export class WaiterReservationsComponent implements OnInit {
   private readonly ftFormatter = new Intl.NumberFormat('hu-HU', {
     maximumFractionDigits: 0,
   });
+  private stopTableStatusListening: (() => void) | null = null;
 
   ngOnInit(): void {
     this.loadReservations();
+
+    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges(() => {
+      this.waiterService.invalidateTodayReservationsCache();
+      this.loadReservations();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopTableStatusListening?.();
+    this.stopTableStatusListening = null;
   }
 
   loadReservations(): void {

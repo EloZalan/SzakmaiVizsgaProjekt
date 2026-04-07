@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, Observable, tap } from 'rxjs';
+import { forkJoin, map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { TableInfo, WaiterTableStatus } from '../models/table-info.model';
 
@@ -106,9 +106,12 @@ export interface MenuItemDto {
 export class WaiterService {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
+  private tablesCache$?: Observable<TableInfo[]>;
+  private menuDataCache$?: Observable<{ categories: MenuCategoryDto[]; items: MenuItemDto[] }>;
+  private todayReservationsCache$?: Observable<WaiterDailyReservationDto[]>;
 
   getTables(): Observable<TableInfo[]> {
-    return this.http
+    this.tablesCache$ ??= this.http
       .get(`${this.config.apiUrl}/tables`)
       .pipe(
         tap((response) => console.log('RAW /tables RESPONSE:', response)),
@@ -120,19 +123,29 @@ export class WaiterService {
           return rows
             .sort((a, b) => a.id - b.id)
             .map((table, index) => this.mapTableDto(table, index + 1));
-        })
+        }),
+        shareReplay(1)
       );
+
+    return this.tablesCache$;
   }
 
   getMenuData(): Observable<{ categories: MenuCategoryDto[]; items: MenuItemDto[] }> {
-    return forkJoin({
+    this.menuDataCache$ ??= forkJoin({
       categories: this.http.get<MenuCategoryDto[]>(`${this.config.apiUrl}/menu-categories`),
       items: this.http.get<MenuItemDto[]>(`${this.config.apiUrl}/menu-items`),
-    });
+    }).pipe(shareReplay(1));
+
+    return this.menuDataCache$;
   }
 
   openOrder(tableId: number): Observable<OrderDto> {
-    return this.http.post<OrderDto>(`${this.config.apiUrl}/tables/${tableId}/orders`, {});
+    return this.http.post<OrderDto>(`${this.config.apiUrl}/tables/${tableId}/orders`, {}).pipe(
+      tap(() => {
+        this.invalidateTablesCache();
+        this.invalidateTodayReservationsCache();
+      })
+    );
   }
 
   getTableOrder(tableId: number): Observable<TableOrderDetailsDto> {
@@ -140,31 +153,73 @@ export class WaiterService {
   }
 
   getTodayReservationsWithOrders(): Observable<WaiterDailyReservationDto[]> {
-    return this.http.get<WaiterDailyReservationDto[]>(`${this.config.apiUrl}/reservations/today-with-orders`);
+    this.todayReservationsCache$ ??= this.http
+      .get<WaiterDailyReservationDto[]>(`${this.config.apiUrl}/reservations/today-with-orders`)
+      .pipe(shareReplay(1));
+
+    return this.todayReservationsCache$;
   }
 
   addOrderItem(orderId: number, menuItemId: number, quantity: number): Observable<unknown> {
     return this.http.post(`${this.config.apiUrl}/orders/${orderId}/items`, {
       menu_item_id: menuItemId,
       quantity,
-    });
+    }).pipe(
+      tap(() => {
+        this.invalidateTablesCache();
+        this.invalidateTodayReservationsCache();
+      })
+    );
   }
 
   markReadyToPay(orderId: number): Observable<unknown> {
-    return this.http.post(`${this.config.apiUrl}/orders/${orderId}/simulate-ready`, {});
+    return this.http.post(`${this.config.apiUrl}/orders/${orderId}/simulate-ready`, {}).pipe(
+      tap(() => {
+        this.invalidateTablesCache();
+        this.invalidateTodayReservationsCache();
+      })
+    );
   }
 
   payOrder(orderId: number, paymentMethod: 'cash' | 'card'): Observable<unknown> {
     return this.http.post(`${this.config.apiUrl}/orders/${orderId}/pay`, {
       payment_method: paymentMethod,
-    });
+    }).pipe(
+      tap(() => {
+        this.invalidateTablesCache();
+        this.invalidateTodayReservationsCache();
+      })
+    );
   }
 
   payOrderWithTip(orderId: number, paymentMethod: 'cash' | 'card', tip: number): Observable<unknown> {
     return this.http.post(`${this.config.apiUrl}/orders/${orderId}/pay`, {
       payment_method: paymentMethod,
       tip: Math.round(tip || 0),
-    });
+    }).pipe(
+      tap(() => {
+        this.invalidateTablesCache();
+        this.invalidateTodayReservationsCache();
+      })
+    );
+  }
+
+  invalidateTablesCache(): void {
+    this.tablesCache$ = undefined;
+  }
+
+  invalidateMenuDataCache(): void {
+    this.menuDataCache$ = undefined;
+  }
+
+  invalidateTodayReservationsCache(): void {
+    this.todayReservationsCache$ = undefined;
+  }
+
+  invalidateAllCaches(): void {
+    this.invalidateTablesCache();
+    this.invalidateMenuDataCache();
+    this.invalidateTodayReservationsCache();
   }
 
   private mapTableDto(table: TableDto, displayIndex: number): TableInfo {
@@ -214,6 +269,7 @@ export class WaiterService {
     if (!reservation) {
       return undefined;
     }
+
     return reservation.note ?? undefined;
   }
 }

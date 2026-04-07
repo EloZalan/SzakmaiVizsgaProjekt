@@ -53,6 +53,8 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     this.loadWaiterPage();
 
     this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+      this.waiterService.invalidateTablesCache();
+      this.waiterService.invalidateTodayReservationsCache();
       const hasSelectedTable = this.selected !== null;
       const tableToKeepSelected = this.selected?.id ?? event.table_id;
       this.loadWaiterPage(tableToKeepSelected, hasSelectedTable);
@@ -310,6 +312,9 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
   }
 
   private finalizePayment(tableId: number): void {
+    this.waiterService.invalidateTablesCache();
+    this.waiterService.invalidateTodayReservationsCache();
+
     this.tables = this.tables.map((t) =>
       t.id !== tableId
         ? t
