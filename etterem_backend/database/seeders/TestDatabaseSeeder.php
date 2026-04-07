@@ -35,6 +35,7 @@ class TestDatabaseSeeder extends Seeder
             'email'    => 'admin@test.com',
             'password' => Hash::make('password'),
             'role'     => 'admin',
+            'email_verified_at' => now(),
         ]);
 
         $waiter1 = User::create([
@@ -43,6 +44,7 @@ class TestDatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role'     => 'waiter',
             'on_shift' => true,
+            'email_verified_at' => now(),
         ]);
 
         $waiter2 = User::create([
@@ -51,6 +53,7 @@ class TestDatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role'     => 'waiter',
             'on_shift' => false,
+            'email_verified_at' => now(),
         ]);
 
         $waiter3 = User::create([
@@ -59,6 +62,7 @@ class TestDatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role'     => 'waiter',
             'on_shift' => false,
+            'email_verified_at' => now(),
         ]);
 
         // ── Asztalok ──────────────────────────────────────────────────

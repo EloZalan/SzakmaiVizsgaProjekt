@@ -16,6 +16,7 @@ class WaiterSeeder extends Seeder
             'email' => 'seeder@waiter.com',
             'password' => Hash::make('password123'),
             'role' => 'waiter',
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -23,6 +24,7 @@ class WaiterSeeder extends Seeder
             'email' => 'tesztelek@waiter.com',
             'password' => Hash::make('password123'),
             'role' => 'waiter',
+            'email_verified_at' => now(),
         ]);
     }
 }
