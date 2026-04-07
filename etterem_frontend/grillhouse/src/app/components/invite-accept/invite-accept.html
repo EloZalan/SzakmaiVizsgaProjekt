@@ -1,0 +1,73 @@
+<section class="invite-shell">
+  <div class="invite-card">
+    <div class="invite-card__accent"></div>
+
+    <header class="invite-card__header">
+      <p class="invite-card__eyebrow">Grill House</p>
+      <h1>Pincéri meghívó aktiválása</h1>
+      <p>Állítsd be a jelszavadat, és ezután be tudsz jelentkezni a rendszerbe.</p>
+    </header>
+
+    @if (loading) {
+      <div class="invite-state">Meghívó ellenőrzése...</div>
+    } @else if (errorMessage && !invite) {
+      <div class="invite-state invite-state--error">{{ errorMessage }}</div>
+      <a routerLink="/login" class="invite-link">Vissza a bejelentkezéshez</a>
+    } @else if (invite) {
+      <div class="invite-summary">
+        <div>
+          <span>Név</span>
+          <strong>{{ invite.name }}</strong>
+        </div>
+        <div>
+          <span>Email</span>
+          <strong>{{ invite.email }}</strong>
+        </div>
+        <div>
+          <span>Lejárat</span>
+          <strong>{{ invite.expires_at | date:'yyyy.MM.dd HH:mm' }}</strong>
+        </div>
+      </div>
+
+      <form class="invite-form" (ngSubmit)="acceptInvite()">
+        <label>
+          <span>Új jelszó</span>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            minlength="8"
+            autocomplete="new-password"
+            [disabled]="submitting || !!successMessage"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Jelszó megerősítése</span>
+          <input
+            type="password"
+            name="passwordConfirmation"
+            [(ngModel)]="passwordConfirmation"
+            minlength="8"
+            autocomplete="new-password"
+            [disabled]="submitting || !!successMessage"
+            required
+          />
+        </label>
+
+        @if (errorMessage) {
+          <p class="invite-message invite-message--error">{{ errorMessage }}</p>
+        }
+
+        @if (successMessage) {
+          <p class="invite-message invite-message--success">{{ successMessage }}</p>
+        }
+
+        <button type="submit" class="invite-submit" [disabled]="submitting || !!successMessage">
+          {{ submitting ? 'Aktiválás...' : 'Fiók aktiválása' }}
+        </button>
+      </form>
+    }
+  </div>
+</section>
