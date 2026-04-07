@@ -24,6 +24,10 @@ class User extends Authenticatable
         'password',
         'role',
         'on_shift',
+        'email_verified_at',
+        'invite_token',
+        'invite_expires_at',
+        'invited_at',
     ];
 
     /**
@@ -51,6 +55,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'on_shift' => 'boolean',
+            'invite_expires_at' => 'datetime',
+            'invited_at' => 'datetime',
         ];
+    }
+
+    public function hasPendingInvite(): bool
+    {
+        return $this->role === 'waiter'
+            && $this->invite_token !== null
+            && $this->invite_expires_at !== null
+            && $this->invite_expires_at->isFuture()
+            && $this->email_verified_at === null;
     }
 }

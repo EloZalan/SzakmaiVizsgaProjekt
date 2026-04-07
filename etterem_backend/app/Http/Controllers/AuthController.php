@@ -22,6 +22,10 @@ class AuthController extends Controller
             return response(['message' => 'Hibás adatok'], 401);
         }
 
+        if ($user->role === 'waiter' && $user->email_verified_at === null) {
+            return response(['message' => 'A meghívó még nincs aktiválva. Ellenőrizd az emailedet.'], 403);
+        }
+
         $token = $user->createToken('myapptoken')->plainTextToken;
 
         // Do not automatically set on_shift during login. The frontend should
@@ -38,6 +42,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'role' => $user->role,
             'on_shift' => $user->on_shift,
+            'email_verified_at' => $user->email_verified_at,
         ]);
     }
 
