@@ -46,3 +46,20 @@ function something()
 {
     // ..
 }
+
+function load_fixture(string $path): mixed
+{
+    $fullPath = __DIR__ . '/Fixtures/' . ltrim($path, '/');
+
+    if (!is_file($fullPath)) {
+        throw new InvalidArgumentException("Fixture not found: {$path}");
+    }
+
+    $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+
+    return match ($extension) {
+        'php' => require $fullPath,
+        'json' => json_decode(file_get_contents($fullPath), true, 512, JSON_THROW_ON_ERROR),
+        default => throw new InvalidArgumentException("Unsupported fixture format: {$extension}"),
+    };
+}
