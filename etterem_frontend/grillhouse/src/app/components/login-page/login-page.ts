@@ -42,6 +42,8 @@ export class LoginPageComponent {
           this.errorMessage = 'Hibás vagy hiányzó adatok.';
         } else if (err.status === 401) {
           this.errorMessage = 'Hibás email vagy jelszó.';
+        } else if (err.status === 403) {
+          this.errorMessage = err?.error?.message ?? 'A fiók még nincs aktiválva.';
         } else {
           this.errorMessage = 'Sikertelen bejelentkezés.';
         }

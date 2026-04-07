@@ -11,6 +11,7 @@ export interface User {
   email: string;
   role: UserRole;
   on_shift?: boolean;
+  email_verified_at?: string | null;
 }
 
 export interface LoginResponse {

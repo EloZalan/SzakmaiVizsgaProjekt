@@ -9,6 +9,15 @@ export interface AdminWaiterDto {
   email: string;
   role: 'admin' | 'waiter' | string;
   on_shift?: boolean;
+  invite_pending?: boolean;
+  invite_expires_at?: string | null;
+  email_verified_at?: string | null;
+}
+
+export interface WaiterInviteDto {
+  name: string;
+  email: string;
+  expires_at: string;
 }
 
 export interface ReservationDto {
@@ -49,8 +58,6 @@ export class AdminDashboardService {
   createWaiter(payload: {
     name: string;
     email: string;
-    password: string;
-    password_confirmation: string;
   }): Observable<AdminWaiterDto | null> {
     return this.http
       .post<AdminWaiterDto | null>(`${this.config.apiUrl}/admin/waiters`, payload)
@@ -58,6 +65,24 @@ export class AdminDashboardService {
         tap(() => this.invalidateWaitersCache()),
         map((res) => res ?? null)
       );
+  }
+
+  getWaiterInvite(token: string): Observable<WaiterInviteDto> {
+    return this.http.get<WaiterInviteDto>(`${this.config.apiUrl}/waiter-invites/${token}`);
+  }
+
+  acceptWaiterInvite(payload: {
+    token: string;
+    password: string;
+    password_confirmation: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.config.apiUrl}/waiter-invites/${payload.token}/accept`,
+      {
+        password: payload.password,
+        password_confirmation: payload.password_confirmation,
+      }
+    );
   }
 
   deleteWaiter(waiterId: number): Observable<void> {

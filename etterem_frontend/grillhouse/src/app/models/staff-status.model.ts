@@ -1,1 +1,1 @@
-export type StaffStatus = 'ACTIVE' | 'INACTIVE';
+export type StaffStatus = 'ACTIVE' | 'INACTIVE' | 'INVITED';
