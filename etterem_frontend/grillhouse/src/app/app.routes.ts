@@ -11,11 +11,13 @@ import { AdminStaffComponent } from './components/admin-staff/admin-staff';
 import { AdminTablesComponent } from './components/admin-tables/admin-tables';
 import { AdminMenuComponent } from './components/admin-menu/admin-menu';
 import { ReservePageComponent } from './components/reserve-page/reserve-page';
+import { InviteAcceptComponent } from './components/invite-accept/invite-accept';
 import { roleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
   { path: 'login', component: LoginPageComponent },
+  { path: 'invite/:token', component: InviteAcceptComponent },
   { path: 'reserve', component: ReservePageComponent },
   {
     path: 'waiter/user',

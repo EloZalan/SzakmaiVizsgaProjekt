@@ -107,6 +107,11 @@
       </div>
 
       <div class="detail-line">
+        <span>Email</span>
+        <strong>{{ selectedStaff.email }}</strong>
+      </div>
+
+      <div class="detail-line">
         <span>Szerepkör</span>
         <strong>{{ getRoleLabel(selectedStaff.role) }}</strong>
       </div>
@@ -119,6 +124,13 @@
           </span>
         </strong>
       </div>
+
+      @if (selectedStaff.invitePending) {
+        <div class="detail-line">
+          <span>Meghívó lejárata</span>
+          <strong>{{ selectedStaff.inviteExpiresAt | date:'yyyy.MM.dd HH:mm' }}</strong>
+        </div>
+      }
 
       <div class="action-row action-row--end" style="margin-top: 1rem;">
         <button class="gh-btn gh-btn--danger" (click)="startRemoveStaff(selectedStaff.id)">Eltávolítás</button>
@@ -135,7 +147,7 @@
       <header class="staff-modal__header">
         <div>
           <h3>Új pincér felvétele</h3>
-          <p>Töltsd ki az adatokat és hozd létre az új felhasználót.</p>
+          <p>Töltsd ki az adatokat, és a rendszer meghívó emailt küld a pincérnek.</p>
         </div>
         <button
           type="button"
@@ -172,35 +184,13 @@
           />
         </label>
 
-        <label class="staff-modal__field">
-          <span>Jelszó</span>
-          <input
-            type="password"
-            name="waiterPassword"
-            [(ngModel)]="newWaiter.password"
-            minlength="6"
-            placeholder="Legalább 6 karakter"
-            [disabled]="addingWaiter"
-            required
-          />
-        </label>
-
-        <label class="staff-modal__field">
-          <span>Jelszó megerősítése</span>
-          <input
-            type="password"
-            name="waiterPasswordConfirmation"
-            [(ngModel)]="newWaiter.passwordConfirmation"
-            minlength="6"
-            placeholder="Írd be újra a jelszót"
-            [disabled]="addingWaiter"
-            required
-          />
-        </label>
-
         @if (addWaiterError) {
           <p class="staff-modal__error">{{ addWaiterError }}</p>
         }
+
+        <p class="staff-modal__hint">
+          A meghívó a pincér email címére érkezik, ahol be tudja állítani a saját jelszavát.
+        </p>
 
         <div class="staff-modal__actions">
           <button
@@ -208,7 +198,7 @@
             class="gh-btn gh-btn--primary"
             [disabled]="addingWaiter"
           >
-            {{ addingWaiter ? 'Mentés...' : 'Létrehozás' }}
+            {{ addingWaiter ? 'Küldés...' : 'Meghívó küldése' }}
           </button>
           <button
             type="button"

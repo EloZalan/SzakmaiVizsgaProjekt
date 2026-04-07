@@ -27,8 +27,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   newWaiter = {
     name: '',
     email: '',
-    password: '',
-    passwordConfirmation: '',
   };
   private stopWaiterStatusListening: (() => void) | null = null;
 
@@ -101,8 +99,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     this.newWaiter = {
       name: '',
       email: '',
-      password: '',
-      passwordConfirmation: '',
     };
     this.cdr.markForCheck();
   }
@@ -118,8 +114,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   addWaiter(): void {
     const name = this.newWaiter.name.trim();
     const email = this.newWaiter.email.trim();
-    const password = this.newWaiter.password;
-    const passwordConfirmation = this.newWaiter.passwordConfirmation;
 
     if (!name) {
       this.addWaiterError = 'A név megadása kötelező.';
@@ -133,18 +127,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!password || password.length < 6) {
-      this.addWaiterError = 'A jelszó legalább 6 karakter legyen.';
-      this.cdr.markForCheck();
-      return;
-    }
-
-    if (passwordConfirmation !== password) {
-      this.addWaiterError = 'A két jelszó nem egyezik.';
-      this.cdr.markForCheck();
-      return;
-    }
-
     this.addingWaiter = true;
     this.addWaiterError = '';
 
@@ -152,8 +134,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
       .createWaiter({
         name,
         email,
-        password,
-        password_confirmation: passwordConfirmation,
       })
       .subscribe({
         next: () => {
@@ -164,7 +144,7 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.addingWaiter = false;
           console.error('CREATE WAITER ERROR:', err);
-          this.addWaiterError = 'Nem sikerült létrehozni a pincért.';
+          this.addWaiterError = err?.error?.message ?? 'Nem sikerült elküldeni a meghívót.';
           this.cdr.markForCheck();
         },
       });
@@ -200,12 +180,17 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   }
 
   private mapWaiterToStaffMember(waiter: AdminWaiterDto): StaffMember {
+    const invitePending = !!waiter.invite_pending;
+
     return {
       id: waiter.id,
       name: waiter.name,
+      email: waiter.email,
       role: waiter.role === 'admin' ? 'ADMIN' : 'PINCER',
-      status: waiter.on_shift === false ? 'INACTIVE' : 'ACTIVE',
-      shift: waiter.on_shift === false ? 'Szabadnap' : 'Műszakban',
+      status: invitePending ? 'INVITED' : waiter.on_shift === false ? 'INACTIVE' : 'ACTIVE',
+      shift: invitePending ? 'Meghívó elküldve' : waiter.on_shift === false ? 'Szabadnap' : 'Műszakban',
+      invitePending,
+      inviteExpiresAt: waiter.invite_expires_at ?? null,
     };
   }
 }
