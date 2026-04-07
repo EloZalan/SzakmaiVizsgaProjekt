@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 
 export interface AdminWaiterDto {
@@ -32,9 +32,18 @@ export interface GuestHistoryPoint {
 export class AdminDashboardService {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
+  private waitersCache$?: Observable<AdminWaiterDto[]>;
+  private reservationsCache$?: Observable<ReservationDto[]>;
+  private dailyRevenueCache$?: Observable<number>;
+  private guestHistoryCache$?: Observable<GuestHistoryPoint[]>;
+  private todayGuestCountCache$?: Observable<number>;
 
   getWaiters(): Observable<AdminWaiterDto[]> {
-    return this.http.get<AdminWaiterDto[]>(`${this.config.apiUrl}/admin/waiters`);
+    this.waitersCache$ ??= this.http
+      .get<AdminWaiterDto[]>(`${this.config.apiUrl}/admin/waiters`)
+      .pipe(shareReplay(1));
+
+    return this.waitersCache$;
   }
 
   createWaiter(payload: {
@@ -45,30 +54,69 @@ export class AdminDashboardService {
   }): Observable<AdminWaiterDto | null> {
     return this.http
       .post<AdminWaiterDto | null>(`${this.config.apiUrl}/admin/waiters`, payload)
-      .pipe(map((res) => res ?? null));
+      .pipe(
+        tap(() => this.invalidateWaitersCache()),
+        map((res) => res ?? null)
+      );
   }
 
   deleteWaiter(waiterId: number): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/admin/waiters/${waiterId}`);
+    return this.http
+      .delete<void>(`${this.config.apiUrl}/admin/waiters/${waiterId}`)
+      .pipe(tap(() => this.invalidateWaitersCache()));
   }
 
   getReservations(): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(`${this.config.apiUrl}/reservations`);
+    this.reservationsCache$ ??= this.http
+      .get<ReservationDto[]>(`${this.config.apiUrl}/reservations`)
+      .pipe(shareReplay(1));
+
+    return this.reservationsCache$;
   }
 
   getDailyRevenue(): Observable<number> {
-    return this.http
+    this.dailyRevenueCache$ ??= this.http
       .get<{ daily_revenue: number }>(`${this.config.apiUrl}/admin/daily-revenue`)
-      .pipe(map((res) => res.daily_revenue));
+      .pipe(
+        map((res) => res.daily_revenue),
+        shareReplay(1)
+      );
+
+    return this.dailyRevenueCache$;
   }
 
   getGuestCountHistory(): Observable<GuestHistoryPoint[]> {
-    return this.http.get<GuestHistoryPoint[]>(`${this.config.apiUrl}/admin/guest-count-history`);
+    this.guestHistoryCache$ ??= this.http
+      .get<GuestHistoryPoint[]>(`${this.config.apiUrl}/admin/guest-count-history`)
+      .pipe(shareReplay(1));
+
+    return this.guestHistoryCache$;
   }
 
   getTodayGuestCount(): Observable<number> {
-    return this.http
+    this.todayGuestCountCache$ ??= this.http
       .get<{ today_guests: number }>(`${this.config.apiUrl}/admin/today-guests`)
-      .pipe(map((res) => res.today_guests));
+      .pipe(
+        map((res) => res.today_guests),
+        shareReplay(1)
+      );
+
+    return this.todayGuestCountCache$;
+  }
+
+  invalidateWaitersCache(): void {
+    this.waitersCache$ = undefined;
+  }
+
+  invalidateStatsCache(): void {
+    this.dailyRevenueCache$ = undefined;
+    this.guestHistoryCache$ = undefined;
+    this.todayGuestCountCache$ = undefined;
+    this.reservationsCache$ = undefined;
+  }
+
+  invalidateAllCaches(): void {
+    this.invalidateWaitersCache();
+    this.invalidateStatsCache();
   }
 }

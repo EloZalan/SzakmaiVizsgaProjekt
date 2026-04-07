@@ -56,10 +56,13 @@ export class AdminStatsComponent implements OnInit, OnDestroy {
     this.loadStats();
 
     this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges(() => {
+      this.adminTablesService.invalidateTablesCache();
+      this.adminDashboardService.invalidateStatsCache();
       this.loadStats();
     });
 
     this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+      this.adminDashboardService.invalidateWaitersCache();
       this.loadStats();
     });
   }

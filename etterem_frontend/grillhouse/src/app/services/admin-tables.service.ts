@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { RestaurantTable } from '../models/restaurant-table.model';
 import { WaiterTableStatus } from '../models/table-info.model';
@@ -47,39 +47,33 @@ interface TableSingleResponse {
 export class AdminTablesService {
   private http = inject(HttpClient);
   private config = inject(ConfigService);
+  private tablesCache$?: Observable<TableDto[]>;
 
   getTables(): Observable<RestaurantTable[]> {
-    return this.http
-      .get<TableDto[] | TableListResponse>(`${this.config.apiUrl}/admin/tables`)
-      .pipe(
-        map((response) => {
-          const rows = this.extractRows(response);
-
-          return rows
-            .sort((a, b) => a.id - b.id)
-            .map((table, index) => this.mapDtoToViewModel(table, index + 1));
-        })
-      );
+    return this.getRawTables().pipe(
+      map((rows) =>
+        rows
+          .sort((a, b) => a.id - b.id)
+          .map((table, index) => this.mapDtoToViewModel(table, index + 1))
+      )
+    );
   }
 
   getTableOverview(): Observable<AdminLiveTable[]> {
-    return this.http
-      .get<TableDto[] | TableListResponse>(`${this.config.apiUrl}/admin/tables`)
-      .pipe(
-        map((response) => {
-          const rows = this.extractRows(response);
-
-          return rows
-            .sort((a, b) => a.id - b.id)
-            .map((table, index) => this.mapDtoToLiveTable(table, index + 1));
-        })
-      );
+    return this.getRawTables().pipe(
+      map((rows) =>
+        rows
+          .sort((a, b) => a.id - b.id)
+          .map((table, index) => this.mapDtoToLiveTable(table, index + 1))
+      )
+    );
   }
 
   createTable(capacity: number): Observable<number | null> {
     return this.http
       .post<TableDto | TableSingleResponse>(`${this.config.apiUrl}/admin/tables`, { capacity })
       .pipe(
+        tap(() => this.invalidateTablesCache()),
         map((response) => {
           const table = this.isWrappedSingle(response) ? response.data : response;
           return table?.id ?? null;
@@ -90,19 +84,43 @@ export class AdminTablesService {
   updateTable(tableId: number, capacity: number): Observable<void> {
     return this.http
       .put(`${this.config.apiUrl}/admin/tables/${tableId}`, { capacity })
-      .pipe(map(() => void 0));
+      .pipe(
+        tap(() => this.invalidateTablesCache()),
+        map(() => void 0)
+      );
   }
 
   deleteTable(tableId: number): Observable<void> {
     return this.http
       .delete(`${this.config.apiUrl}/admin/tables/${tableId}`)
-      .pipe(map(() => void 0));
+      .pipe(
+        tap(() => this.invalidateTablesCache()),
+        map(() => void 0)
+      );
   }
 
   resetTableToFree(tableId: number): Observable<void> {
     return this.http
       .post(`${this.config.apiUrl}/admin/tables/${tableId}/reset-to-free`, {})
-      .pipe(map(() => void 0));
+      .pipe(
+        tap(() => this.invalidateTablesCache()),
+        map(() => void 0)
+      );
+  }
+
+  invalidateTablesCache(): void {
+    this.tablesCache$ = undefined;
+  }
+
+  private getRawTables(): Observable<TableDto[]> {
+    this.tablesCache$ ??= this.http
+      .get<TableDto[] | TableListResponse>(`${this.config.apiUrl}/admin/tables`)
+      .pipe(
+        map((response) => this.extractRows(response)),
+        shareReplay(1)
+      );
+
+    return this.tablesCache$;
   }
 
   private extractRows(response: TableDto[] | TableListResponse): TableDto[] {

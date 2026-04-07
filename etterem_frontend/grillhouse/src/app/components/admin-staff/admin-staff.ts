@@ -42,6 +42,7 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     this.loadStaff();
 
     this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+      this.adminDashboardService.invalidateWaitersCache();
       this.loadStaff();
     });
   }

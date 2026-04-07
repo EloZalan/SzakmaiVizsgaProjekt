@@ -37,6 +37,7 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
     this.loadTables();
 
     this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+      this.adminTablesService.invalidateTablesCache();
       const tableToKeepSelected = this.selectedTable?.id ?? event.table_id;
       this.loadTables(tableToKeepSelected);
     });
