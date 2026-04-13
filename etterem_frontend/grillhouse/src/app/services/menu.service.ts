@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { Language, LanguageService } from './language.service';
 
@@ -30,6 +30,14 @@ export class MenuService {
   private config = inject(ConfigService);
   private languageService = inject(LanguageService);
 
+  private adminCategoriesCache$?: Observable<MenuCategory[]>;
+  private adminMenuItemsCache$?: Observable<MenuItemDto[]>;
+
+  private invalidateAdminMenuCache(): void {
+    this.adminCategoriesCache$ = undefined;
+    this.adminMenuItemsCache$ = undefined;
+  }
+
   private publicLanguageHeaders(): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
@@ -55,11 +63,23 @@ export class MenuService {
   }
 
   getAdminCategories(): Observable<MenuCategory[]> {
-    return this.http.get<MenuCategory[]>(`${this.config.apiUrl}/menu-categories`, this.fixedLanguageHeaders('hu'));
+    if (!this.adminCategoriesCache$) {
+      this.adminCategoriesCache$ = this.http
+        .get<MenuCategory[]>(`${this.config.apiUrl}/menu-categories`, this.fixedLanguageHeaders('hu'))
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    }
+
+    return this.adminCategoriesCache$;
   }
 
   getAdminMenuItems(): Observable<MenuItemDto[]> {
-    return this.http.get<MenuItemDto[]>(`${this.config.apiUrl}/admin/menu-items`, this.fixedLanguageHeaders('hu'));
+    if (!this.adminMenuItemsCache$) {
+      this.adminMenuItemsCache$ = this.http
+        .get<MenuItemDto[]>(`${this.config.apiUrl}/admin/menu-items`, this.fixedLanguageHeaders('hu'))
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    }
+
+    return this.adminMenuItemsCache$;
   }
 
   createCategory(nameHu: string, nameEn?: string): Observable<MenuCategory> {
@@ -69,7 +89,9 @@ export class MenuService {
       name_en: (nameEn && nameEn.trim()) || nameHu,
     };
 
-    return this.http.post<MenuCategory>(`${this.config.apiUrl}/admin/menu-categories`, payload, this.fixedLanguageHeaders('hu'));
+    return this.http
+      .post<MenuCategory>(`${this.config.apiUrl}/admin/menu-categories`, payload, this.fixedLanguageHeaders('hu'))
+      .pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   updateCategory(id: number, nameHu: string, nameEn?: string): Observable<MenuCategory> {
@@ -79,11 +101,15 @@ export class MenuService {
       name_en: (nameEn && nameEn.trim()) || nameHu,
     };
 
-    return this.http.put<MenuCategory>(`${this.config.apiUrl}/admin/menu-categories/${id}`, payload, this.fixedLanguageHeaders('hu'));
+    return this.http
+      .put<MenuCategory>(`${this.config.apiUrl}/admin/menu-categories/${id}`, payload, this.fixedLanguageHeaders('hu'))
+      .pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   deleteCategory(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/admin/menu-categories/${id}`, this.fixedLanguageHeaders('hu'));
+    return this.http
+      .delete<void>(`${this.config.apiUrl}/admin/menu-categories/${id}`, this.fixedLanguageHeaders('hu'))
+      .pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   createMenuItem(
@@ -99,7 +125,7 @@ export class MenuService {
       `${this.config.apiUrl}/admin/menu-items`,
       this.buildMenuItemFormData(categoryId, nameHu, description, price, imageFile, false, sourceItemId, nameEn),
       this.fixedLanguageHeaders('hu')
-    );
+    ).pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   updateMenuItem(
@@ -115,11 +141,13 @@ export class MenuService {
     const formData = this.buildMenuItemFormData(categoryId, nameHu, description, price, imageFile, removeImage, null, nameEn);
     formData.append('_method', 'PUT');
 
-    return this.http.post<MenuItemDto>(`${this.config.apiUrl}/admin/menu-items/${id}`, formData, this.fixedLanguageHeaders('hu'));
+    return this.http.post<MenuItemDto>(`${this.config.apiUrl}/admin/menu-items/${id}`, formData, this.fixedLanguageHeaders('hu'))
+      .pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   deleteMenuItem(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/admin/menu-items/${id}`, this.fixedLanguageHeaders('hu'));
+    return this.http.delete<void>(`${this.config.apiUrl}/admin/menu-items/${id}`, this.fixedLanguageHeaders('hu'))
+      .pipe(tap(() => this.invalidateAdminMenuCache()));
   }
 
   private buildMenuItemFormData(
