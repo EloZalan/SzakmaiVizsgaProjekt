@@ -4,8 +4,8 @@
       <div class="home-reserve-modal__accent"></div>
       <header class="home-reserve-modal__header">
         <div>
-          <h3>Asztalfoglalás</h3>
-          <p>Foglalj asztalt néhány kattintással</p>
+          <h3>{{ currentLanguage === 'hu' ? 'Asztalfoglalás' : 'Table Reservation' }}</h3>
+          <p>{{ currentLanguage === 'hu' ? 'Foglalj asztalt néhány kattintással' : 'Book a table in a few clicks' }}</p>
         </div>
         <button type="button" class="gh-btn gh-btn--ghost gh-btn--sm" (click)="requestClose()">✕</button>
       </header>

@@ -63,6 +63,10 @@ svg {
   background: var(--gh-bg);
 }
 
+.home-page section[id] {
+  scroll-margin-top: 84px;
+}
+
 .gh-btn {
   display: inline-flex;
   align-items: center;
@@ -420,15 +424,24 @@ svg {
   cursor: pointer;
 }
 
-.nav-links a {
+.nav-links a,
+.nav-links button {
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
   position: relative;
   padding-bottom: 3px;
   cursor: pointer;
+  border: none;
+  background: transparent;
+  font: inherit;
 }
 
-.nav-links a::after {
+.nav-links button {
+  padding: 0;
+}
+
+.nav-links a::after,
+.nav-links button::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -440,11 +453,13 @@ svg {
   transition: width 0.2s ease;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links button:hover {
   color: #fff;
 }
 
-.nav-links a:hover::after {
+.nav-links a:hover::after,
+.nav-links button:hover::after {
   width: 100%;
 }
 
@@ -1169,28 +1184,6 @@ svg {
   font-weight: 900;
 }
 
-.scroll-top-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: none;
-  background: var(--gh-accent);
-  color: white;
-  font-size: 26px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  z-index: 99999;
-  transition: transform 0.2s ease;
-}
-
-.scroll-top-btn:hover {
-  transform: translateY(-3px);
-}
-
 @media (max-width: 1200px) {
   .waiter-layout,
   .admin-layout {
@@ -1358,13 +1351,6 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .scroll-top-btn {
-    width: 48px;
-    height: 48px;
-    right: 16px;
-    bottom: 16px;
-    font-size: 22px;
-  }
 }
 
 

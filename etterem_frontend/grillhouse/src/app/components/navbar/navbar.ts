@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { LanguageService } from '../../services/language.service';
@@ -32,6 +32,7 @@ export class NavbarComponent implements AfterViewInit {
 
   constructor(
     private actions: GrillhouseActionsService,
+    private router: Router,
     public languageService: LanguageService,
     public themeService: ThemeService
   ) {}
@@ -73,17 +74,32 @@ export class NavbarComponent implements AfterViewInit {
 
   scrollToSection(fragment: string): void {
     this.mobileMenuOpen = false;
-    const element = document.getElementById(fragment);
-    if (element) {
-      const navbarHeight = 72; // navbar min-height
-      const elementPosition = element.offsetTop;
-      const offsetPosition = elementPosition - navbarHeight;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
+    const currentUrl = this.router.url.split('#')[0];
+    if (currentUrl !== '/') {
+      void this.router.navigate(['/'], { fragment }).then((navigated) => {
+        if (navigated) {
+          this.scrollToSectionWhenAvailable(fragment);
+        }
       });
+      return;
     }
+
+    this.scrollToSectionWhenAvailable(fragment);
+  }
+
+  private scrollToSectionWhenAvailable(fragment: string, attempt = 0): void {
+    const target = document.getElementById(fragment);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    if (attempt >= 12) {
+      return;
+    }
+
+    setTimeout(() => this.scrollToSectionWhenAvailable(fragment, attempt + 1), 50);
   }
 
   toggleMobileMenu(): void {

@@ -6,7 +6,7 @@
   [class.nav-shell--compact]="compactNav"
 >
   <div class="gh-container nav-inner" #navInner>
-    <a class="nav-brand" #navBrand (click)="scrollToSection('top')">
+    <a class="nav-brand" #navBrand href="#top">
       <span class="nav-brand__icon">
              <img src="../../../assets/images/logo1024A.png" alt="Grillhouse logo">
       </span>
@@ -14,9 +14,9 @@
     </a>
 
     <nav class="nav-links" #navLinks>
-      <a (click)="scrollToSection('menu')">{{ currentLanguage === 'hu' ? 'Menü' : 'Menu' }}</a>
-      <a (click)="scrollToSection('about')">{{ currentLanguage === 'hu' ? 'Rólunk' : 'About' }}</a>
-      <a (click)="scrollToSection('location')">{{ currentLanguage === 'hu' ? 'Helyszín' : 'Location' }}</a>
+      <a class="nav-link" href="#menu">{{ currentLanguage === 'hu' ? 'Menü' : 'Menu' }}</a>
+      <a class="nav-link" href="#about">{{ currentLanguage === 'hu' ? 'Rólunk' : 'About' }}</a>
+      <a class="nav-link" href="#location">{{ currentLanguage === 'hu' ? 'Helyszín' : 'Location' }}</a>
     </nav>
 
     <button
@@ -47,6 +47,15 @@
     <div class="nav-mobile">
       <div class="gh-container nav-mobile__inner">
         <div class="nav-mobile__actions">
+          <a class="gh-btn gh-btn--ghost" href="#menu" (click)="closeMobileMenu()">
+            {{ currentLanguage === 'hu' ? 'Menü' : 'Menu' }}
+          </a>
+          <a class="gh-btn gh-btn--ghost" href="#about" (click)="closeMobileMenu()">
+            {{ currentLanguage === 'hu' ? 'Rólunk' : 'About' }}
+          </a>
+          <a class="gh-btn gh-btn--ghost" href="#location" (click)="closeMobileMenu()">
+            {{ currentLanguage === 'hu' ? 'Helyszín' : 'Location' }}
+          </a>
           <button class="gh-btn gh-btn--ghost" (click)="toggleLanguage()" title="Toggle language">
             <mat-icon>{{ languageService.currentLanguageValue === 'hu' ? 'language' : 'language' }}</mat-icon>
             <span>{{ languageService.currentLanguageValue === 'hu' ? 'EN' : 'HU' }}</span>
