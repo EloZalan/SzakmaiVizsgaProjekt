@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../services/config.service';
 import { BusinessHoursService } from '../../services/business-hours.service';
+import { LanguageService, Language } from '../../services/language.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -40,6 +41,7 @@ export class ReservePageComponent implements OnInit {
     private http: HttpClient,
     private config: ConfigService,
     private businessHours: BusinessHoursService,
+    private languageService: LanguageService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -63,8 +65,70 @@ export class ReservePageComponent implements OnInit {
 
   allTimes: string[] = [];
   availableTimes: string[] = [];
+  currentLanguage: Language = 'hu';
+
+  private readonly texts: Record<Language, Record<string, string>> = {
+    hu: {
+      title: 'Asztalfoglalás',
+      subtitle: 'Foglalj asztalt néhány kattintással',
+      nameLabel: 'Név',
+      namePlaceholder: 'Kiss Pista',
+      phoneLabel: 'Telefonszám',
+      dateLabel: 'Dátum',
+      timeLabel: 'Időpont',
+      guestsLabel: 'Vendégek száma',
+      noteLabel: 'Megjegyzés (opcionális)',
+      notePlaceholder: 'Pl. születésnap, allergia, különleges kérés...',
+      noSlots: 'Erre a napra már nincs foglalható idősáv. Válassz másik dátumot.',
+      submitButton: 'Foglalás elküldése',
+      sendingButton: 'Küldés...',
+      successTitle: 'Sikeres foglalás',
+      successMessage: 'A foglalás sikeresen rögzítve lett.',
+      failTitle: 'Sikertelen foglalás',
+      closeButton: 'Bezár',
+      backHome: 'Vissza a főoldalra',
+      fillAllFields: 'Kérlek tölts ki minden mezőt helyesen.',
+      invalidDateTime: 'Érvénytelen dátum vagy időpont.',
+      noTableCapacity: 'Nincs ekkora asztal az étteremben a megadott létszámhoz.',
+      noTableTime: 'Nincs szabad asztal ebben az időpontban.',
+      phoneInvalid: 'A telefonszám nem megfelelő formátumú. Használd a +36... formátumot.',
+      networkError: 'Nem sikerült a foglalás. Próbáld újra később.',
+    },
+    en: {
+      title: 'Table Reservation',
+      subtitle: 'Book a table in a few clicks',
+      nameLabel: 'Name',
+      namePlaceholder: 'Jane Doe',
+      phoneLabel: 'Phone number',
+      dateLabel: 'Date',
+      timeLabel: 'Time',
+      guestsLabel: 'Number of guests',
+      noteLabel: 'Note (optional)',
+      notePlaceholder: 'E.g. birthday, allergy, special request...',
+      noSlots: 'No time slots are available for that day. Choose another date.',
+      submitButton: 'Send reservation',
+      sendingButton: 'Sending...',
+      successTitle: 'Reservation success',
+      successMessage: 'Your reservation has been saved successfully.',
+      failTitle: 'Reservation failed',
+      closeButton: 'Close',
+      backHome: 'Back to home',
+      fillAllFields: 'Please fill in all fields correctly.',
+      invalidDateTime: 'Invalid date or time.',
+      noTableCapacity: 'There is no table this large in the restaurant.',
+      noTableTime: 'No table is available at this time.',
+      phoneInvalid: 'The phone number format is invalid. Use +36... format.',
+      networkError: 'Reservation failed. Please try again later.',
+    },
+  };
 
   ngOnInit(): void {
+    this.currentLanguage = this.languageService.currentLanguageValue;
+    this.languageService.language$.subscribe(lang => {
+      this.currentLanguage = lang;
+      this.cdr.detectChanges();
+    });
+
     this.minDate = this.toDateInputValue(new Date());
     this.date = this.minDate;
     // Initialize allTimes for today so it respects business hours
@@ -89,22 +153,18 @@ export class ReservePageComponent implements OnInit {
     const guestCount = Number(this.guests);
 
     if (!guestName || !phone || !this.date || !this.time || !guestCount || guestCount < 1) {
-      this.openResultModal(false, 'Sikertelen foglalás', 'Kérlek tölts ki minden mezőt helyesen.');
+      this.openResultModal(false, this.tr('failTitle'), this.tr('fillAllFields'));
       return;
     }
 
     if (this.maxTableCapacity !== null && guestCount > this.maxTableCapacity) {
-      this.openResultModal(
-        false,
-        'Sikertelen foglalás',
-        'Nincs ekkora asztal az étteremben a megadott létszámhoz.'
-      );
+      this.openResultModal(false, this.tr('failTitle'), this.tr('noTableCapacity'));
       return;
     }
 
     const startTime = this.toUtcIso(this.date, this.time);
     if (!startTime) {
-      this.openResultModal(false, 'Sikertelen foglalás', 'Érvénytelen dátum vagy időpont.');
+      this.openResultModal(false, this.tr('failTitle'), this.tr('invalidDateTime'));
       return;
     }
 
@@ -118,14 +178,14 @@ export class ReservePageComponent implements OnInit {
     };
 
     this.http
-      .post<ReservationResponse>(`${this.config.apiUrl}/reservations`, payload)
+      .post<ReservationResponse>(`${this.config.apiUrl}/reservations`, payload, this.buildHeaders())
       .pipe(finalize(() => {
         this.submitting = false;
         this.cdr.detectChanges();
       }))
       .subscribe({
         next: () => {
-          this.openResultModal(true, 'Sikeres foglalás', 'A foglalás sikeresen rögzítve lett.');
+          this.openResultModal(true, this.tr('successTitle'), this.tr('successMessage'));
           this.name = '';
           this.phoneNumber = '';
           this.guests = null;
@@ -137,7 +197,7 @@ export class ReservePageComponent implements OnInit {
           const rawMessage = this.extractErrorMessage(err);
           this.openResultModal(
             false,
-            'Sikertelen foglalás',
+            this.tr('failTitle'),
             this.normalizeReservationError(rawMessage)
           );
           this.cdr.detectChanges();
@@ -169,7 +229,7 @@ export class ReservePageComponent implements OnInit {
 
   private loadMaxTableCapacity(): void {
     this.http
-      .get<MaxCapacityResponse>(`${this.config.apiUrl}/tables/max-capacity`)
+      .get<MaxCapacityResponse>(`${this.config.apiUrl}/tables/max-capacity`, this.buildHeaders())
       .subscribe({
         next: (res) => {
           this.maxTableCapacity = Number(res?.max_capacity ?? 0);
@@ -183,15 +243,35 @@ export class ReservePageComponent implements OnInit {
   private normalizeReservationError(message: string): string {
     const normalized = (message || '').toLowerCase();
 
-    if (normalized.includes('nincs ekkora asztal')) {
-      return 'Nincs ekkora asztal az étteremben a megadott létszámhoz.';
+    if (normalized.includes('validation.phone') || normalized.includes('phone number is not valid') || normalized.includes('telefonszám')) {
+      return this.tr('phoneInvalid');
     }
 
-    if (normalized.includes('nincs szabad asztal')) {
-      return 'Nincs szabad asztal ebben az időpontban.';
+    if (normalized.includes('nincs ekkora asztal') || normalized.includes('there is no table this large')) {
+      return this.tr('noTableCapacity');
     }
 
-    return message;
+    if (normalized.includes('nincs szabad asztal') || normalized.includes('no table is available')) {
+      return this.tr('noTableTime');
+    }
+
+    if (normalized.includes('the given data was invalid')) {
+      return this.tr('fillAllFields');
+    }
+
+    return message || this.tr('networkError');
+  }
+
+  private buildHeaders() {
+    return {
+      headers: {
+        'Accept-Language': this.currentLanguage,
+      },
+    };
+  }
+
+  public tr(key: string): string {
+    return this.texts[this.currentLanguage][key] ?? key;
   }
 
   private toUtcIso(dateValue: string, timeValue: string): string | null {
