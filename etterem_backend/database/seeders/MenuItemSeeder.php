@@ -24,7 +24,7 @@ class MenuItemSeeder extends Seeder
             // Category 2: Köret
             ['name_hu' => 'Sült krumpli', 'name_en' => 'French fries', 'description_hu' => '(150g)', 'description_en' => '(150g)', 'price' => 890, 'category_id' => 2, 'image_filename' => 'french_fries.jpg'],
             ['name_hu' => 'Édesburgonya', 'name_en' => 'Sweet potato fries', 'description_hu' => 'Ropogós édesburgonya hasábok (150g)', 'description_en' => 'Crispy sweet potato fries (150g)', 'price' => 1290, 'category_id' => 2, 'image_filename' => 'sweet_potato.jpg'],
-            ['name_hu' => 'Grillezett zöldség', 'name_en' => 'Grilled vegetables', 'description_hu' => 'Szezonális zöldségek grillen (160g)', 'description_en' => 'Seasonal grilled vegetables (160g)', 'price' => 1490, 'category_id' => 2, 'image_filename' => 'fried_vegetables.jpg'],
+            ['name_hu' => 'Grillezett zöldség', 'name_en' => 'Grilled vegetables', 'description_hu' => 'Szezonális zöldségek grillen (160g)', 'description_en' => 'Seasonal grilled vegetables (160g)', 'price' => 1490, 'category_id' => 2, 'image_filename' => 'fried_vegtables.jpg'],
             ['name_hu' => 'Jázmin rizs', 'name_en' => 'Jasmine rice', 'description_hu' => 'Párolt jázmin rizs (180g)', 'description_en' => 'Steamed jasmine rice (180g)', 'price' => 790, 'category_id' => 2, 'image_filename' => 'rice.jpg'],
             ['name_hu' => 'Steak burgonya', 'name_en' => 'Steak potatoes', 'description_hu' => 'Fűszeres steak burgonya (170g)', 'description_en' => 'Seasoned steak potatoes (170g)', 'price' => 1090, 'category_id' => 2, 'image_filename' => 'steak_potatoes.jpg'],
 
