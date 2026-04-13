@@ -100,6 +100,30 @@ class TestDatabaseSeeder extends Seeder
             'price' => 4900,
             'category_id' => $catMain->id,
         ]);
+        MenuItem::create([
+            'name' => 'Sertésszűz', 'name_hu' => 'Sertésszűz', 'name_en' => 'Pork tenderloin',
+            'description' => 'Fokhagymás sertésszűz (200g)',
+            'description_hu' => 'Fokhagymás sertésszűz (200g)',
+            'description_en' => 'Garlic pork tenderloin (200g)',
+            'price' => 5200,
+            'category_id' => $catMain->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Lazacfilé', 'name_hu' => 'Lazacfilé', 'name_en' => 'Salmon fillet',
+            'description' => 'Citromos lazacfilé (180g)',
+            'description_hu' => 'Citromos lazacfilé (180g)',
+            'description_en' => 'Lemon salmon fillet (180g)',
+            'price' => 6900,
+            'category_id' => $catMain->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Marhaburger', 'name_hu' => 'Marhaburger', 'name_en' => 'Beef burger',
+            'description' => 'Szaftos marhaburger kézműves buciban',
+            'description_hu' => 'Szaftos marhaburger kézműves buciban',
+            'description_en' => 'Juicy beef burger in artisan bun',
+            'price' => 3900,
+            'category_id' => $catMain->id,
+        ]);
         $fries = MenuItem::create([
             'name' => 'Sült krumpli', 'name_hu' => 'Sült krumpli', 'name_en' => 'French fries',
             'description' => '(150g)',
@@ -108,12 +132,76 @@ class TestDatabaseSeeder extends Seeder
             'price' => 890,
             'category_id' => $catSide->id,
         ]);
+        MenuItem::create([
+            'name' => 'Édesburgonya', 'name_hu' => 'Édesburgonya', 'name_en' => 'Sweet potato fries',
+            'description' => 'Ropogós édesburgonya hasábok (150g)',
+            'description_hu' => 'Ropogós édesburgonya hasábok (150g)',
+            'description_en' => 'Crispy sweet potato fries (150g)',
+            'price' => 1290,
+            'category_id' => $catSide->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Grillezett zöldség', 'name_hu' => 'Grillezett zöldség', 'name_en' => 'Grilled vegetables',
+            'description' => 'Szezonális zöldségek grillen (160g)',
+            'description_hu' => 'Szezonális zöldségek grillen (160g)',
+            'description_en' => 'Seasonal grilled vegetables (160g)',
+            'price' => 1490,
+            'category_id' => $catSide->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Jázmin rizs', 'name_hu' => 'Jázmin rizs', 'name_en' => 'Jasmine rice',
+            'description' => 'Párolt jázmin rizs (180g)',
+            'description_hu' => 'Párolt jázmin rizs (180g)',
+            'description_en' => 'Steamed jasmine rice (180g)',
+            'price' => 790,
+            'category_id' => $catSide->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Steak burgonya', 'name_hu' => 'Steak burgonya', 'name_en' => 'Steak potatoes',
+            'description' => 'Fűszeres steak burgonya (170g)',
+            'description_hu' => 'Fűszeres steak burgonya (170g)',
+            'description_en' => 'Seasoned steak potatoes (170g)',
+            'price' => 1090,
+            'category_id' => $catSide->id,
+        ]);
         $tiramisu = MenuItem::create([
             'name' => 'Tiramisu', 'name_hu' => 'Tiramisu', 'name_en' => 'Tiramisu',
             'description' => 'Olasz módra (150g)',
             'description_hu' => 'Olasz módra (150g)',
             'description_en' => 'Italian style (150g)',
             'price' => 2190,
+            'category_id' => $catDessert->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Sajttorta', 'name_hu' => 'Sajttorta', 'name_en' => 'Cheesecake',
+            'description' => 'Krémes sajttorta gyümölcsraguval',
+            'description_hu' => 'Krémes sajttorta gyümölcsraguval',
+            'description_en' => 'Creamy cheesecake with fruit coulis',
+            'price' => 1990,
+            'category_id' => $catDessert->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Brownie', 'name_hu' => 'Brownie', 'name_en' => 'Brownie',
+            'description' => 'Csokoládés brownie vaníliafagyival',
+            'description_hu' => 'Csokoládés brownie vaníliafagyival',
+            'description_en' => 'Chocolate brownie with vanilla ice cream',
+            'price' => 1890,
+            'category_id' => $catDessert->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Almás pite', 'name_hu' => 'Almás pite', 'name_en' => 'Apple pie',
+            'description' => 'Házi almás pite fahéjjal',
+            'description_hu' => 'Házi almás pite fahéjjal',
+            'description_en' => 'Homemade apple pie with cinnamon',
+            'price' => 1690,
+            'category_id' => $catDessert->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Somlói galuska', 'name_hu' => 'Somlói galuska', 'name_en' => 'Hungarian trifle',
+            'description' => 'Klasszikus somlói galuska',
+            'description_hu' => 'Klasszikus somlói galuska',
+            'description_en' => 'Classic Hungarian trifle',
+            'price' => 1790,
             'category_id' => $catDessert->id,
         ]);
         $cola = MenuItem::create([
@@ -130,6 +218,30 @@ class TestDatabaseSeeder extends Seeder
             'description_hu' => '(500ml)',
             'description_en' => '(500ml)',
             'price' => 390,
+            'category_id' => $catDrink->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Limonádé', 'name_hu' => 'Limonádé', 'name_en' => 'Lemonade',
+            'description' => 'Friss citromos limonádé (400ml)',
+            'description_hu' => 'Friss citromos limonádé (400ml)',
+            'description_en' => 'Fresh lemonade (400ml)',
+            'price' => 990,
+            'category_id' => $catDrink->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Narancslé', 'name_hu' => 'Narancslé', 'name_en' => 'Orange juice',
+            'description' => '100% narancslé (300ml)',
+            'description_hu' => '100% narancslé (300ml)',
+            'description_en' => '100% orange juice (300ml)',
+            'price' => 890,
+            'category_id' => $catDrink->id,
+        ]);
+        MenuItem::create([
+            'name' => 'Jeges tea', 'name_hu' => 'Jeges tea', 'name_en' => 'Iced tea',
+            'description' => 'Barackos jeges tea (400ml)',
+            'description_hu' => 'Barackos jeges tea (400ml)',
+            'description_en' => 'Peach iced tea (400ml)',
+            'price' => 790,
             'category_id' => $catDrink->id,
         ]);
 

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MenuService, MenuCategory } from '../../services/menu.service';
@@ -69,6 +69,11 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
   loading = false;
   error = '';
+  private dragPointerX: number | null = null;
+  private dragPointerY: number | null = null;
+  private autoScrollFrame: number | null = null;
+  private readonly autoScrollEdgePx = 120;
+  private readonly autoScrollMaxStepPx = 20;
 
   editing: EditingState = this.createEmptyEditingState();
 
@@ -83,6 +88,31 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.releaseEditingPreviewUrl();
+    this.stopDragAutoScroll();
+  }
+
+  @HostListener('document:dragover', ['$event'])
+  onDocumentDragOver(event: DragEvent): void {
+    if (!this.draggingMenuItem) {
+      return;
+    }
+
+    this.dragPointerX = event.clientX;
+    this.dragPointerY = event.clientY;
+
+    if (this.autoScrollFrame === null) {
+      this.autoScrollFrame = requestAnimationFrame(() => this.performAutoScroll());
+    }
+  }
+
+  @HostListener('document:drop')
+  onDocumentDrop(): void {
+    this.stopDragAutoScroll();
+  }
+
+  @HostListener('document:dragend')
+  onDocumentDragEnd(): void {
+    this.stopDragAutoScroll();
   }
 
   loadMenu(): void {
@@ -417,6 +447,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
     this.draggingMenuItem = item;
     this.dragOverZone = null;
+    this.dragPointerX = null;
+    this.dragPointerY = null;
 
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
@@ -429,6 +461,7 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
   onMenuItemDragEnd(): void {
     this.draggingMenuItem = null;
     this.dragOverZone = null;
+    this.stopDragAutoScroll();
     this.cdr.markForCheck();
   }
 
@@ -531,6 +564,7 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.showDropDecisionModal = false;
     this.draggingMenuItem = null;
     this.dragOverZone = null;
+    this.stopDragAutoScroll();
     this.cdr.markForCheck();
   }
 
@@ -704,6 +738,75 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
   private releaseEditingPreviewUrl(): void {
     if (this.editing.imagePreviewUrl?.startsWith('blob:')) {
       URL.revokeObjectURL(this.editing.imagePreviewUrl);
+    }
+  }
+
+  private performAutoScroll(): void {
+    this.autoScrollFrame = null;
+
+    if (!this.draggingMenuItem || this.dragPointerX === null || this.dragPointerY === null) {
+      return;
+    }
+
+    const targetElement = document.elementFromPoint(this.dragPointerX, this.dragPointerY);
+    const scrollableContainer = this.findScrollableContainer(targetElement);
+
+    let topDistance = this.dragPointerY;
+    let bottomDistance = window.innerHeight - this.dragPointerY;
+
+    if (scrollableContainer) {
+      const rect = scrollableContainer.getBoundingClientRect();
+      topDistance = this.dragPointerY - rect.top;
+      bottomDistance = rect.bottom - this.dragPointerY;
+    }
+
+    let scrollDelta = 0;
+
+    if (topDistance < this.autoScrollEdgePx) {
+      const intensity = (this.autoScrollEdgePx - topDistance) / this.autoScrollEdgePx;
+      scrollDelta = -Math.ceil(intensity * this.autoScrollMaxStepPx);
+    } else if (bottomDistance < this.autoScrollEdgePx) {
+      const intensity = (this.autoScrollEdgePx - bottomDistance) / this.autoScrollEdgePx;
+      scrollDelta = Math.ceil(intensity * this.autoScrollMaxStepPx);
+    }
+
+    if (scrollDelta !== 0) {
+      if (!scrollableContainer) {
+        window.scrollBy({ top: scrollDelta, behavior: 'auto' });
+      } else {
+        scrollableContainer.scrollTop += scrollDelta;
+      }
+
+      this.autoScrollFrame = requestAnimationFrame(() => this.performAutoScroll());
+    }
+  }
+
+  private findScrollableContainer(startElement: Element | null): HTMLElement | null {
+    let current: HTMLElement | null = startElement as HTMLElement | null;
+
+    while (current) {
+      const style = window.getComputedStyle(current);
+      const overflowY = style.overflowY;
+      const canScrollY = current.scrollHeight > current.clientHeight;
+      const allowsScroll = overflowY === 'auto' || overflowY === 'scroll';
+
+      if (canScrollY && allowsScroll) {
+        return current;
+      }
+
+      current = current.parentElement;
+    }
+
+    return null;
+  }
+
+  private stopDragAutoScroll(): void {
+    this.dragPointerX = null;
+    this.dragPointerY = null;
+
+    if (this.autoScrollFrame !== null) {
+      cancelAnimationFrame(this.autoScrollFrame);
+      this.autoScrollFrame = null;
     }
   }
 }
