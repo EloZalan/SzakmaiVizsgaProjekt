@@ -86,32 +86,50 @@ class TestDatabaseSeeder extends Seeder
         // ── Ételek (kép nélkül) ───────────────────────────────────────
         $ribEye = MenuItem::create([
             'name' => 'Rib-eye steak', 'name_hu' => 'Rib-eye steak', 'name_en' => 'Rib-eye steak',
-            'description' => 'Szaftos marha steak (200g)', 'price' => 8500,
+            'description' => 'Szaftos marha steak (200g)',
+            'description_hu' => 'Szaftos marha steak (200g)',
+            'description_en' => 'Juicy beef steak (200g)',
+            'price' => 8500,
             'category_id' => $catMain->id,
         ]);
         $chicken = MenuItem::create([
             'name' => 'Csirkemell', 'name_hu' => 'Csirkemell', 'name_en' => 'Chicken breast',
-            'description' => 'Grillezett csirkemell (180g)', 'price' => 4900,
+            'description' => 'Grillezett csirkemell (180g)',
+            'description_hu' => 'Grillezett csirkemell (180g)',
+            'description_en' => 'Grilled chicken breast (180g)',
+            'price' => 4900,
             'category_id' => $catMain->id,
         ]);
         $fries = MenuItem::create([
             'name' => 'Sült krumpli', 'name_hu' => 'Sült krumpli', 'name_en' => 'French fries',
-            'description' => '(150g)', 'price' => 890,
+            'description' => '(150g)',
+            'description_hu' => '(150g)',
+            'description_en' => '(150g)',
+            'price' => 890,
             'category_id' => $catSide->id,
         ]);
         $tiramisu = MenuItem::create([
             'name' => 'Tiramisu', 'name_hu' => 'Tiramisu', 'name_en' => 'Tiramisu',
-            'description' => 'Olasz módra (150g)', 'price' => 2190,
+            'description' => 'Olasz módra (150g)',
+            'description_hu' => 'Olasz módra (150g)',
+            'description_en' => 'Italian style (150g)',
+            'price' => 2190,
             'category_id' => $catDessert->id,
         ]);
         $cola = MenuItem::create([
             'name' => 'Coca Cola', 'name_hu' => 'Coca Cola', 'name_en' => 'Coca Cola',
-            'description' => 'Az igazi (250ml)', 'price' => 550,
+            'description' => 'Az igazi (250ml)',
+            'description_hu' => 'Az igazi (250ml)',
+            'description_en' => 'The real one (250ml)',
+            'price' => 550,
             'category_id' => $catDrink->id,
         ]);
         $water = MenuItem::create([
             'name' => 'Ásványvíz', 'name_hu' => 'Ásványvíz', 'name_en' => 'Mineral water',
-            'description' => '(500ml)', 'price' => 390,
+            'description' => '(500ml)',
+            'description_hu' => '(500ml)',
+            'description_en' => '(500ml)',
+            'price' => 390,
             'category_id' => $catDrink->id,
         ]);
 

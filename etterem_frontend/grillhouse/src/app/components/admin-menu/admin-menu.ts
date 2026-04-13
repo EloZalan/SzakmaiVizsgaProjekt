@@ -8,7 +8,8 @@ interface MenuItem {
   name: string;
   nameHu: string;
   nameEn: string;
-  description?: string;
+  descriptionHu: string;
+  descriptionEn: string;
   price: number;
   categoryId: number | null;
   imageUrl: string | null;
@@ -28,7 +29,8 @@ interface EditingState {
   id: number | null;
   name: string;
   nameEn: string;
-  description: string;
+  descriptionHu: string;
+  descriptionEn: string;
   price: number;
   categoryId: number | null;
   currentImageUrl: string | null;
@@ -112,7 +114,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
           name: item.name_hu || item.name,
           nameHu: item.name_hu || item.name,
           nameEn: item.name_en || item.name_hu || item.name,
-          description: item.description || '',
+          descriptionHu: item.description_hu || item.description || '',
+          descriptionEn: item.description_en || item.description_hu || item.description || '',
           price: item.price,
           categoryId: item.category_id,
           imageUrl: item.image_url,
@@ -244,7 +247,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       id: item.id,
       name: item.nameHu,
       nameEn: item.nameEn,
-      description: item.description || '',
+      descriptionHu: item.descriptionHu,
+      descriptionEn: item.descriptionEn,
       price: item.price,
       categoryId: item.categoryId,
       currentImageUrl: item.imageUrl,
@@ -323,11 +327,12 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
         .createMenuItem(
           categoryId,
           this.editing.name.trim(),
-          this.editing.description.trim(),
+          this.editing.descriptionHu.trim(),
           Math.round(this.editing.price),
           this.editing.imageFile,
           null,
           this.editing.nameEn.trim() || this.editing.name.trim(),
+          this.editing.descriptionEn.trim() || this.editing.descriptionHu.trim(),
         )
         .subscribe({
           next: () => {
@@ -344,12 +349,13 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
         .updateMenuItem(
           this.editing.id,
           this.editing.name.trim(),
-          this.editing.description.trim(),
+          this.editing.descriptionHu.trim(),
           Math.round(this.editing.price),
           categoryId,
           this.editing.imageFile,
           this.editing.removeImage,
           this.editing.nameEn.trim() || this.editing.name.trim(),
+          this.editing.descriptionEn.trim() || this.editing.descriptionHu.trim(),
         )
         .subscribe({
           next: () => {
@@ -575,12 +581,13 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       .updateMenuItem(
         item.id,
         item.nameHu,
-        item.description || '',
+        item.descriptionHu,
         Math.round(item.price),
         targetCategoryId,
         null,
         false,
         item.nameEn,
+        item.descriptionEn,
       )
       .subscribe({
         next: () => {
@@ -621,11 +628,12 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       .createMenuItem(
         targetCategoryId,
         item.nameHu,
-        item.description || '',
+        item.descriptionHu,
         Math.round(item.price),
         null,
         item.id,
         item.nameEn,
+        item.descriptionEn,
       )
       .subscribe({
         next: () => {
@@ -676,7 +684,8 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
       id: null,
       name: '',
       nameEn: '',
-      description: '',
+      descriptionHu: '',
+      descriptionEn: '',
       price: 0,
       categoryId: null,
       currentImageUrl: null,

@@ -17,6 +17,8 @@ export interface MenuItemDto {
   name_hu?: string;
   name_en?: string;
   description: string | null;
+  description_hu?: string | null;
+  description_en?: string | null;
   price: number;
   category_id: number | null;
   image_url: string | null;
@@ -115,15 +117,26 @@ export class MenuService {
   createMenuItem(
     categoryId: number | null,
     nameHu: string,
-    description: string,
+    descriptionHu: string,
     price: number,
     imageFile: File | null = null,
     sourceItemId: number | null = null,
     nameEn?: string,
+    descriptionEn?: string,
   ): Observable<MenuItemDto> {
     return this.http.post<MenuItemDto>(
       `${this.config.apiUrl}/admin/menu-items`,
-      this.buildMenuItemFormData(categoryId, nameHu, description, price, imageFile, false, sourceItemId, nameEn),
+      this.buildMenuItemFormData(
+        categoryId,
+        nameHu,
+        descriptionHu,
+        price,
+        imageFile,
+        false,
+        sourceItemId,
+        nameEn,
+        descriptionEn,
+      ),
       this.fixedLanguageHeaders('hu')
     ).pipe(tap(() => this.invalidateAdminMenuCache()));
   }
@@ -131,14 +144,25 @@ export class MenuService {
   updateMenuItem(
     id: number,
     nameHu: string,
-    description: string,
+    descriptionHu: string,
     price: number,
     categoryId: number | null,
     imageFile: File | null = null,
     removeImage = false,
     nameEn?: string,
+    descriptionEn?: string,
   ): Observable<MenuItemDto> {
-    const formData = this.buildMenuItemFormData(categoryId, nameHu, description, price, imageFile, removeImage, null, nameEn);
+    const formData = this.buildMenuItemFormData(
+      categoryId,
+      nameHu,
+      descriptionHu,
+      price,
+      imageFile,
+      removeImage,
+      null,
+      nameEn,
+      descriptionEn,
+    );
     formData.append('_method', 'PUT');
 
     return this.http.post<MenuItemDto>(`${this.config.apiUrl}/admin/menu-items/${id}`, formData, this.fixedLanguageHeaders('hu'))
@@ -153,19 +177,22 @@ export class MenuService {
   private buildMenuItemFormData(
     categoryId: number | null,
     nameHu: string,
-    description: string,
+    descriptionHu: string,
     price: number,
     imageFile: File | null,
     removeImage: boolean,
     sourceItemId: number | null = null,
     nameEn?: string,
+    descriptionEn?: string,
   ): FormData {
     const formData = new FormData();
 
     formData.append('name', nameHu);
     formData.append('name_hu', nameHu);
     formData.append('name_en', (nameEn && nameEn.trim()) || nameHu);
-    formData.append('description', description);
+    formData.append('description', descriptionHu);
+    formData.append('description_hu', descriptionHu);
+    formData.append('description_en', (descriptionEn && descriptionEn.trim()) || descriptionHu);
     formData.append('price', `${Math.round(price)}`);
     formData.append('category_id', categoryId === null ? '' : `${categoryId}`);
     formData.append('remove_image', removeImage ? '1' : '0');

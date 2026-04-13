@@ -52,6 +52,8 @@ class MenuItemController extends Controller
             'name_hu'     => 'sometimes|required|string',
             'name_en'     => 'sometimes|required|string',
             'description' => 'nullable|string',
+            'description_hu' => 'nullable|string',
+            'description_en' => 'nullable|string',
             'price'       => 'required|integer|min:0',
             'category_id' => 'nullable|exists:menu_categories,id',
             'image' => 'nullable|image|max:5120',
@@ -60,6 +62,7 @@ class MenuItemController extends Controller
         ]);
 
         [$nameHu, $nameEn] = $this->resolveNames($request);
+        [$descriptionHu, $descriptionEn] = $this->resolveDescriptions($request);
 
         if ($nameHu === '' || $nameEn === '') {
             return response()->json([
@@ -74,7 +77,9 @@ class MenuItemController extends Controller
             'name' => $nameHu,
             'name_hu' => $nameHu,
             'name_en' => $nameEn,
-            'description' => $request->input('description'),
+            'description' => $descriptionHu,
+            'description_hu' => $descriptionHu,
+            'description_en' => $descriptionEn,
             'price' => $request->input('price'),
             'category_id' => $this->resolveCategoryId($request->input('category_id')),
             'image_path' => $this->resolveImagePathForStore($request),
@@ -107,6 +112,8 @@ class MenuItemController extends Controller
             'name_hu'     => 'sometimes|required|string',
             'name_en'     => 'sometimes|required|string',
             'description' => 'nullable|string',
+            'description_hu' => 'nullable|string',
+            'description_en' => 'nullable|string',
             'price'       => 'required|integer|min:0',
             'category_id' => 'nullable|exists:menu_categories,id',
             'image' => 'nullable|image|max:5120',
@@ -114,6 +121,11 @@ class MenuItemController extends Controller
         ]);
 
         [$nameHu, $nameEn] = $this->resolveNames($request, $menu_item->name_hu ?? $menu_item->name, $menu_item->name_en ?? $menu_item->name);
+        [$descriptionHu, $descriptionEn] = $this->resolveDescriptions(
+            $request,
+            $menu_item->description_hu ?? $menu_item->description,
+            $menu_item->description_en ?? $menu_item->description
+        );
 
         if ($nameHu === '' || $nameEn === '') {
             return response()->json([
@@ -139,7 +151,9 @@ class MenuItemController extends Controller
             'name' => $nameHu,
             'name_hu' => $nameHu,
             'name_en' => $nameEn,
-            'description' => $request->input('description'),
+            'description' => $descriptionHu,
+            'description_hu' => $descriptionHu,
+            'description_en' => $descriptionEn,
             'price' => $request->input('price'),
             'category_id' => $this->resolveCategoryId($request->input('category_id')),
             'image_path' => $imagePath,
@@ -184,13 +198,17 @@ class MenuItemController extends Controller
         $isUnavailable = $item->menuCategory?->name === MenuCategory::UNAVAILABLE_CATEGORY_NAME;
         $nameHu = $item->name_hu ?? $item->name;
         $nameEn = $item->name_en ?? $item->name;
+        $descriptionHu = $item->description_hu ?? $item->description;
+        $descriptionEn = $item->description_en ?? $item->description;
 
         return [
             'id' => $item->id,
             'name' => $this->localizedName($nameHu, $nameEn, $request),
             'name_hu' => $nameHu,
             'name_en' => $nameEn,
-            'description' => $item->description,
+            'description' => $this->localizedName($descriptionHu ?? '', $descriptionEn ?? '', $request),
+            'description_hu' => $descriptionHu,
+            'description_en' => $descriptionEn,
             'price' => $item->price,
             'category_id' => $isUnavailable ? null : $item->category_id,
             'image_url' => $this->resolveImageUrl($item->image_path),
@@ -212,6 +230,35 @@ class MenuItemController extends Controller
         }
 
         return [$nameHu, $nameEn];
+    }
+
+    private function resolveDescriptions(Request $request, ?string $fallbackHu = null, ?string $fallbackEn = null): array
+    {
+        $baseDescription = $request->input('description');
+
+        $descriptionHu = $request->input('description_hu', $baseDescription ?? $fallbackHu);
+        $descriptionEn = $request->input('description_en', $baseDescription ?? $fallbackEn);
+
+        $descriptionHu = is_string($descriptionHu) ? trim($descriptionHu) : null;
+        $descriptionEn = is_string($descriptionEn) ? trim($descriptionEn) : null;
+
+        if ($descriptionHu === '') {
+            $descriptionHu = null;
+        }
+
+        if ($descriptionEn === '') {
+            $descriptionEn = null;
+        }
+
+        if ($descriptionHu === null && $descriptionEn !== null) {
+            $descriptionHu = $descriptionEn;
+        }
+
+        if ($descriptionEn === null && $descriptionHu !== null) {
+            $descriptionEn = $descriptionHu;
+        }
+
+        return [$descriptionHu, $descriptionEn];
     }
 
     private function storeUploadedImage(Request $request): ?string

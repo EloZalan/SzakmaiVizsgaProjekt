@@ -55,10 +55,20 @@
 
             @if (editing.type === 'item') {
               <div class="form-group">
-                <label>Leírás</label>
+                <label>Leírás (HU)</label>
                 <textarea
-                  [(ngModel)]="editing.description"
-                  placeholder="Add meg a leírást"
+                  [(ngModel)]="editing.descriptionHu"
+                  placeholder="Add meg a magyar leírást"
+                  class="form-input"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Description (EN)</label>
+                <textarea
+                  [(ngModel)]="editing.descriptionEn"
+                  placeholder="Add meg az angol leírást"
                   class="form-input"
                   rows="3"
                 ></textarea>
@@ -233,8 +243,8 @@
                         <div class="menu-item__content">
                           <div class="menu-item__info">
                             <strong>{{ item.name }}</strong>
-                            @if (item.description) {
-                              <p class="menu-item__description">{{ item.description }}</p>
+                            @if (item.descriptionHu) {
+                              <p class="menu-item__description">{{ item.descriptionHu }}</p>
                             }
                           </div>
                           <div class="menu-item__price">{{ item.price }} Ft</div>
@@ -331,8 +341,8 @@
                   <div class="menu-item__content">
                     <div class="menu-item__info">
                       <strong>{{ item.name }}</strong>
-                      @if (item.description) {
-                        <p class="menu-item__description">{{ item.description }}</p>
+                      @if (item.descriptionHu) {
+                        <p class="menu-item__description">{{ item.descriptionHu }}</p>
                       }
                     </div>
                     <div class="menu-item__price">{{ item.price }} Ft</div>

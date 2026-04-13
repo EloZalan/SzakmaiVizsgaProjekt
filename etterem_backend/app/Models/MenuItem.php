@@ -11,6 +11,8 @@ class MenuItem extends Model
         'name_hu',
         'name_en',
         'description',
+        'description_hu',
+        'description_en',
         'price',
         'category_id',
         'image_path',
