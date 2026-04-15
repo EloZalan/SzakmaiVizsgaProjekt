@@ -13,4 +13,9 @@ describe('ConfigService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should expose backend api url', () => {
+    expect(service.apiUrl).toContain('/backend/api');
+    expect(service.apiUrl.startsWith('https://')).toBe(true);
+  });
 });
