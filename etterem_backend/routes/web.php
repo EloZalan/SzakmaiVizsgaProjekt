@@ -22,3 +22,7 @@ Route::get('/docs/openapi.yaml', function () {
         'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
     ]);
 });
+
+Route::get('/menu-items', function () {
+    return redirect('/api/menu-items');
+});

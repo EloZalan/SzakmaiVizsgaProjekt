@@ -4,5 +4,5 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ConfigService {
-  readonly apiUrl = 'http://localhost:8000/api';
+  readonly apiUrl = 'https://jcloud02.jedlik.eu/schmitzhofer.pal/backend/api';
 }

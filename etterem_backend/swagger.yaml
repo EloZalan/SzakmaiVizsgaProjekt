@@ -7,8 +7,10 @@ info:
     A védett endpointok Bearer tokennel (Sanctum) hívhatók.
 
 servers:
-  - url: http://localhost:8000/api
-    description: Local Laravel API
+  - url: /api
+    description: Current host API
+  - url: https://jcloud02.jedlik.eu/schmitzhofer.pal/backend/api
+    description: Jedlik production API
 
 tags:
   - name: Auth
