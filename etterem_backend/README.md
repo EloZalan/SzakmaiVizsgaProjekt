@@ -57,3 +57,19 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Waiter Invite Email Setup
+
+The waiter invite flow is implemented in both API and frontend integration:
+
+- `POST /api/admin/waiters`: creates a waiter with a temporary invite token and sends an email.
+- `GET /api/waiter-invites/{token}`: validates invite token and returns invite details.
+- `POST /api/waiter-invites/{token}/accept`: sets password and activates the invited waiter account.
+
+Required environment variables for real email sending:
+
+- `FRONTEND_URL`: base URL of the frontend app (example: `http://localhost:4200`).
+- `MAIL_MAILER`: `smtp` for real sending (default Laravel value is often `log`, which only writes emails to logs).
+- `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`.
+
+If `MAIL_MAILER=log`, invites are generated but emails are not actually sent to inboxes.

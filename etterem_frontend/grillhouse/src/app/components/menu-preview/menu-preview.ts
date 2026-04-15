@@ -1,12 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, Subscription } from 'rxjs';
+import { forkJoin, interval, Subscription } from 'rxjs';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
 import { MenuCard } from '../../models/menu-card.model';
 import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.service';
-import { RealtimeService } from '../../services/realtime.service';
 
 interface CategorySlide {
   category: MenuCategory;
@@ -33,6 +32,7 @@ interface ChefDayOption {
 })
 export class MenuPreviewComponent implements OnInit, OnDestroy {
   categorySlides: CategorySlide[] = [];
+  chefRecommendationsVisible: CategoryPreviewCard[] = [];
   activeCategoryIndex = 0;
   selectedChefDayKey = 1;
 
@@ -50,20 +50,24 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage = '';
   currentLanguage: Language = 'hu';
+  private hasLoadedMenuOnce = false;
+  private isMenuRequestInFlight = false;
+  private lastMenuDataSignature = '';
+  private preloadedImageUrls = new Set<string>();
+  private chefRecommendationsByDay = new Map<number, CategoryPreviewCard[]>();
   private languageSubscription: Subscription | null = null;
-  private stopMenuChangesListening: (() => void) | null = null;
+  private pollSubscription: Subscription | null = null;
 
   constructor(
     private actions: GrillhouseActionsService,
     private menuService: MenuService,
-    private languageService: LanguageService,
-    private realtimeService: RealtimeService
+    private languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     this.selectedChefDayKey = new Date().getDay();
     this.currentLanguage = this.languageService.currentLanguageValue;
-    this.loadMenu();
+    this.loadMenu(true);
     this.languageSubscription = this.languageService.language$.subscribe(lang => {
       const languageChanged = this.currentLanguage !== lang;
       this.currentLanguage = lang;
@@ -73,7 +77,7 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.stopMenuChangesListening = this.realtimeService.listenToMenuChanges(() => {
+    this.pollSubscription = interval(10000).subscribe(() => {
       this.loadMenu();
     });
   }
@@ -82,8 +86,8 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
     this.languageSubscription?.unsubscribe();
     this.languageSubscription = null;
 
-    this.stopMenuChangesListening?.();
-    this.stopMenuChangesListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
   onViewFullMenu(): void {
@@ -106,20 +110,21 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
     return this.categorySlides[this.activeCategoryIndex] ?? null;
   }
 
-  get chefRecommendations(): CategoryPreviewCard[] {
-    return this.categorySlides
-      .filter((slide) => !this.isDailyMenuCategory(slide.category.name))
-      .map((slide) => {
-        const index = (this.selectedChefDayKey + slide.category.id) % slide.items.length;
-        return {
-          category: slide.category,
-          item: slide.items[index],
-        };
-      });
-  }
-
   selectChefDay(dayKey: number): void {
     this.selectedChefDayKey = dayKey;
+    this.updateVisibleChefRecommendations();
+  }
+
+  trackByChefDay(_index: number, day: ChefDayOption): number {
+    return day.key;
+  }
+
+  trackByChefRecommendation(_index: number, card: CategoryPreviewCard): string {
+    return `${card.category.id}:${card.item.id}`;
+  }
+
+  trackByMenuItem(_index: number, item: MenuCard): number {
+    return item.id;
   }
 
   getChefDayLabel(day: ChefDayOption): string {
@@ -144,8 +149,17 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
       (this.activeCategoryIndex + 1) % this.categorySlides.length;
   }
 
-  private loadMenu(): void {
-    this.loading = true;
+  private loadMenu(forceShowLoader = false): void {
+    if (this.isMenuRequestInFlight) {
+      return;
+    }
+
+    this.isMenuRequestInFlight = true;
+
+    const shouldShowLoader = forceShowLoader || !this.hasLoadedMenuOnce;
+    if (shouldShowLoader) {
+      this.loading = true;
+    }
     this.errorMessage = '';
 
     forkJoin({
@@ -153,9 +167,18 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
       items: this.menuService.getMenuItems(),
     }).subscribe({
       next: ({ categories, items }) => {
+        const menuDataSignature = this.buildMenuDataSignature(categories, items);
+        if (this.hasLoadedMenuOnce && menuDataSignature === this.lastMenuDataSignature) {
+          this.isMenuRequestInFlight = false;
+          this.loading = false;
+          return;
+        }
+
+        this.lastMenuDataSignature = menuDataSignature;
         this.categories = categories;
 
         const mappedItems = items.map((item) => this.mapToMenuCard(item));
+        this.preloadMenuImages(mappedItems);
 
         this.categorySlides = this.categories
           .map((category) => ({
@@ -164,18 +187,86 @@ export class MenuPreviewComponent implements OnInit, OnDestroy {
           }))
           .filter((slide) => slide.items.length > 0);
 
+        this.rebuildChefRecommendationsByDay();
+        this.updateVisibleChefRecommendations();
+
         if (this.activeCategoryIndex >= this.categorySlides.length) {
           this.activeCategoryIndex = 0;
         }
 
+        this.hasLoadedMenuOnce = true;
+        this.isMenuRequestInFlight = false;
         this.loading = false;
       },
       error: (err) => {
+        this.isMenuRequestInFlight = false;
         this.loading = false;
-        this.errorMessage = this.currentLanguage === 'hu' ? 'Nem sikerült betölteni a menüt.' : 'Failed to load menu.';
+
+        if (!this.hasLoadedMenuOnce) {
+          this.errorMessage = this.currentLanguage === 'hu' ? 'Nem sikerült betölteni a menüt.' : 'Failed to load menu.';
+        }
+
         console.error('Menu loading error:', err);
       },
     });
+  }
+
+  private buildMenuDataSignature(categories: MenuCategory[], items: MenuItemDto[]): string {
+    const categorySignature = [...categories]
+      .sort((a, b) => a.id - b.id)
+      .map((category) => `${category.id}|${category.name}|${category.name_hu ?? ''}|${category.name_en ?? ''}`)
+      .join('||');
+
+    const itemSignature = [...items]
+      .sort((a, b) => a.id - b.id)
+      .map(
+        (item) =>
+          `${item.id}|${item.category_id ?? ''}|${item.name}|${item.name_hu ?? ''}|${item.name_en ?? ''}|${item.description ?? ''}|${item.description_hu ?? ''}|${item.description_en ?? ''}|${item.price}|${item.image_url ?? ''}`
+      )
+      .join('||');
+
+    return `${categorySignature}###${itemSignature}`;
+  }
+
+  private preloadMenuImages(items: MenuCard[]): void {
+    for (const item of items) {
+      const imageUrl = item.imageUrl?.trim();
+
+      if (!imageUrl || this.preloadedImageUrls.has(imageUrl)) {
+        continue;
+      }
+
+      this.preloadedImageUrls.add(imageUrl);
+
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = imageUrl;
+    }
+  }
+
+  private rebuildChefRecommendationsByDay(): void {
+    this.chefRecommendationsByDay.clear();
+
+    const recommendationSlides = this.categorySlides.filter(
+      (slide) => !this.isDailyMenuCategory(slide.category.name)
+    );
+
+    for (const day of this.chefDays) {
+      const recommendations = recommendationSlides.map((slide) => {
+        const index = (day.key + slide.category.id) % slide.items.length;
+
+        return {
+          category: slide.category,
+          item: slide.items[index],
+        };
+      });
+
+      this.chefRecommendationsByDay.set(day.key, recommendations);
+    }
+  }
+
+  private updateVisibleChefRecommendations(): void {
+    this.chefRecommendationsVisible = this.chefRecommendationsByDay.get(this.selectedChefDayKey) ?? [];
   }
 
   private mapToMenuCard(item: MenuItemDto): MenuCard {

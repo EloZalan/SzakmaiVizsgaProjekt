@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { interval, Subscription } from 'rxjs';
 import { MenuService, MenuCategory } from '../../services/menu.service';
 
 interface MenuItem {
@@ -69,11 +70,15 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
   loading = false;
   error = '';
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private lastMenuDataSignature = '';
   private dragPointerX: number | null = null;
   private dragPointerY: number | null = null;
   private autoScrollFrame: number | null = null;
   private readonly autoScrollEdgePx = 120;
   private readonly autoScrollMaxStepPx = 20;
+  private pollSubscription: Subscription | null = null;
 
   editing: EditingState = this.createEmptyEditingState();
 
@@ -84,9 +89,27 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMenu();
+
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (
+        this.loading ||
+        this.decisionLoading ||
+        this.editing.type !== null ||
+        this.removingCategoryId !== null ||
+        this.removingItemId !== null
+      ) {
+        return;
+      }
+
+      this.menuService.invalidateAdminMenuCache();
+      this.loadMenu(true);
+    });
   }
 
   ngOnDestroy(): void {
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
+
     this.releaseEditingPreviewUrl();
     this.stopDragAutoScroll();
   }
@@ -115,31 +138,45 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
     this.stopDragAutoScroll();
   }
 
-  loadMenu(): void {
-    this.loading = true;
-    this.error = '';
+  loadMenu(silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.error = '';
+    }
 
     this.menuService.getAdminCategories().subscribe({
       next: (categories) => {
-        this.categories = categories.map((category) => ({
+        const mappedCategories = categories.map((category) => ({
           ...category,
           name: category.name_hu || category.name,
         }));
-        this.loadMenuItems();
+        this.loadMenuItems(mappedCategories, silent);
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.error = 'Nem sikerült betölteni a kategóriákat.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.error = 'Nem sikerült betölteni a kategóriákat.';
+        }
         console.error('MENU LOAD ERROR:', err);
         this.cdr.markForCheck();
       },
     });
   }
 
-  private loadMenuItems(): void {
+  private loadMenuItems(mappedCategories: MenuCategory[], silent = false): void {
     this.menuService.getAdminMenuItems().subscribe({
       next: (items) => {
-        this.menuItems = items.map(item => ({
+        const mappedMenuItems = items.map(item => ({
           id: item.id,
           name: item.name_hu || item.name,
           nameHu: item.name_hu || item.name,
@@ -150,16 +187,49 @@ export class AdminMenuComponent implements OnInit, OnDestroy {
           categoryId: item.category_id,
           imageUrl: item.image_url,
         }));
+
+        const menuDataSignature = this.buildMenuDataSignature(mappedCategories, mappedMenuItems);
+        if (this.hasLoadedOnce && menuDataSignature === this.lastMenuDataSignature) {
+          this.isRequestInFlight = false;
+          this.loading = false;
+          return;
+        }
+
+        this.lastMenuDataSignature = menuDataSignature;
+        this.categories = mappedCategories;
+        this.menuItems = mappedMenuItems;
+        this.hasLoadedOnce = true;
+        this.isRequestInFlight = false;
         this.loading = false;
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.error = 'Nem sikerült betölteni a menü tételeket.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.error = 'Nem sikerült betölteni a menü tételeket.';
+        }
         console.error('MENU ITEMS LOAD ERROR:', err);
         this.cdr.markForCheck();
       },
     });
+  }
+
+  private buildMenuDataSignature(categories: MenuCategory[], items: MenuItem[]): string {
+    const categorySignature = [...categories]
+      .sort((a, b) => a.id - b.id)
+      .map((category) => `${category.id}|${category.name}|${category.name_hu ?? ''}|${category.name_en ?? ''}`)
+      .join('||');
+
+    const itemSignature = [...items]
+      .sort((a, b) => a.id - b.id)
+      .map(
+        (item) =>
+          `${item.id}|${item.categoryId ?? ''}|${item.nameHu}|${item.nameEn}|${item.descriptionHu}|${item.descriptionEn}|${item.price}|${item.imageUrl ?? ''}`
+      )
+      .join('||');
+
+    return `${categorySignature}###${itemSignature}`;
   }
 
   toggleCategory(catId: number): void {

@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { interval, Subscription } from 'rxjs';
 import { AdminDashboardService, AdminWaiterDto } from '../../services/admin-dashboard.service';
 import { StaffMember } from '../../models/staff-member.model';
-import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-admin-staff',
@@ -28,35 +28,53 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     name: '',
     email: '',
   };
-  private stopWaiterStatusListening: (() => void) | null = null;
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private pollSubscription: Subscription | null = null;
 
   constructor(
     private adminDashboardService: AdminDashboardService,
-    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadStaff();
 
-    this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (this.isRequestInFlight) {
+        return;
+      }
+
       this.adminDashboardService.invalidateWaitersCache();
-      this.loadStaff();
+      this.loadStaff(true);
     });
   }
 
   ngOnDestroy(): void {
-    this.stopWaiterStatusListening?.();
-    this.stopWaiterStatusListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
-  loadStaff(): void {
-    this.loading = true;
-    this.error = '';
+  loadStaff(silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.error = '';
+    }
 
     this.adminDashboardService.getWaiters().subscribe({
       next: (waiters) => {
+        this.isRequestInFlight = false;
         this.loading = false;
+        this.hasLoadedOnce = true;
         this.staffMembers = waiters.map((w) => this.mapWaiterToStaffMember(w));
 
         if (this.selectedStaff) {
@@ -66,8 +84,11 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.error = 'Nem sikerült betölteni a pincéreket.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.error = 'Nem sikerült betölteni a pincéreket.';
+        }
         console.error('STAFF LOAD ERROR:', err);
         this.cdr.markForCheck();
       },

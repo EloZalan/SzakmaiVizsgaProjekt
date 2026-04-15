@@ -19,7 +19,7 @@
     <div class="chef-offer__days">
       <button
         class="gh-btn gh-btn--ghost gh-btn--sm chef-day-btn"
-        *ngFor="let day of chefDays"
+        *ngFor="let day of chefDays; trackBy: trackByChefDay"
         [class.chef-day-btn--active]="selectedChefDayKey === day.key"
         (click)="selectChefDay(day.key)"
       >
@@ -28,9 +28,9 @@
     </div>
 
     <div class="menu-grid menu-grid--centered-three">
-      <article class="menu-card" *ngFor="let card of chefRecommendations">
+      <article class="menu-card" *ngFor="let card of chefRecommendationsVisible; trackBy: trackByChefRecommendation">
         <div class="menu-card__image-wrap" *ngIf="card.item.imageUrl; else chefImagePlaceholder">
-          <img class="menu-card__image" [src]="card.item.imageUrl" [alt]="card.item.name">
+          <img class="menu-card__image" [src]="card.item.imageUrl" [alt]="card.item.name" loading="eager" fetchpriority="high" decoding="async">
         </div>
         <ng-template #chefImagePlaceholder>
           <div class="menu-card__image-placeholder">🍽️</div>
@@ -49,7 +49,7 @@
       </article>
     </div>
 
-    <div class="gh-empty" *ngIf="chefRecommendations.length === 0">
+    <div class="gh-empty" *ngIf="chefRecommendationsVisible.length === 0">
       {{ currentLanguage === 'hu' ? 'Nincs elérhető séf ajánlat.' : 'No chef recommendations available.' }}
     </div>
   </div>
@@ -80,7 +80,7 @@
       </div>
 
       <div class="menu-grid full-menu-slider__grid">
-        <article class="menu-card" *ngFor="let m of slide.items">
+        <article class="menu-card" *ngFor="let m of slide.items; trackBy: trackByMenuItem">
           <div class="menu-card__image-wrap" *ngIf="m.imageUrl; else fullImagePlaceholder">
             <img class="menu-card__image" [src]="m.imageUrl" [alt]="m.name">
           </div>

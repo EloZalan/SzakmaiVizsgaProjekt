@@ -5,6 +5,7 @@ use App\Models\MenuItem;
 use App\Models\Reservation;
 use App\Models\Table;
 use App\Models\User;
+use App\Mail\WaiterInviteMail;
 use Illuminate\Support\Facades\Mail;
 
 test('admin listázhatja a pincéreket', function () {
@@ -47,6 +48,10 @@ test('admin hozzáadhat új pincért', function () {
         'email' => 'ujpincer@test.com',
         'role' => 'waiter',
     ]);
+
+    Mail::assertSent(WaiterInviteMail::class, function (WaiterInviteMail $mail) {
+        return $mail->user->email === 'ujpincer@test.com';
+    });
 
     expect(User::where('email', 'ujpincer@test.com')->firstOrFail()->invite_token)->not->toBeNull();
 });

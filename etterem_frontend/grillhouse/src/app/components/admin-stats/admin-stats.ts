@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
+import { forkJoin, interval, Subscription } from 'rxjs';
 import { AdminDashboardService, GuestHistoryPoint } from '../../services/admin-dashboard.service';
 import { AdminTablesService } from '../../services/admin-tables.service';
-import { RealtimeService } from '../../services/realtime.service';
 
 interface ChartDataPoint {
   x: number;
@@ -42,42 +41,50 @@ export class AdminStatsComponent implements OnInit, OnDestroy {
   private readonly CHART_WIDTH  = 540;
   private readonly CHART_HEIGHT = 150;
 
-  private stopTableStatusListening: (() => void) | null = null;
-  private stopWaiterStatusListening: (() => void) | null = null;
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private pollSubscription: Subscription | null = null;
 
   constructor(
     private adminDashboardService: AdminDashboardService,
     private adminTablesService: AdminTablesService,
-    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadStats();
 
-    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges(() => {
-      this.adminTablesService.invalidateTablesCache();
-      this.adminDashboardService.invalidateStatsCache();
-      this.loadStats();
-    });
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (this.isRequestInFlight) {
+        return;
+      }
 
-    this.stopWaiterStatusListening = this.realtimeService.listenToWaiterStatusChanges(() => {
+      this.adminTablesService.invalidateTablesCache();
       this.adminDashboardService.invalidateWaitersCache();
-      this.loadStats();
+      this.adminDashboardService.invalidateStatsCache();
+      this.loadStats(true);
     });
   }
 
   ngOnDestroy(): void {
-    this.stopTableStatusListening?.();
-    this.stopTableStatusListening = null;
-
-    this.stopWaiterStatusListening?.();
-    this.stopWaiterStatusListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
-  loadStats(): void {
-    this.loading = true;
-    this.error = '';
+  loadStats(silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.error = '';
+    }
 
     forkJoin({
       waiters:      this.adminDashboardService.getWaiters(),
@@ -87,7 +94,9 @@ export class AdminStatsComponent implements OnInit, OnDestroy {
       guestHistory: this.adminDashboardService.getGuestCountHistory(),
     }).subscribe({
       next: ({ waiters, todayGuests, tables, dailyRevenue, guestHistory }) => {
+        this.isRequestInFlight = false;
         this.loading = false;
+        this.hasLoadedOnce = true;
         this.todayGuests    = todayGuests;
         this.totalTables    = tables.length;
         this.activeWaiters  = waiters.filter(
@@ -98,8 +107,11 @@ export class AdminStatsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.error = 'Nem sikerült betölteni a statisztikákat.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.error = 'Nem sikerült betölteni a statisztikákat.';
+        }
         console.error('STATS LOAD ERROR:', err);
         this.cdr.markForCheck();
       },

@@ -35,7 +35,7 @@ export class MenuService {
   private adminCategoriesCache$?: Observable<MenuCategory[]>;
   private adminMenuItemsCache$?: Observable<MenuItemDto[]>;
 
-  private invalidateAdminMenuCache(): void {
+  invalidateAdminMenuCache(): void {
     this.adminCategoriesCache$ = undefined;
     this.adminMenuItemsCache$ = undefined;
   }

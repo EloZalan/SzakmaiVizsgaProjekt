@@ -2,3 +2,4 @@
 !.gitignore
 !menu-items/
 !menu-items/**
+!menu-items/.htaccess

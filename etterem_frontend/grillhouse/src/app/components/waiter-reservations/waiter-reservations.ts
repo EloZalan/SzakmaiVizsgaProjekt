@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { interval, Subscription } from 'rxjs';
 
 import {
   WaiterDailyReservationDto,
   WaiterDailyReservationOrderDto,
   WaiterService,
 } from '../../services/waiter.service';
-import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-waiter-reservations',
@@ -17,7 +17,6 @@ import { RealtimeService } from '../../services/realtime.service';
 export class WaiterReservationsComponent implements OnInit, OnDestroy {
   constructor(
     private waiterService: WaiterService,
-    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -29,29 +28,48 @@ export class WaiterReservationsComponent implements OnInit, OnDestroy {
   private readonly ftFormatter = new Intl.NumberFormat('hu-HU', {
     maximumFractionDigits: 0,
   });
-  private stopTableStatusListening: (() => void) | null = null;
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private pollSubscription: Subscription | null = null;
 
   ngOnInit(): void {
     this.loadReservations();
 
-    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges(() => {
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (this.isRequestInFlight) {
+        return;
+      }
+
       this.waiterService.invalidateTodayReservationsCache();
-      this.loadReservations();
+      this.loadReservations(true);
     });
   }
 
   ngOnDestroy(): void {
-    this.stopTableStatusListening?.();
-    this.stopTableStatusListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
-  loadReservations(): void {
-    this.loading = true;
-    this.errorMessage = '';
+  loadReservations(silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.errorMessage = '';
+    }
 
     this.waiterService.getTodayReservationsWithOrders().subscribe({
       next: (reservations) => {
+        this.isRequestInFlight = false;
         this.loading = false;
+        this.hasLoadedOnce = true;
         this.reservations = [...reservations].sort((a, b) => {
           const aTime = new Date(a.start_time).getTime();
           const bTime = new Date(b.start_time).getTime();
@@ -68,8 +86,11 @@ export class WaiterReservationsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.errorMessage = 'Nem sikerült betölteni a mai foglalásokat.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.errorMessage = 'Nem sikerült betölteni a mai foglalásokat.';
+        }
         console.error('DAILY RESERVATIONS LOAD ERROR:', err);
         this.cdr.markForCheck();
       },

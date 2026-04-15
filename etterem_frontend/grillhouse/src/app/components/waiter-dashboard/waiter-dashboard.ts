@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { forkJoin, firstValueFrom } from 'rxjs';
+import { forkJoin, firstValueFrom, interval, Subscription } from 'rxjs';
 
 import { TableInfo, TableOrderItem } from '../../models/table-info.model';
 import { PaymentMethod } from '../../models/payment-method.model';
@@ -9,7 +9,6 @@ import {
   MenuItemDto,
   TableOrderDetailsDto,
 } from '../../services/waiter.service';
-import { RealtimeService } from '../../services/realtime.service';
 
 @Component({
   selector: 'app-waiter-dashboard',
@@ -21,7 +20,6 @@ import { RealtimeService } from '../../services/realtime.service';
 export class WaiterDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private waiterService: WaiterService,
-    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -47,23 +45,30 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage = '';
   detailsLoading = false;
-  private stopTableStatusListening: (() => void) | null = null;
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private pollSubscription: Subscription | null = null;
 
   ngOnInit(): void {
     this.loadWaiterPage();
 
-    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (this.isRequestInFlight) {
+        return;
+      }
+
       this.waiterService.invalidateTablesCache();
+      this.waiterService.invalidateMenuDataCache();
       this.waiterService.invalidateTodayReservationsCache();
       const hasSelectedTable = this.selected !== null;
-      const tableToKeepSelected = this.selected?.id ?? event.table_id;
-      this.loadWaiterPage(tableToKeepSelected, hasSelectedTable);
+      const tableToKeepSelected = this.selected?.id ?? null;
+      this.loadWaiterPage(tableToKeepSelected, hasSelectedTable, true);
     });
   }
 
   ngOnDestroy(): void {
-    this.stopTableStatusListening?.();
-    this.stopTableStatusListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
   get occupiedCount(): number {
@@ -82,9 +87,20 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     return this.tables.reduce((sum, t) => sum + (t.guests || 0), 0);
   }
 
-  loadWaiterPage(selectedTableId?: number | null, reloadSelectedOrder = false): void {
-    this.loading = true;
-    this.errorMessage = '';
+  loadWaiterPage(selectedTableId?: number | null, reloadSelectedOrder = false, silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.errorMessage = '';
+    }
 
     forkJoin({
       tables: this.waiterService.getTables(),
@@ -92,7 +108,9 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
     })
       .subscribe({
         next: ({ tables, menuData }) => {
+          this.isRequestInFlight = false;
           this.loading = false;
+          this.hasLoadedOnce = true;
           this.tables = tables;
           this.menuCategories = menuData.categories;
           this.menuItems = menuData.items;
@@ -118,8 +136,11 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
+          this.isRequestInFlight = false;
           this.loading = false;
-          this.errorMessage = 'Nem sikerült betölteni a pincér felület adatait.';
+          if (!silent || !this.hasLoadedOnce) {
+            this.errorMessage = 'Nem sikerült betölteni a pincér felület adatait.';
+          }
           console.error('WAITER PAGE LOAD ERROR:', err);
           this.cdr.markForCheck();
         },

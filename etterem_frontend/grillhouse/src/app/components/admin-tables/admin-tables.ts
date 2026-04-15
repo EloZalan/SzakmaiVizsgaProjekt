@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { interval, Subscription } from 'rxjs';
 import { AdminLiveTable, AdminTablesService } from '../../services/admin-tables.service';
-import { RealtimeService } from '../../services/realtime.service';
 
 type EditorMode = 'create' | 'edit' | 'delete' | 'reset' | null;
 
@@ -25,37 +25,55 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
   form = {
     seats: 4,
   };
-  private stopTableStatusListening: (() => void) | null = null;
+  private hasLoadedOnce = false;
+  private isRequestInFlight = false;
+  private pollSubscription: Subscription | null = null;
 
   constructor(
     private adminTablesService: AdminTablesService,
-    private realtimeService: RealtimeService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadTables();
 
-    this.stopTableStatusListening = this.realtimeService.listenToTableStatusChanges((event) => {
+    this.pollSubscription = interval(10000).subscribe(() => {
+      if (this.isRequestInFlight || this.saving) {
+        return;
+      }
+
       this.adminTablesService.invalidateTablesCache();
-      const tableToKeepSelected = this.selectedTable?.id ?? event.table_id;
-      this.loadTables(tableToKeepSelected);
+      const tableToKeepSelected = this.selectedTable?.id ?? null;
+      this.loadTables(tableToKeepSelected, true);
     });
   }
 
   ngOnDestroy(): void {
-    this.stopTableStatusListening?.();
-    this.stopTableStatusListening = null;
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = null;
   }
 
-  loadTables(selectedTableId: number | null = this.selectedTable?.id ?? null): void {
-    this.loading = true;
-    this.error = '';
+  loadTables(selectedTableId: number | null = this.selectedTable?.id ?? null, silent = false): void {
+    if (this.isRequestInFlight) {
+      return;
+    }
+
+    this.isRequestInFlight = true;
+
+    if (!silent || !this.hasLoadedOnce) {
+      this.loading = true;
+    }
+
+    if (!silent) {
+      this.error = '';
+    }
 
     this.adminTablesService.getTableOverview().subscribe({
       next: (tables) => {
+        this.isRequestInFlight = false;
         this.tables = tables;
         this.loading = false;
+        this.hasLoadedOnce = true;
 
         if (selectedTableId !== null) {
           this.selectedTable = tables.find((table) => table.id === selectedTableId) ?? null;
@@ -68,8 +86,11 @@ export class AdminTablesComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
+        this.isRequestInFlight = false;
         this.loading = false;
-        this.error = 'Nem sikerült betölteni az asztalokat.';
+        if (!silent || !this.hasLoadedOnce) {
+          this.error = 'Nem sikerült betölteni az asztalokat.';
+        }
         console.error('ADMIN TABLES LOAD ERROR:', err);
         this.cdr.markForCheck();
       },
