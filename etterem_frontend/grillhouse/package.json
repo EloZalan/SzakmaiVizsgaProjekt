@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production --base-href /schmitzhofer.pal/frontend/ --deploy-url /schmitzhofer.pal/frontend/",
+    "build:ftp": "ng build --configuration production --base-href ./ --deploy-url ./",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e:open": "cypress open",

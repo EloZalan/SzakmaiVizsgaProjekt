@@ -32,6 +32,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/schmitzhofer.pal/frontend/",
+              "deployUrl": "/schmitzhofer.pal/frontend/",
               "budgets": [
                 {
                   "type": "initial",
