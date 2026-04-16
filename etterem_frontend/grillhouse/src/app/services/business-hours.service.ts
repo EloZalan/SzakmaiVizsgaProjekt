@@ -1,11 +1,7 @@
 import { Injectable } from '@angular/core';
+import type { BusinessHours } from '../models/business-hours.model';
 
-export interface BusinessHours {
-  dayOfWeek: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  dayName: string;
-  opens: string; // HH:mm
-  closes: string; // HH:mm
-}
+export type { BusinessHours } from '../models/business-hours.model';
 
 @Injectable({
   providedIn: 'root',
