@@ -2,7 +2,8 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
-import { AdminLiveTable, AdminTablesService } from '../../services/admin-tables.service';
+import { AdminTablesService } from '../../services/admin-tables.service';
+import type { AdminLiveTable } from '../../models/admin-live-table.model';
 
 type EditorMode = 'create' | 'edit' | 'delete' | 'reset' | null;
 
