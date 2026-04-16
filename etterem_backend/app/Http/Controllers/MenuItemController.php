@@ -324,6 +324,6 @@ class MenuItemController extends Controller
             return null;
         }
 
-        return request()->getSchemeAndHttpHost() . '/storage/' . ltrim($imagePath, '/');
+        return rtrim(request()->root(), '/') . '/storage/' . ltrim($imagePath, '/');
     }
 }
