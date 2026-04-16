@@ -1,22 +1,11 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, interval, Subscription } from 'rxjs';
-import { AdminDashboardService, GuestHistoryPoint } from '../../services/admin-dashboard.service';
+import { AdminDashboardService } from '../../services/admin-dashboard.service';
+import type { GuestHistoryPoint } from '../../models/guest-history-point.model';
 import { AdminTablesService } from '../../services/admin-tables.service';
-
-interface ChartDataPoint {
-  x: number;
-  y: number;
-  date: string;
-  dayLabel: string;
-  guestCount: number;
-  tooltip: string;
-}
-
-interface ChartGridLine {
-  y: number;
-  label: string;
-}
+import type { ChartDataPoint } from '../../models/admin-stats-chart-data-point.model';
+import type { ChartGridLine } from '../../models/admin-stats-chart-grid-line.model';
 
 @Component({
   selector: 'app-admin-stats',
