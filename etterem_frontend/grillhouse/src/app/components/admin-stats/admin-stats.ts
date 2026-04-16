@@ -107,7 +107,7 @@ export class AdminStatsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Chart helpers ──────────────────────────────────────────────
+                                                                    
 
   private get chartMaxValue(): number {
     return Math.max(...this.guestHistory.map(p => p.guest_count), 1);

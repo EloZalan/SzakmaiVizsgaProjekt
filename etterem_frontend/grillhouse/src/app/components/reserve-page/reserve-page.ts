@@ -113,7 +113,7 @@ export class ReservePageComponent implements OnInit {
 
     this.minDate = this.toDateInputValue(new Date());
     this.date = this.minDate;
-    // Initialize allTimes for today so it respects business hours
+                                                                  
     this.generateAllTimesForDate(this.parseLocalDate(this.date) || new Date());
     this.refreshTimeOptions();
     this.loadMaxTableCapacity();
