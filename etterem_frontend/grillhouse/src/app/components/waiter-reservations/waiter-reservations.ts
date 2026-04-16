@@ -1,11 +1,10 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 
-import {
-  WaiterDailyReservationDto,
-  WaiterDailyReservationOrderDto,
-  WaiterService,
-} from '../../services/waiter.service';
+import { WaiterService } from '../../services/waiter.service';
+import type { WaiterDailyReservationDto } from '../../models/waiter-daily-reservation-dto.model';
+import type { WaiterDailyReservationOrderDto } from '../../models/waiter-daily-reservation-order-dto.model';
+import type { WaiterDailyReservationOrderItemDto } from '../../models/waiter-daily-reservation-order-item-dto.model';
 
 @Component({
   selector: 'app-waiter-reservations',
@@ -224,7 +223,7 @@ export class WaiterReservationsComponent implements OnInit, OnDestroy {
       doc.line(left, y, right, y);
       y += 4;
 
-      reservation.order.items.forEach((item) => {
+      reservation.order.items.forEach((item: WaiterDailyReservationOrderItemDto) => {
         const nameLines = doc.splitTextToSize(item.name, 44) as string[];
         doc.setFont('courier', 'bold');
         doc.text(nameLines, left, y);
