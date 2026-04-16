@@ -1,11 +1,10 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 
-import {
-  WaiterDailyReservationDto,
-  WaiterDailyReservationOrderDto,
-  WaiterService,
-} from '../../services/waiter.service';
+import { WaiterService } from '../../services/waiter.service';
+import type { WaiterDailyReservationDto } from '../../models/waiter-daily-reservation-dto.model';
+import type { WaiterDailyReservationOrderDto } from '../../models/waiter-daily-reservation-order-dto.model';
+import type { WaiterDailyReservationOrderItemDto } from '../../models/waiter-daily-reservation-order-item-dto.model';
 
 @Component({
   selector: 'app-waiter-reservations',
@@ -189,48 +188,65 @@ export class WaiterReservationsComponent implements OnInit, OnDestroy {
     try {
       const { default: JsPDF } = await import('jspdf');
 
+      const [fontNormal, fontBold] = await Promise.all([
+        fetch('fonts/DejaVuSansMono.ttf').then((r) => r.arrayBuffer()),
+        fetch('fonts/DejaVuSansMono-Bold.ttf').then((r) => r.arrayBuffer()),
+      ]);
+
+      const toBase64 = (buf: ArrayBuffer): string => {
+        const bytes = new Uint8Array(buf);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+      };
+
       const doc = new JsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: [80, 220],
       });
 
+      doc.addFileToVFS('DejaVuSansMono.ttf', toBase64(fontNormal));
+      doc.addFont('DejaVuSansMono.ttf', 'DejaVuSansMono', 'normal');
+      doc.addFileToVFS('DejaVuSansMono-Bold.ttf', toBase64(fontBold));
+      doc.addFont('DejaVuSansMono-Bold.ttf', 'DejaVuSansMono', 'bold');
+
       const left = 6;
       const right = 74;
       const center = 40;
       let y = 10;
 
-      doc.setFont('courier', 'bold');
+      doc.setFont('DejaVuSansMono', 'bold');
       doc.setFontSize(12);
       doc.text('GRILLHOUSE', center, y, { align: 'center' });
       y += 5;
       doc.setFontSize(10);
-      doc.text('ETTERMI NYUGTA', center, y, { align: 'center' });
+      doc.text('ÉTTERMI NYUGTA', center, y, { align: 'center' });
       y += 5;
 
-      doc.setFont('courier', 'normal');
+      doc.setFont('DejaVuSansMono', 'normal');
       doc.setFontSize(8);
-      doc.text(`Foglalas: #${reservation.reservation_id}`, left, y);
+      doc.text(`Foglalás: #${reservation.reservation_id}`, left, y);
       y += 4;
       doc.text(`Asztal: ${reservation.table_id}`, left, y);
       y += 4;
-      doc.text(`Vendeg: ${this.displayGuestName(reservation.guest_name)}`, left, y);
+      doc.text(`Vendég: ${this.displayGuestName(reservation.guest_name)}`, left, y);
       y += 4;
-      doc.text(`Letszam: ${reservation.guest_count} fo`, left, y);
+      doc.text(`Létszám: ${reservation.guest_count} fő`, left, y);
       y += 4;
-      doc.text(`Datum: ${new Date().toLocaleString('hu-HU')}`, left, y);
+      doc.text(`Dátum: ${new Date().toLocaleString('hu-HU')}`, left, y);
       y += 3;
 
       doc.line(left, y, right, y);
       y += 4;
 
-      reservation.order.items.forEach((item) => {
+      reservation.order.items.forEach((item: WaiterDailyReservationOrderItemDto) => {
         const nameLines = doc.splitTextToSize(item.name, 44) as string[];
-        doc.setFont('courier', 'bold');
+        doc.setFont('DejaVuSansMono', 'bold');
         doc.text(nameLines, left, y);
         y += nameLines.length * 3.7;
 
-        doc.setFont('courier', 'normal');
+        doc.setFont('DejaVuSansMono', 'normal');
         doc.text(`${item.quantity} x ${this.formatFt(item.price)}`, left, y);
         doc.text(this.formatFt(item.line_total), right, y, { align: 'right' });
         y += 4.5;
@@ -242,19 +258,19 @@ export class WaiterReservationsComponent implements OnInit, OnDestroy {
 
       const foodAndDrinkTotal = reservation.order.total_price;
 
-      doc.setFont('courier', 'normal');
-      doc.text('Etel + ital osszesen:', left, y);
+      doc.setFont('DejaVuSansMono', 'normal');
+      doc.text('Étel + ital összesen:', left, y);
       doc.text(this.formatFt(foodAndDrinkTotal), right, y, { align: 'right' });
       y += 4;
 
-      doc.setFont('courier', 'bold');
-      doc.text('Fizetendo vegosszeg:', left, y);
+      doc.setFont('DejaVuSansMono', 'bold');
+      doc.text('Fizetendő végösszeg:', left, y);
       doc.text(this.formatFt(foodAndDrinkTotal), right, y, { align: 'right' });
       y += 6;
 
-      doc.setFont('courier', 'normal');
+      doc.setFont('DejaVuSansMono', 'normal');
       doc.setFontSize(7);
-      doc.text('Koszonjuk, hogy a Grillhouse-t valasztotta!', center, y, { align: 'center' });
+      doc.text('Köszönjük, hogy a Grillhouse-t választotta!', center, y, { align: 'center' });
 
       doc.save(`nyugta-foglalas-${reservation.reservation_id}-${this.getReceiptTimestamp(new Date())}.pdf`);
     } catch (err) {

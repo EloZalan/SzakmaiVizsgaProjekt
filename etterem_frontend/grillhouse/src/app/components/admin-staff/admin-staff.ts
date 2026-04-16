@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
-import { AdminDashboardService, AdminWaiterDto } from '../../services/admin-dashboard.service';
+import { AdminDashboardService } from '../../services/admin-dashboard.service';
+import type { AdminWaiterDto } from '../../models/admin-waiter-dto.model';
 import { StaffMember } from '../../models/staff-member.model';
 
 @Component({

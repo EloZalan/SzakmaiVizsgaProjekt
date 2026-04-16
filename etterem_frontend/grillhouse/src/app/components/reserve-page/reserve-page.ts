@@ -6,28 +6,10 @@ import { BusinessHoursService } from '../../services/business-hours.service';
 import { LanguageService, Language } from '../../services/language.service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import type { CreateReservationPayload } from '../../models/reserve-page-create-reservation-payload.model';
+import type { ReservationResponse } from '../../models/reserve-page-reservation-response.model';
+import type { MaxCapacityResponse } from '../../models/reserve-page-max-capacity-response.model';
 
-interface CreateReservationPayload {
-  guest_name: string;
-  phone_number: string;
-  guest_count: number;
-  start_time: string;
-  note?: string | null;
-}
-
-interface ReservationResponse {
-  id: number;
-  table_id: number;
-  guest_name: string;
-  phone_number: string | null;
-  start_time: string;
-  end_time: string;
-  guest_count: number;
-}
-
-interface MaxCapacityResponse {
-  max_capacity: number;
-}
 
 @Component({
   selector: 'app-reserve-page',
@@ -131,7 +113,7 @@ export class ReservePageComponent implements OnInit {
 
     this.minDate = this.toDateInputValue(new Date());
     this.date = this.minDate;
-    // Initialize allTimes for today so it respects business hours
+                                                                  
     this.generateAllTimesForDate(this.parseLocalDate(this.date) || new Date());
     this.refreshTimeOptions();
     this.loadMaxTableCapacity();

@@ -4,42 +4,13 @@ import { map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { RestaurantTable } from '../models/restaurant-table.model';
 import { WaiterTableStatus } from '../models/table-info.model';
+import type { TableDto } from '../models/admin-table-dto.model';
+import type { TableReservationDto } from '../models/admin-table-reservation-dto.model';
+import type { AdminLiveTable } from '../models/admin-live-table.model';
+import type { TableListResponse } from '../models/admin-table-list-response.model';
+import type { TableSingleResponse } from '../models/admin-table-single-response.model';
 
-export interface TableDto {
-  id: number;
-  capacity: number;
-  status: string;
-  waiter_name?: string | null;
-  reservation?: TableReservationDto | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface TableReservationDto {
-  id: number;
-  guest_name: string;
-  start_time: string;
-  end_time: string;
-  guest_count: number;
-}
-
-export interface AdminLiveTable {
-  id: number;
-  name: string;
-  seats: number;
-  status: WaiterTableStatus;
-  guests: number;
-  server: string;
-  note?: string;
-}
-
-interface TableListResponse {
-  data: TableDto[];
-}
-
-interface TableSingleResponse {
-  data: TableDto;
-}
+export type { AdminLiveTable } from '../models/admin-live-table.model';
 
 @Injectable({
   providedIn: 'root',

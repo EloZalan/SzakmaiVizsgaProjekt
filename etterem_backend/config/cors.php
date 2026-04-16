@@ -7,7 +7,7 @@ return [
 
     'allowed_origins' => array_filter(array_map('trim', explode(',', (string) env(
         'CORS_ALLOWED_ORIGINS',
-        'http://localhost:4200,http://127.0.0.1:4200'
+        'https://jcloud02.jedlik.eu,http://jcloud02.jedlik.eu'
     )))),
 
     'allowed_origins_patterns' => [],

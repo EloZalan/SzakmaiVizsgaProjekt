@@ -3,12 +3,11 @@ import { forkJoin, firstValueFrom, interval, Subscription } from 'rxjs';
 
 import { TableInfo, TableOrderItem } from '../../models/table-info.model';
 import { PaymentMethod } from '../../models/payment-method.model';
-import {
-  WaiterService,
-  MenuCategoryDto,
-  MenuItemDto,
-  TableOrderDetailsDto,
-} from '../../services/waiter.service';
+import { WaiterService } from '../../services/waiter.service';
+import type { MenuCategoryDto } from '../../models/waiter-menu-category-dto.model';
+import type { MenuItemDto } from '../../models/waiter-menu-item-dto.model';
+import type { TableOrderDetailsDto } from '../../models/waiter-table-order-details-dto.model';
+import type { TableOrderItemDto } from '../../models/waiter-table-order-item-dto.model';
 
 @Component({
   selector: 'app-waiter-dashboard',
@@ -515,7 +514,7 @@ export class WaiterDashboardComponent implements OnInit, OnDestroy {
   }
 
   private applyOrderDetailsToTable(tableId: number, order: TableOrderDetailsDto): void {
-    const items: TableOrderItem[] = (order.items || []).map((it) => ({
+    const items: TableOrderItem[] = (order.items || []).map((it: TableOrderItemDto) => ({
       menuItemId: it.menu_item_id,
       name: it.name ?? 'Tétel',
       qty: it.quantity,

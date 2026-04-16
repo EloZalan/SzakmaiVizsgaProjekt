@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { GrillhouseActionsService, TravelMode } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
-import { BusinessHoursService, BusinessHours } from '../../services/business-hours.service';
+import { BusinessHoursService } from '../../services/business-hours.service';
+import type { BusinessHours } from '../../models/business-hours.model';
 
 @Component({
   selector: 'app-visit-us',

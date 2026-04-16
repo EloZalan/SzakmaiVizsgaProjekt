@@ -5,23 +5,12 @@ import { forkJoin, interval, Subscription } from 'rxjs';
 import { GrillhouseActionsService } from '../../services/grillhouse-actions';
 import { LanguageService, Language } from '../../services/language.service';
 import { MenuCard } from '../../models/menu-card.model';
-import { MenuCategory, MenuItemDto, MenuService } from '../../services/menu.service';
-
-interface CategorySlide {
-  category: MenuCategory;
-  items: MenuCard[];
-}
-
-interface CategoryPreviewCard {
-  category: MenuCategory;
-  item: MenuCard;
-}
-
-interface ChefDayOption {
-  key: number;
-  labelHu: string;
-  labelEn: string;
-}
+import { MenuService } from '../../services/menu.service';
+import type { MenuCategory } from '../../models/menu-category.model';
+import type { MenuItemDto } from '../../models/menu-item-dto.model';
+import type { CategorySlide } from '../../models/menu-preview-category-slide.model';
+import type { CategoryPreviewCard } from '../../models/menu-preview-category-preview-card.model';
+import type { ChefDayOption } from '../../models/menu-preview-chef-day-option.model';
 
 @Component({
   selector: 'app-menu-preview',
