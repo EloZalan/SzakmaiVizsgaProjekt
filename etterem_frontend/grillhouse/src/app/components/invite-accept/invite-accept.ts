@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AdminDashboardService, WaiterInviteDto } from '../../services/admin-dashboard.service';
+import { AdminDashboardService } from '../../services/admin-dashboard.service';
+import type { WaiterInviteDto } from '../../models/waiter-invite-dto.model';
 
 @Component({
   selector: 'app-invite-accept',

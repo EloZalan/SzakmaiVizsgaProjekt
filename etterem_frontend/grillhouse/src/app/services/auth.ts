@@ -2,22 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { ConfigService } from './config.service';
+import type { User } from '../models/user.model';
+import type { LoginResponse } from '../models/login-response.model';
+import type { UserRole } from '../models/user-role.model';
 
-export type UserRole = 'admin' | 'waiter' | 'customer';
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: UserRole;
-  on_shift?: boolean;
-  email_verified_at?: string | null;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: User;
-}
+export type { User } from '../models/user.model';
+export type { LoginResponse } from '../models/login-response.model';
+export type { UserRole } from '../models/user-role.model';
 
 @Injectable({
   providedIn: 'root',
