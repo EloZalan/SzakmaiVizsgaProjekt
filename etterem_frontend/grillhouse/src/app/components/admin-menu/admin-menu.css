@@ -1,4 +1,4 @@
-/* Menu Container */
+                    
 .menu-container {
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
   flex-wrap: wrap;
 }
 
-/* Edit Panel */
+                
 .edit-panel {
   background: #2a2a2a;
   border: 1px solid #FF8C00;
@@ -130,7 +130,7 @@
   flex: 1;
 }
 
-/* Categories List */
+                     
 .categories-list {
   display: flex;
   flex-direction: column;
@@ -246,7 +246,7 @@
   padding: 1rem;
 }
 
-/* Items List */
+                
 .items-list {
   display: flex;
   flex-direction: column;
@@ -452,7 +452,7 @@
   font-size: 12px;
 }
 
-/* Responsive */
+                
 @media (max-width: 768px) {
   .drag-decision-modal__backdrop {
     padding: 0.6rem;

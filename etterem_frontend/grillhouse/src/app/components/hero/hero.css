@@ -1,4 +1,4 @@
-/* Hero background slides fade in/out when active slide changes */
+                                                                  
 .hero-shell__bg {
 	position: absolute;
 	inset: 0;
@@ -20,7 +20,7 @@
 }
 
 
-/* Ensure content appears above background slides */
+                                                    
 .hero-shell__content {
 	z-index: 1;
 }
