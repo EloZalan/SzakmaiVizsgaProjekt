@@ -3,102 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { TableInfo, WaiterTableStatus } from '../models/table-info.model';
-
-export interface TableDto {
-  id: number;
-  capacity: number;
-  status: string;
-  waiter_name?: string | null;
-  reservation?: ReservationDto | null;
-}
-
-export interface ReservationDto {
-  id: number;
-  table_id: number;
-  guest_name: string;
-  phone_number: string;
-  start_time: string;
-  end_time: string;
-  guest_count: number;
-  note?: string | null;
-}
-
-export interface OrderDto {
-  id: number;
-  table_id: number;
-  reservation_id: number;
-  waiter_id: number;
-  total_price: number;
-  status: 'in_progress' | 'ready_to_pay' | 'done';
-}
-
-export interface TableOrderItemDto {
-  id: number;
-  menu_item_id: number;
-  name: string | null;
-  price: number | null;
-  quantity: number;
-  line_total: number | null;
-}
-
-export interface TableOrderDetailsDto {
-  order_id?: number;
-  table_id?: number;
-  reservation_id: number | null;
-  status?: 'in_progress' | 'ready_to_pay' | 'done';
-  total_price: number;
-  opened_at?: string | null;
-  items: TableOrderItemDto[];
-  message?: string;
-}
-
-export interface WaiterDailyReservationOrderItemDto {
-  id: number;
-  menu_item_id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  line_total: number;
-}
-
-export interface WaiterDailyReservationOrderDto {
-  order_id: number;
-  status: 'in_progress' | 'ready_to_pay' | 'done';
-  opened_at: string | null;
-  total_price: number;
-  paid_total: number | null;
-  display_total: number;
-  tip_amount: number;
-  payment_method: 'cash' | 'card' | null;
-  items: WaiterDailyReservationOrderItemDto[];
-}
-
-export interface WaiterDailyReservationDto {
-  reservation_id: number;
-  table_id: number;
-  table_capacity: number | null;
-  guest_name: string;
-  guest_count: number;
-  start_time: string;
-  end_time: string;
-  closed_at: string | null;
-  note: string | null;
-  order: WaiterDailyReservationOrderDto | null;
-}
-
-export interface MenuCategoryDto {
-  id: number;
-  name: string;
-}
-
-export interface MenuItemDto {
-  id: number;
-  name: string;
-  description: string | null;
-  price: number;
-  category_id: number | null;
-  image_url: string | null;
-}
+import type { TableDto } from '../models/waiter-table-dto.model';
+import type { ReservationDto } from '../models/waiter-reservation-dto.model';
+import type { OrderDto } from '../models/waiter-order-dto.model';
+import type { TableOrderItemDto } from '../models/waiter-table-order-item-dto.model';
+import type { TableOrderDetailsDto } from '../models/waiter-table-order-details-dto.model';
+import type { WaiterDailyReservationOrderItemDto } from '../models/waiter-daily-reservation-order-item-dto.model';
+import type { WaiterDailyReservationOrderDto } from '../models/waiter-daily-reservation-order-dto.model';
+import type { WaiterDailyReservationDto } from '../models/waiter-daily-reservation-dto.model';
+import type { MenuCategoryDto } from '../models/waiter-menu-category-dto.model';
+import type { MenuItemDto } from '../models/waiter-menu-item-dto.model';
 
 @Injectable({
   providedIn: 'root',

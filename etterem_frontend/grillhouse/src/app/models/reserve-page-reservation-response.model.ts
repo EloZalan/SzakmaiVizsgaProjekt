@@ -1,0 +1,9 @@
+export interface ReservationResponse {
+  id: number;
+  table_id: number;
+  guest_name: string;
+  phone_number: string | null;
+  start_time: string;
+  end_time: string;
+  guest_count: number;
+}

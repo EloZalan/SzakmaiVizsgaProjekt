@@ -133,7 +133,7 @@ export class HeroComponent implements OnInit, OnDestroy {
       this.activeIndex = (this.activeIndex + 1) % this.slides.length;
       this.startTypingAnimation();
       this.cdr.markForCheck();
-    }, 5000); // 5 másodperc
+    }, 5000);               
   }
 
   private stopAutoSlide(): void {

@@ -3,26 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
 import { Language, LanguageService } from './language.service';
+import type { MenuCategory } from '../models/menu-category.model';
+import type { MenuItemDto } from '../models/menu-item-dto.model';
 
-export interface MenuCategory {
-  id: number;
-  name: string;
-  name_hu?: string;
-  name_en?: string;
-}
-
-export interface MenuItemDto {
-  id: number;
-  name: string;
-  name_hu?: string;
-  name_en?: string;
-  description: string | null;
-  description_hu?: string | null;
-  description_en?: string | null;
-  price: number;
-  category_id: number | null;
-  image_url: string | null;
-}
+export type { MenuCategory } from '../models/menu-category.model';
+export type { MenuItemDto } from '../models/menu-item-dto.model';
 
 @Injectable({
   providedIn: 'root',

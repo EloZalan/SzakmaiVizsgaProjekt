@@ -2,43 +2,14 @@ import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
-import { MenuService, MenuCategory } from '../../services/menu.service';
-
-interface MenuItem {
-  id: number;
-  name: string;
-  nameHu: string;
-  nameEn: string;
-  descriptionHu: string;
-  descriptionEn: string;
-  price: number;
-  categoryId: number | null;
-  imageUrl: string | null;
-}
+import { MenuService } from '../../services/menu.service';
+import type { MenuCategory } from '../../models/menu-category.model';
+import type { MenuItem } from '../../models/admin-menu-item.model';
+import type { DropDecisionState } from '../../models/admin-menu-drop-decision-state.model';
+import type { EditingState } from '../../models/admin-menu-editing-state.model';
 
 type DragDropZone = number | 'uncategorized' | null;
 type DropAction = 'copy' | 'move';
-
-interface DropDecisionState {
-  item: MenuItem;
-  targetCategoryId: number | null;
-  targetLabel: string;
-}
-
-interface EditingState {
-  type: 'category' | 'item' | null;
-  id: number | null;
-  name: string;
-  nameEn: string;
-  descriptionHu: string;
-  descriptionEn: string;
-  price: number;
-  categoryId: number | null;
-  currentImageUrl: string | null;
-  imageFile: File | null;
-  imagePreviewUrl: string | null;
-  removeImage: boolean;
-}
 
 @Component({
   selector: 'app-admin-menu',

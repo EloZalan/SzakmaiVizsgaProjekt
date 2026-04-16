@@ -2,38 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, shareReplay, tap } from 'rxjs';
 import { ConfigService } from './config.service';
+import type { AdminWaiterDto } from '../models/admin-waiter-dto.model';
+import type { WaiterInviteDto } from '../models/waiter-invite-dto.model';
+import type { ReservationDto } from '../models/admin-reservation-dto.model';
+import type { GuestHistoryPoint } from '../models/guest-history-point.model';
 
-export interface AdminWaiterDto {
-  id: number;
-  name: string;
-  email: string;
-  role: 'admin' | 'waiter' | string;
-  on_shift?: boolean;
-  invite_pending?: boolean;
-  invite_expires_at?: string | null;
-  email_verified_at?: string | null;
-}
-
-export interface WaiterInviteDto {
-  name: string;
-  email: string;
-  expires_at: string;
-}
-
-export interface ReservationDto {
-  id: number;
-  table_id: number;
-  guest_name: string;
-  phone_number: string;
-  start_time: string;
-  end_time?: string;
-  guest_count: number;
-}
-
-export interface GuestHistoryPoint {
-  date: string;
-  guest_count: number;
-}
+export type { AdminWaiterDto } from '../models/admin-waiter-dto.model';
+export type { WaiterInviteDto } from '../models/waiter-invite-dto.model';
+export type { ReservationDto } from '../models/admin-reservation-dto.model';
+export type { GuestHistoryPoint } from '../models/guest-history-point.model';
 
 @Injectable({
   providedIn: 'root',

@@ -7,11 +7,11 @@ export class GrillhouseActionsService {
   private fullMenuVisible = false;
 
   login(): void {
-    // TODO: implement later
+                            
   }
 
   reserveTable(): void {
-    // TODO: implement later
+                            
   }
 
   viewMenu(): void {
@@ -27,9 +27,9 @@ export class GrillhouseActionsService {
     return this.fullMenuVisible;
   }
 
-  /**
-   * Opens Google Maps directions in a new tab using the selected travel mode.
-   */
+     
+                                                                              
+     
   getDirections(mode: TravelMode = 'driving'): void {
     const destination = 'Gízai piramismező';
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
