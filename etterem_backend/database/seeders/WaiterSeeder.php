@@ -11,20 +11,22 @@ class WaiterSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Seeder Waiter',
-            'email' => 'seeder@waiter.com',
-            'password' => Hash::make('password123'),
-            'role' => 'waiter',
-            'email_verified_at' => now(),
-        ]);
+        $waiters = [
+            ['name' => 'Kovács Bence', 'email' => 'kovacs.bence@waiter.com'],
+            ['name' => 'Nagy Dóra', 'email' => 'nagy.dora@waiter.com'],
+            ['name' => 'Tóth Márk', 'email' => 'toth.mark@waiter.com'],
+            ['name' => 'Varga Lilla', 'email' => 'varga.lilla@waiter.com'],
+            ['name' => 'Szabó Gergő', 'email' => 'szabo.gergo@waiter.com'],
+        ];
 
-        User::create([
-            'name' => 'Teszt Elek',
-            'email' => 'tesztelek@waiter.com',
-            'password' => Hash::make('password123'),
-            'role' => 'waiter',
-            'email_verified_at' => now(),
-        ]);
+        foreach ($waiters as $waiter) {
+            User::create([
+                'name' => $waiter['name'],
+                'email' => $waiter['email'],
+                'password' => Hash::make('password123'),
+                'role' => 'waiter',
+                'email_verified_at' => now(),
+            ]);
+        }
     }
 }
