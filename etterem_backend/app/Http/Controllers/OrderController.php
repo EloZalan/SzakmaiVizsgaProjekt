@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TableStatusChanged;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\Order;
@@ -49,8 +48,6 @@ class OrderController extends Controller
             'total_price' => 0,
             'status' => 'in_progress'
         ]);
-
-        event(new TableStatusChanged($table->id));
 
         return response()->json($order, 201);
     }
@@ -145,8 +142,6 @@ class OrderController extends Controller
         $addedPrice = $menuItem->price * $fields['quantity'];
         $order->increment('total_price', $addedPrice);
 
-        event(new TableStatusChanged($order->table_id));
-
         return response()->json([
             'item' => $menuItem->name,
             'quantity' => $fields['quantity'],
@@ -183,8 +178,6 @@ class OrderController extends Controller
         $newTotal = max(0, $order->total_price - $lineTotal);
         $order->update(['total_price' => $newTotal]);
 
-        event(new TableStatusChanged($order->table_id));
-
         return response()->json([
             'message' => 'Rendelés tétel törölve.',
             'current_total' => $order->total_price
@@ -205,8 +198,6 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => 'ready_to_pay']);
-
-        event(new TableStatusChanged($order->table_id));
 
         return response()->json([
             'order_id' => $order->id,

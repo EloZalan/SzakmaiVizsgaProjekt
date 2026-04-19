@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MenuChanged;
 use App\Models\MenuCategory;
 use Illuminate\Http\Request;
 
@@ -50,8 +49,6 @@ class MenuCategoryController extends Controller
             'name_hu' => $nameHu,
             'name_en' => $nameEn,
         ]);
-
-        event(new MenuChanged('category', 'created', $category->id));
 
         return response()->json($this->serializeCategory($category, $request), 201);
     }
@@ -111,8 +108,6 @@ class MenuCategoryController extends Controller
             'name_en' => $nameEn,
         ]);
 
-        event(new MenuChanged('category', 'updated', $menu_category->id));
-
         return response()->json($this->serializeCategory($menu_category, $request), 200);
     }
 
@@ -121,10 +116,7 @@ class MenuCategoryController extends Controller
      */
     public function destroy(MenuCategory $menu_category)
     {
-        $categoryId = $menu_category->id;
         $menu_category->delete();
-
-        event(new MenuChanged('category', 'deleted', $categoryId));
 
         return response()->json("", 204);
     }

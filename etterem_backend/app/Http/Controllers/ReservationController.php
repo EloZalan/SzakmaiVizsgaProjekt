@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TableStatusChanged;
 use App\Models\Reservation;
 use App\Models\Table;
 use App\Services\ReservationService;
@@ -156,8 +155,6 @@ class ReservationController extends Controller
             'note' => $request->input('note') ?: null,
         ]);
 
-        event(new TableStatusChanged($table->id));
-
         return response()->json($reservation, 201);
     }
 
@@ -193,15 +190,11 @@ class ReservationController extends Controller
             'guest_count' => $request->guest_count,
         ]);
 
-        event(new TableStatusChanged($table->id));
-
         return response()->json($reservation, 201);
     }
 
     public function update(Request $request, Reservation $reservation)
     {
-        $originalTableId = $reservation->table_id;
-
         $request->validate([
             'guest_name' => 'sometimes|required|string',
             'phone_number' => [
@@ -248,12 +241,6 @@ class ReservationController extends Controller
 
         $reservation->save();
 
-        event(new TableStatusChanged($reservation->table_id));
-
-        if ($originalTableId !== $reservation->table_id) {
-            event(new TableStatusChanged($originalTableId));
-        }
-
         return response()->json($reservation, 200);
     }
 
@@ -282,11 +269,7 @@ class ReservationController extends Controller
 
     public function destroy(Reservation $reservation)
     {
-        $tableId = $reservation->table_id;
-
         $reservation->delete();
-
-        event(new TableStatusChanged($tableId));
 
         return response()->json("", 204);
     }

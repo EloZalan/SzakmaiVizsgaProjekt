@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TableStatusChanged;
 use App\Models\Order;
-use App\Models\Table;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -45,8 +43,6 @@ class PaymentController extends Controller
         $payment = Payment::create($paymentData);
 
         $order->update(['status' => 'done']);
-
-        event(new TableStatusChanged($order->table_id));
 
         return response()->json([
             'payment_id' => $payment->id,

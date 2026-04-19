@@ -1,12 +1,10 @@
 <?php
 
-use App\Events\TableStatusChanged;
 use App\Models\Order;
 use App\Models\Table;
 use App\Models\User;
 use App\Services\ReservationService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 
 test('kulon fixture fajlbol tolti be a foglalas payloadot', function () {
@@ -47,8 +45,6 @@ test('mockkal helyettesiti a reservation service valaszat a publikus foglalasnal
 
     $payload = load_fixture('reservations/store.valid.php')['store_valid'];
 
-    Event::fake([TableStatusChanged::class]);
-
     $mock = Mockery::mock(ReservationService::class);
     $mock->shouldReceive('findAvailableTable')
         ->once()
@@ -65,10 +61,6 @@ test('mockkal helyettesiti a reservation service valaszat a publikus foglalasnal
             'table_id' => $table->id,
             'guest_name' => 'Fixture Vendeg',
         ]);
-
-    Event::assertDispatched(TableStatusChanged::class, function (TableStatusChanged $event) use ($table) {
-        return $event->tableId === $table->id;
-    });
 });
 
 test('stubbal fix asztalt ad vissza a walk in foglalashoz', function () {
@@ -93,7 +85,6 @@ test('stubbal fix asztalt ad vissza a walk in foglalashoz', function () {
         }
     };
 
-    Event::fake([TableStatusChanged::class]);
     app()->instance(ReservationService::class, $stub);
 
     $this->actingAs($waiter)
@@ -102,13 +93,9 @@ test('stubbal fix asztalt ad vissza a walk in foglalashoz', function () {
         ->assertJsonFragment([
             'table_id' => $table->id,
         ]);
-
-    Event::assertDispatched(TableStatusChanged::class, function (TableStatusChanged $event) use ($table) {
-        return $event->tableId === $table->id;
-    });
 });
 
-test('spy segitsegevel ellenorzi hogy az order status valtozas eventet dispatchol', function () {
+test('simulate ready to pay frissiti a rendelest', function () {
     /** @var \Tests\TestCase $this */
     $waiter = User::where('email', 'waiter1@test.com')->firstOrFail();
     $order = Order::query()
@@ -116,17 +103,11 @@ test('spy segitsegevel ellenorzi hogy az order status valtozas eventet dispatcho
         ->whereHas('orderItems')
         ->firstOrFail();
 
-    Event::spy();
-
     $this->actingAs($waiter)
         ->postJson("/api/orders/{$order->id}/simulate-ready")
         ->assertOk()
         ->assertJsonFragment(['new_status' => 'ready_to_pay']);
 
-    Event::shouldHaveReceived('dispatch')
-        ->with(\Mockery::on(function ($event) use ($order) {
-            return $event instanceof TableStatusChanged
-                && $event->tableId === $order->table_id;
-        }))
-        ->once();
+    $order->refresh();
+    expect($order->status)->toBe('ready_to_pay');
 });

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MenuChanged;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
@@ -87,8 +86,6 @@ class MenuItemController extends Controller
 
         $item->load('menuCategory');
 
-        event(new MenuChanged('item', 'created', $item->id));
-
         return response()->json($this->serializeMenuItem($item, $request), 201);
     }
 
@@ -161,8 +158,6 @@ class MenuItemController extends Controller
 
         $menu_item->load('menuCategory');
 
-        event(new MenuChanged('item', 'updated', $menu_item->id));
-
         return response()->json($this->serializeMenuItem($menu_item, $request), 200);
     }
 
@@ -178,8 +173,6 @@ class MenuItemController extends Controller
         }
 
         $menu_item->delete();
-
-        event(new MenuChanged('item', 'deleted', $itemId));
 
         return response()->json([], 204);
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\WaiterStatusChanged;
 use App\Mail\WaiterInviteMail;
 use App\Models\Payment;
 use App\Models\Reservation;
@@ -49,8 +48,6 @@ class AdminActionsController extends Controller
                 'message' => 'A meghívó email küldése sikertelen volt, a pincér nem lett létrehozva.',
             ], 500);
         }
-
-        event(new WaiterStatusChanged($user->id, false, 'created'));
 
         return response()->json([
             'id' => $user->id,
@@ -119,8 +116,6 @@ class AdminActionsController extends Controller
             ], 404);
         }
         User::destroy($user->id);
-
-        event(new WaiterStatusChanged($user->id, null, 'deleted'));
 
         return response()->json("", 204);
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TableStatusChanged;
 use App\Models\Table;
 use Illuminate\Http\Request;
 
@@ -138,8 +137,6 @@ class TableController extends Controller
 
         $reservation->admin_released_at = $now;
         $reservation->save();
-
-        event(new TableStatusChanged($table->id));
 
         return response()->json([
             'message' => $this->t([
