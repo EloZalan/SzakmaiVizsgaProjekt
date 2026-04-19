@@ -48,6 +48,8 @@
         }
       </label>
 
+
+
       @if (errorMessage) {
         <p class="error">{{ errorMessage }}</p>
       }
@@ -59,6 +61,12 @@
       >
         {{ loading ? 'Bejelentkezés...' : 'Bejelentkezés' }}
       </button>
+
+      <div class="login-back-corner">
+        <a routerLink="/" class="gh-btn gh-btn--ghost login-back-link">
+          Vissza a főoldalra
+        </a>
+      </div>
     </form>
   </div>
 </div>

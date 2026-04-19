@@ -915,12 +915,33 @@ svg {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 24px;
+  position: relative;
 }
 
 .login-card__title,
 .reserve-title {
   margin: 0 0 16px;
   font-size: 32px;
+}
+
+.login-back-corner {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 14px;
+  position: static;
+}
+
+.login-back-link {
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.login-back-link:hover {
+  opacity: 1;
 }
 
 .login-field,
@@ -1401,9 +1422,9 @@ svg {
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-                                                         
-                                           
-                                                            
+
+
+
 .home-page.light-theme {
   background: #f5f2ee;
   color: #1a1208;
